@@ -10,9 +10,15 @@
         body { font-family: 'Inter', sans-serif; }
         #bg {
             position: fixed; inset: 0; z-index: 0;
-            background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80') center/cover;
-            filter: blur(16px) brightness(35%);
+            background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80') center/cover no-repeat;
+            filter: blur(8px) brightness(35%);
             transform: scale(1.06);
+        }
+        @media (max-width: 640px) {
+            #bg {
+                background-position: left center;
+                filter: blur(4px) brightness(30%);
+            }
         }
     </style>
 </head>

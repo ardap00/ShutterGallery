@@ -20,16 +20,16 @@
     <div id="bg"></div>
 
     <!-- Menü (Geri dönüş düğmesi) -->
-    <div class="fixed top-8 left-8 z-50">
-        <button onclick="history.back()" class="text-white/60 hover:text-emerald-400 transition-colors flex items-center gap-3 bg-black/30 px-4 py-2 rounded-full backdrop-blur-sm border border-white/5 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            <span class="font-mono text-xs tracking-widest uppercase">Geri</span>
+    <div class="fixed top-4 left-4 md:top-8 md:left-8 z-50">
+        <button onclick="history.back()" class="text-white/60 hover:text-emerald-400 transition-colors flex items-center gap-2 md:gap-3 bg-black/30 px-3 py-2 md:px-4 md:py-2 rounded-full backdrop-blur-sm border border-white/5 cursor-pointer">
+            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <span class="hidden md:inline font-mono text-[10px] md:text-xs tracking-widest uppercase">Geri</span>
         </button>
     </div>
 
     <!-- Uygulama Logosu -->
-    <div class="fixed top-8 left-1/2 -translate-x-1/2 z-40 pointer-events-none text-center">
-        <a href="{{ url_for('main.index') }}" class="pointer-events-auto text-xl font-bold tracking-widest text-white hover:text-emerald-400 transition-colors drop-shadow-lg inline-block">
+    <div class="fixed top-4 md:top-8 left-1/2 -translate-x-1/2 z-40 pointer-events-none text-center">
+        <a href="{{ url_for('main.index') }}" class="pointer-events-auto text-base md:text-xl font-bold tracking-widest text-white hover:text-emerald-400 transition-colors drop-shadow-lg inline-block">
             Shutter<span class="text-emerald-500">Gallery</span>
         </a>
     </div>

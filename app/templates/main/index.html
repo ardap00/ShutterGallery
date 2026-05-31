@@ -114,7 +114,7 @@
         
         <!-- Uygulama Logosu (LCD Merkez Üst) -->
         <div class="absolute top-4 sm:top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none text-center">
-            <h1 class="text-white/90 font-bold text-lg sm:text-xl tracking-widest uppercase drop-shadow-lg" style="text-shadow: 0 2px 10px rgba(0,0,0,0.8);">
+            <h1 class="text-white/90 font-bold text-base sm:text-xl tracking-widest uppercase drop-shadow-lg" style="text-shadow: 0 2px 10px rgba(0,0,0,0.8);">
                 Shutter<span class="text-emerald-500">Gallery</span>
             </h1>
         </div>
@@ -123,7 +123,7 @@
         <div class="absolute top-4 left-4 sm:top-8 sm:left-8 z-50 pointer-events-auto group">
             <button class="text-white hover:text-emerald-400 transition-colors flex items-center gap-2 sm:gap-3 bg-black/30 px-3 py-2 sm:px-4 rounded-full backdrop-blur-sm border border-white/5">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                <span class="font-mono text-[10px] sm:text-xs tracking-widest uppercase">{{ _('Menü') }}</span>
+                <span class="hidden sm:inline font-mono text-[10px] sm:text-xs tracking-widest uppercase">{{ _('Menü') }}</span>
             </button>
             
             <div class="absolute top-full left-0 mt-3 w-48 sm:w-56 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-left scale-95 group-hover:scale-100 shadow-2xl">
@@ -158,9 +158,9 @@
             </div>
             <div class="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase flex gap-3 sm:gap-4 pointer-events-auto bg-black/40 sm:bg-transparent px-3 py-2 sm:p-0 rounded-full items-center">
                 {% if current_user.is_authenticated %}
-                <a href="{{ url_for('posts.new_post') }}" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-full transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] hover:scale-105 flex items-center gap-2 border border-emerald-400/50">
+                <a href="{{ url_for('posts.new_post') }}" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 sm:px-5 sm:py-2.5 rounded-full transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] hover:scale-105 flex items-center gap-2 border border-emerald-400/50">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    {{ _('FOTOĞRAF YÜKLE') }}
+                    <span class="hidden sm:inline">{{ _('FOTOĞRAF YÜKLE') }}</span>
                 </a>
                 {% else %}
                 <a href="{{ url_for('auth.login') }}" class="text-zinc-300 hover:text-emerald-400 transition-colors">{{ _('Giriş') }}</a>
