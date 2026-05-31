@@ -59,7 +59,3 @@ def discover():
     )
     return render_template('main/index.html', posts=posts, feed_type='discover')
 
-@main.route('/gallery')
-def gallery():
-    posts = db.session.execute(db.select(PhotoPost).order_by(PhotoPost.timestamp.desc())).scalars().all()
-    return render_template('main/gallery.html', posts=posts)

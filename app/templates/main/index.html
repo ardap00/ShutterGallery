@@ -131,8 +131,8 @@
                     {% if current_user.is_authenticated %}
                     <a href="{{ url_for('users.profile', username=current_user.username) }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors border-b border-white/5">Profilim</a>
                     <a href="{{ url_for('users.notifications') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors border-b border-white/5">Bildirimler</a>
-                    <a href="{{ url_for('users.settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors border-b border-white/5">Hesap Ayarları</a>
-                    <a href="{{ url_for('users.settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors">Ayarlar</a>
+                    <a href="{{ url_for('users.settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors border-b border-white/5">Ayarlar</a>
+                    <a href="{{ url_for('auth.logout') }}" onclick="sessionStorage.removeItem('camera_powered')" class="flex items-center gap-3 px-5 py-3.5 text-red-400 hover:text-red-300 hover:bg-white/5 transition-colors">Çıkış Yap</a>
                     {% else %}
                     <a href="{{ url_for('auth.login') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors border-b border-white/5">Giriş Yap</a>
                     <a href="{{ url_for('auth.register') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors">Kayıt Ol</a>
@@ -155,10 +155,12 @@
                 <span>1/4000</span>
                 <span class="text-emerald-400">🔋 100%</span>
             </div>
-            <div class="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase flex gap-3 sm:gap-4 pointer-events-auto bg-black/40 sm:bg-transparent px-3 py-2 sm:p-0 rounded-full">
+            <div class="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase flex gap-3 sm:gap-4 pointer-events-auto bg-black/40 sm:bg-transparent px-3 py-2 sm:p-0 rounded-full items-center">
                 {% if current_user.is_authenticated %}
-                <a href="{{ url_for('posts.new_post') }}" class="text-zinc-300 hover:text-emerald-400 transition-colors">Yükle</a>
-                <a href="{{ url_for('auth.logout') }}" onclick="sessionStorage.removeItem('camera_powered')" class="text-zinc-300 hover:text-red-400 transition-colors">Çıkış</a>
+                <a href="{{ url_for('posts.new_post') }}" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-full transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] hover:scale-105 flex items-center gap-2 border border-emerald-400/50">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    FOTOĞRAF YÜKLE
+                </a>
                 {% else %}
                 <a href="{{ url_for('auth.login') }}" class="text-zinc-300 hover:text-emerald-400 transition-colors">Giriş</a>
                 <a href="{{ url_for('auth.register') }}" class="text-zinc-300 hover:text-white transition-colors">Kayıt</a>
