@@ -3,7 +3,7 @@ import uuid
 from flask import render_template, url_for, flash, redirect, request, current_app
 from flask_login import current_user, login_required
 from app.users import users
-from app.users.forms import UpdateProfileForm
+from app.users.forms import UpdateProfileForm, UserSettingsForm
 from app.models import User, PhotoPost, db
 from werkzeug.utils import secure_filename
 from PIL import Image
@@ -41,9 +41,9 @@ def profile(username):
     
     return render_template('users/profile.html', user=user, posts=posts, tab=tab, post_count=post_count)
 
-@users.route('/settings', methods=['GET', 'POST'])
+@users.route('/account_settings', methods=['GET', 'POST'])
 @login_required
-def settings():
+def account_settings():
     form = UpdateProfileForm()
     if form.validate_on_submit():
         if form.avatar.data:
@@ -52,20 +52,33 @@ def settings():
         current_user.username = form.username.data
         current_user.email = form.email.data
         current_user.bio = form.bio.data
-        current_user.language = form.language.data
         db.session.commit()
         from flask_babel import _
         flash(_('Hesap bilgileriniz güncellendi!'), 'success')
-        return redirect(url_for('users.settings'))
+        return redirect(url_for('users.account_settings'))
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.email.data = current_user.email
         form.bio.data = current_user.bio
-        form.language.data = current_user.language
     
     avatar_file = current_user.avatar_file if current_user.avatar_file else 'default.jpg'
     avatar_url = url_for('static', filename='avatars/' + avatar_file)
-    return render_template('users/settings.html', form=form, avatar_url=avatar_url)
+    return render_template('users/account_settings.html', form=form, avatar_url=avatar_url)
+
+@users.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    form = UserSettingsForm()
+    if form.validate_on_submit():
+        current_user.language = form.language.data
+        db.session.commit()
+        from flask_babel import _
+        flash(_('Ayarlarınız kaydedildi!'), 'success')
+        return redirect(url_for('users.settings'))
+    elif request.method == 'GET':
+        form.language.data = current_user.language
+    
+    return render_template('users/settings.html', form=form)
 
 @users.route('/notifications')
 @login_required

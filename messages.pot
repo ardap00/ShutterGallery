@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-31 14:10+0300\n"
+"POT-Creation-Date: 2026-05-31 14:19+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -79,39 +79,52 @@ msgid "Bildirimler"
 msgstr ""
 
 #: app/templates/main/index.html:134
+#: app/templates/users/account_settings.html:6
+msgid "Hesap Ayarları"
+msgstr ""
+
+#: app/templates/main/index.html:135 app/templates/users/settings.html:7
 msgid "Ayarlar"
 msgstr ""
 
-#: app/templates/main/index.html:135
+#: app/templates/main/index.html:136 app/templates/users/settings.html:12
 msgid "Çıkış Yap"
 msgstr ""
 
-#: app/templates/main/index.html:137
+#: app/templates/main/index.html:138
 msgid "Giriş Yap"
 msgstr ""
 
-#: app/templates/main/index.html:138
+#: app/templates/main/index.html:139
 msgid "Kayıt Ol"
 msgstr ""
 
-#: app/templates/main/index.html:162
+#: app/templates/main/index.html:163
 msgid "FOTOĞRAF YÜKLE"
 msgstr ""
 
-#: app/templates/main/index.html:165
+#: app/templates/main/index.html:166
 msgid "Giriş"
 msgstr ""
 
-#: app/templates/main/index.html:166
+#: app/templates/main/index.html:167
 msgid "Kayıt"
 msgstr ""
 
-#: app/templates/main/index.html:195
+#: app/templates/main/index.html:196
 msgid "Takip Edilenler"
 msgstr ""
 
-#: app/templates/main/index.html:198
+#: app/templates/main/index.html:199
 msgid "Keşfet"
+msgstr ""
+
+#: app/templates/users/account_settings.html:7
+msgid "Profil & Hesap Yönetimi"
+msgstr ""
+
+#: app/templates/users/settings.html:8
+msgid "Uygulama Ayarları"
 msgstr ""
 
 #: app/users/forms.py:10
@@ -127,26 +140,34 @@ msgid "Biyografi"
 msgstr ""
 
 #: app/users/forms.py:13
-msgid "Dil"
-msgstr ""
-
-#: app/users/forms.py:14
 msgid "Profil Fotoğrafı Güncelle"
 msgstr ""
 
-#: app/users/forms.py:15
+#: app/users/forms.py:14
 msgid "Güncelle"
 msgstr ""
 
-#: app/users/forms.py:21
+#: app/users/forms.py:20
 msgid "Bu kullanıcı adı alınmış. Lütfen başka bir tane seçin."
 msgstr ""
 
-#: app/users/forms.py:27
+#: app/users/forms.py:26
 msgid "Bu e-posta adresi zaten kullanımda."
 msgstr ""
 
-#: app/users/routes.py:58
+#: app/users/forms.py:29
+msgid "Dil"
+msgstr ""
+
+#: app/users/forms.py:30
+msgid "Kaydet"
+msgstr ""
+
+#: app/users/routes.py:57
 msgid "Hesap bilgileriniz güncellendi!"
+msgstr ""
+
+#: app/users/routes.py:76
+msgid "Ayarlarınız kaydedildi!"
 msgstr ""
 

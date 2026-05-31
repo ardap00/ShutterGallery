@@ -36,7 +36,12 @@ translations = {
     'Giriş': 'Login',
     'Kayıt': 'Register',
     'Takip Edilenler': 'Following',
-    'Keşfet': 'Discover'
+    'Keşfet': 'Discover',
+    'Hesap Ayarları': 'Account Settings',
+    'Profil & Hesap Yönetimi': 'Profile & Account Management',
+    'Uygulama Ayarları': 'Application Settings',
+    'Ayarlarınız kaydedildi!': 'Your settings have been saved!',
+    'Kaydet': 'Save',
 }
 
 for i in range(len(lines)):

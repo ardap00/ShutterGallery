@@ -131,6 +131,7 @@
                     {% if current_user.is_authenticated %}
                     <a href="{{ url_for('users.profile', username=current_user.username) }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors border-b border-white/5">{{ _('Profilim') }}</a>
                     <a href="{{ url_for('users.notifications') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors border-b border-white/5">{{ _('Bildirimler') }}</a>
+                    <a href="{{ url_for('users.account_settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors border-b border-white/5">{{ _('Hesap Ayarları') }}</a>
                     <a href="{{ url_for('users.settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors border-b border-white/5">{{ _('Ayarlar') }}</a>
                     <a href="{{ url_for('auth.logout') }}" onclick="sessionStorage.removeItem('camera_powered')" class="flex items-center gap-3 px-5 py-3.5 text-red-400 hover:text-red-300 hover:bg-white/5 transition-colors">{{ _('Çıkış Yap') }}</a>
                     {% else %}

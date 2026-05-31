@@ -10,7 +10,6 @@ class UpdateProfileForm(FlaskForm):
     username = StringField(_l('Kullanıcı Adı'), validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField(_l('E-posta'), validators=[DataRequired(), Email()])
     bio = TextAreaField(_l('Biyografi'), validators=[Length(max=200)])
-    language = SelectField(_l('Dil'), choices=[('tr', 'Türkçe'), ('en', 'English')])
     avatar = FileField(_l('Profil Fotoğrafı Güncelle'), validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
     submit = SubmitField(_l('Güncelle'))
 
@@ -25,3 +24,8 @@ class UpdateProfileForm(FlaskForm):
             user = db.session.execute(db.select(User).filter_by(email=email.data)).scalar_one_or_none()
             if user:
                 raise ValidationError(_l('Bu e-posta adresi zaten kullanımda.'))
+
+class UserSettingsForm(FlaskForm):
+    language = SelectField(_l('Dil'), choices=[('tr', 'Türkçe'), ('en', 'English')])
+    submit = SubmitField(_l('Kaydet'))
+
