@@ -23,7 +23,7 @@
             <img src="{{ url_for('static', filename='avatars/' + avatar_filename) }}" alt="{{ user.username }}" class="w-full h-full rounded-full object-cover border-4 border-zinc-800 shadow-2xl">
             {% endif %}
             {% if current_user == user %}
-            <a href="{{ url_for('users.settings') }}" class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <a href="{{ url_for('users.account_settings') }}" class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <span class="text-xs font-mono uppercase tracking-widest text-emerald-400">Düzenle</span>
             </a>
             {% endif %}
