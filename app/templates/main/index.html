@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShutterGallery — Fotoğrafın Kalbi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #020204; overflow: hidden; }
+
+        #bg {
+            position: fixed; inset: 0; z-index: 0;
+            background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1920&q=80') center/cover no-repeat;
+            filter: blur(28px) brightness(30%);
+            transform: scale(1.1);
+            transition: filter 2.5s cubic-bezier(0.4, 0, 0.2, 1), transform 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #hint {
+            position: fixed; bottom: 108px; left: 50%; transform: translateX(-50%);
+            z-index: 30; color: rgba(255,255,255,0.4);
+            font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
+            white-space: nowrap; transition: opacity 0.6s ease;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        @keyframes pulse-green {
+            0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+            50%      { box-shadow: 0 0 0 16px rgba(34,197,94,0); }
+        }
+        #power-btn { animation: pulse-green 2.2s infinite; transition: all 0.6s ease; }
+        #power-btn.off { opacity: 0; pointer-events: none; transform: translateY(20px); }
+
+        #lcd-interface {
+            position: fixed; inset: 0; z-index: 20;
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity 1.2s ease, visibility 1.2s ease;
+        }
+        #lcd-interface.show { opacity: 1; visibility: visible; pointer-events: auto; }
+
+        .hud-line { background: rgba(255, 255, 255, 0.2); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.3); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.8); }
+
+        @keyframes fadeSlideRight {
+            from { opacity: 0; transform: translateX(-40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeSlideLeft {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="bg"></div>
+    <canvas id="c" class="fixed inset-0 w-full h-full" style="z-index:10; transition: opacity 1s ease;"></canvas>
+
+    <div id="hint">↔ Sürükle & Döndür &nbsp;·&nbsp; Scroll: Yakınlaş</div>
+
+    <!-- Intro Text Overlay -->
+    <div id="intro-overlay" class="fixed inset-0 pointer-events-none z-20 flex items-center justify-between px-8 md:px-16 lg:px-32 transition-opacity duration-1000">
+        <!-- Left Side: Motto & Vision -->
+        <div class="max-w-md text-left opacity-0 animate-[fadeSlideRight_1.5s_ease_forwards_0.5s] hidden sm:block">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight drop-shadow-2xl" style="text-shadow: 0 4px 20px rgba(0,0,0,0.9);">
+                Anı Yakala,<br><span class="text-emerald-500">Dünyayla Paylaş.</span>
+            </h2>
+            <p class="text-zinc-200 text-sm md:text-base leading-relaxed mb-8 font-medium drop-shadow-md" style="text-shadow: 0 2px 10px rgba(0,0,0,0.9);">
+                ShutterGallery, fotoğraf tutkunlarını bir araya getiren premium bir vitrindir. Sadece en iyi karelerin, en yüksek kalitede yer aldığı bağımsız fotoğrafçılık platformu.
+            </p>
+            <div class="flex flex-col gap-3 text-xs font-mono text-emerald-400/90 tracking-[0.2em] uppercase font-bold">
+                <span class="flex items-center gap-3"><div class="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div> Sınırsız İlham</span>
+                <span class="flex items-center gap-3"><div class="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div> Teknik Detaylar (EXIF)</span>
+                <span class="flex items-center gap-3"><div class="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div> Profesyonel Topluluk</span>
+            </div>
+        </div>
+
+        <!-- Right Side: Stats / About -->
+        <div class="max-w-sm text-right opacity-0 animate-[fadeSlideLeft_1.5s_ease_forwards_0.8s] hidden lg:block">
+            <h3 class="text-2xl font-bold text-white mb-6 tracking-widest uppercase drop-shadow-2xl" style="text-shadow: 0 4px 20px rgba(0,0,0,0.9);">Hakkımızda</h3>
+            <p class="text-zinc-200 text-sm leading-relaxed mb-10 font-medium drop-shadow-md" style="text-shadow: 0 2px 10px rgba(0,0,0,0.9);">
+                2026 yılında kurulan ShutterGallery, fotoğrafçıların yeteneklerini hiçbir algoritma baskısı olmadan sergileyebilmesi için özenle tasarlandı.
+            </p>
+            <div class="inline-flex flex-col gap-5 text-left">
+                <div class="px-6 py-4 border border-white/10 bg-black/40 backdrop-blur-md rounded-2xl border-l-4 border-l-emerald-500 shadow-2xl">
+                    <p class="text-[10px] text-zinc-400 font-mono tracking-widest uppercase mb-1">Kuruluş</p>
+                    <p class="text-white text-base font-bold tracking-widest">EST. 2026</p>
+                </div>
+                <div class="px-6 py-4 border border-white/10 bg-black/40 backdrop-blur-md rounded-2xl border-l-4 border-l-emerald-500 shadow-2xl">
+                    <p class="text-[10px] text-zinc-400 font-mono tracking-widest uppercase mb-1">Platform</p>
+                    <p class="text-white text-base font-bold tracking-widest">SHUTTERGALLERY v1.0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed bottom-10 inset-x-0 flex justify-center" style="z-index:30;">
+        <button id="power-btn"
+                class="flex items-center gap-3 px-8 py-3.5 rounded-full border border-emerald-500 bg-black/80 text-emerald-400 text-xs font-bold tracking-[0.25em] uppercase hover:bg-emerald-500 hover:text-white transition-all duration-300"
+                style="backdrop-filter:blur(12px);">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9"/>
+            </svg>
+            KAMERAYI ÇALIŞTIR
+        </button>
+    </div>
+
+    <!-- LCD Arayüzü (Kamera Ekranı Simülasyonu) -->
+    <div id="lcd-interface" class="flex items-center justify-center">
+        
+        <!-- Uygulama Logosu (LCD Merkez Üst) -->
+        <div class="absolute top-4 sm:top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none text-center">
+            <h1 class="text-white/90 font-bold text-lg sm:text-xl tracking-widest uppercase drop-shadow-lg" style="text-shadow: 0 2px 10px rgba(0,0,0,0.8);">
+                Shutter<span class="text-emerald-500">Gallery</span>
+            </h1>
+        </div>
+        
+        <!-- Top Left Dropdown Panel -->
+        <div class="absolute top-4 left-4 sm:top-8 sm:left-8 z-50 pointer-events-auto group">
+            <button class="text-white hover:text-emerald-400 transition-colors flex items-center gap-2 sm:gap-3 bg-black/30 px-3 py-2 sm:px-4 rounded-full backdrop-blur-sm border border-white/5">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <span class="font-mono text-[10px] sm:text-xs tracking-widest uppercase">Menü</span>
+            </button>
+            
+            <div class="absolute top-full left-0 mt-3 w-48 sm:w-56 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-left scale-95 group-hover:scale-100 shadow-2xl">
+                <div class="py-2 font-mono text-[10px] tracking-[0.2em] uppercase">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('users.profile', username=current_user.username) }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors border-b border-white/5">Profilim</a>
+                    <a href="{{ url_for('users.notifications') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors border-b border-white/5">Bildirimler</a>
+                    <a href="{{ url_for('users.settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors border-b border-white/5">Hesap Ayarları</a>
+                    <a href="{{ url_for('users.settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors">Ayarlar</a>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors border-b border-white/5">Giriş Yap</a>
+                    <a href="{{ url_for('auth.register') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-emerald-400 hover:bg-white/5 transition-colors">Kayıt Ol</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- HUD Elements -->
+        <div class="hidden sm:flex absolute top-24 left-8 text-white font-mono text-xs tracking-widest drop-shadow-md flex-col gap-2 pointer-events-none">
+            <div class="flex items-center gap-2 text-red-500 font-bold"><div class="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_red]"></div> REC 00:00:00</div>
+            <div class="text-white/80">RAW + JPEG</div>
+        </div>
+        
+        <!-- Top Right Info & Auth -->
+        <div class="absolute top-4 right-4 sm:top-8 sm:right-8 flex flex-col items-end gap-3 z-50">
+            <div class="hidden sm:flex text-white font-mono text-xs tracking-widest drop-shadow-md gap-6 bg-black/30 px-4 py-2 rounded-full backdrop-blur-sm pointer-events-none">
+                <span>ISO 800</span>
+                <span>F/1.4</span>
+                <span>1/4000</span>
+                <span class="text-emerald-400">🔋 100%</span>
+            </div>
+            <div class="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase flex gap-3 sm:gap-4 pointer-events-auto bg-black/40 sm:bg-transparent px-3 py-2 sm:p-0 rounded-full">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('posts.new_post') }}" class="text-zinc-300 hover:text-emerald-400 transition-colors">Yükle</a>
+                <a href="{{ url_for('auth.logout') }}" onclick="sessionStorage.removeItem('camera_powered')" class="text-zinc-300 hover:text-red-400 transition-colors">Çıkış</a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="text-zinc-300 hover:text-emerald-400 transition-colors">Giriş</a>
+                <a href="{{ url_for('auth.register') }}" class="text-zinc-300 hover:text-white transition-colors">Kayıt</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="hidden sm:flex absolute bottom-8 left-8 text-white/80 font-mono text-xs tracking-widest drop-shadow-md gap-4">
+            <span>AF-C</span>
+            <span>AWB</span>
+        </div>
+        
+        <!-- Focus Box HUD -->
+        <div class="hidden sm:flex absolute inset-0 m-auto w-[60vw] max-w-2xl h-[50vh] border border-white/20 flex-col justify-center items-center pointer-events-none">
+            <!-- Köşe imleçleri -->
+            <div class="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-emerald-400"></div>
+            <div class="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-emerald-400"></div>
+            <div class="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-emerald-400"></div>
+            <div class="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-emerald-400"></div>
+            
+            <!-- Merkez Artı -->
+            <div class="w-px h-6 hud-line absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="w-6 h-px hud-line absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+        </div>
+
+        <!-- Instagram Explore Style Gallery -->
+        <div class="absolute inset-0 top-20 sm:top-24 bottom-4 sm:bottom-24 overflow-y-auto pointer-events-auto custom-scrollbar z-10 px-4 md:px-12 lg:px-24">
+            
+            <!-- Feed Tabs -->
+            <div class="flex justify-center gap-4 mb-8 pt-4">
+                <a href="{{ url_for('main.index') }}" class="px-6 py-2 rounded-full border transition-colors text-xs tracking-widest font-bold uppercase {% if feed_type == 'feed' %}border-emerald-500 bg-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]{% else %}border-white/10 text-zinc-500 hover:text-white hover:border-white/30{% endif %}">
+                    Takip Edilenler
+                </a>
+                <a href="{{ url_for('main.discover') }}" class="px-6 py-2 rounded-full border transition-colors text-xs tracking-widest font-bold uppercase {% if feed_type == 'discover' %}border-emerald-500 bg-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]{% else %}border-white/10 text-zinc-500 hover:text-white hover:border-white/30{% endif %}">
+                    Keşfet
+                </a>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="max-w-xl mx-auto mb-8 relative">
+                <form action="{{ url_for('main.search') }}" method="GET">
+                    <input type="text" name="q" placeholder="Temalarda, kullanıcılarda veya fotoğraf başlıklarında ara..." class="w-full bg-black/40 border border-white/10 rounded-full px-6 py-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-emerald-500/50 transition-colors backdrop-blur-md shadow-xl">
+                    <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-emerald-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </button>
+                </form>
+            </div>
+
+            {% if posts %}
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-7xl mx-auto pb-12">
+                {% for post in posts %}
+                <div class="relative group rounded-lg overflow-hidden bg-zinc-900 aspect-square border border-white/5">
+                    <a href="{{ url_for('posts.post', post_id=post.id) }}" class="block w-full h-full">
+                        <img src="{{ url_for('static', filename='uploads/' + post.image_file) }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    </a>
+                    
+                    <!-- Overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 pointer-events-none">
+                        <div class="flex justify-between items-end w-full">
+                            <div class="flex-1 truncate pr-2">
+                                <h3 class="text-sm font-bold text-white truncate drop-shadow-md">{{ post.title }}</h3>
+                                <p class="text-[10px] text-emerald-400 font-mono uppercase truncate drop-shadow-md">{{ post.author.username }}</p>
+                            </div>
+                            <div class="pointer-events-auto flex items-center gap-3">
+                                {% if current_user.is_authenticated %}
+                                <form action="{{ url_for('posts.like_post', post_id=post.id) }}" method="POST" class="inline">
+                                    <button type="submit" class="flex flex-col items-center hover:scale-110 transition-transform">
+                                        {% if current_user.has_liked_post(post) %}
+                                        <span class="text-red-500 text-xl leading-none drop-shadow-md">♥</span>
+                                        {% else %}
+                                        <span class="text-white text-xl leading-none drop-shadow-md">♡</span>
+                                        {% endif %}
+                                        <span class="text-white text-[10px] font-bold">{{ post.likers.count() }}</span>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <div class="flex flex-col items-center">
+                                    <span class="text-white text-xl leading-none drop-shadow-md">♡</span>
+                                    <span class="text-white text-[10px] font-bold">{{ post.likers.count() }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="flex flex-col items-center justify-center h-full text-center">
+                <p class="text-zinc-400 text-xs tracking-widest uppercase mb-4">Henüz fotoğraf yok</p>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('posts.new_post') }}" class="px-6 py-2 rounded-full border border-emerald-500/50 text-emerald-400 text-xs font-bold tracking-widest uppercase hover:bg-emerald-500/10 transition-colors">İlk Sen Yükle</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Error Reporter -->
+    <div id="error-box" style="position:fixed; top:20px; left:20px; z-index:9999; background:rgba(220,0,0,0.8); color:white; padding:15px; border-radius:8px; font-family:monospace; display:none; max-width: 80%;"></div>
+
+    <!-- Fallback CDNs -->
+    <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+    <script>
+        if (typeof THREE === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+        }
+    </script>
+
+    <script>
+    window.addEventListener('error', function(e) {
+        const eb = document.getElementById('error-box');
+        eb.style.display = 'block';
+        eb.innerHTML += "Hata: " + e.message + " (" + e.filename + ":" + e.lineno + ")<br>";
+    });
+
+    try {
+        // ── RENDERER ─────────────────────────────────────────────
+        const canvas = document.getElementById('c');
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
+        
+        function resizeRenderer() {
+            const W = window.innerWidth || document.documentElement.clientWidth;
+            const H = window.innerHeight || document.documentElement.clientHeight;
+            renderer.setSize(W, H);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            if(cam) {
+                cam.aspect = W / H;
+                cam.updateProjectionMatrix();
+            }
+        }
+
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.3;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        // ── SCENE ────────────────────────────────────────────────
+        const scene = new THREE.Scene();
+        const cam = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+        resizeRenderer();
+
+        // ── ORBITAL CAMERA ───────────────────────────────────────
+        let sph = { theta: 0.6, phi: 1.25, r: 5.5 };
+        let currentLook = new THREE.Vector3(0, 0.05, 0);
+        
+        function updateCam() {
+            cam.position.set(
+                currentLook.x + sph.r * Math.sin(sph.phi) * Math.sin(sph.theta),
+                currentLook.y + sph.r * Math.cos(sph.phi),
+                currentLook.z + sph.r * Math.sin(sph.phi) * Math.cos(sph.theta)
+            );
+            cam.lookAt(currentLook);
+        }
+        updateCam();
+
+        // ── CONTROLS ─────────────────────────────────────────────
+        let drag = false, prev = { x: 0, y: 0 }, userInteracted = false;
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        canvas.addEventListener('mousedown', e => { 
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, cam);
+            const intersects = raycaster.intersectObject(G, true);
+            
+            if (intersects.length > 0) {
+                drag = true; 
+                prev = { x: e.clientX, y: e.clientY }; 
+                userInteracted = true; 
+            }
+        });
+        window.addEventListener('mouseup', () => { drag = false; });
+        window.addEventListener('mousemove', e => {
+            if (!drag) return;
+            sph.theta -= (e.clientX - prev.x) * 0.008;
+            sph.phi = Math.max(0.15, Math.min(Math.PI - 0.15, sph.phi - (e.clientY - prev.y) * 0.006)); // Inverted Y-axis
+            prev = { x: e.clientX, y: e.clientY };
+            updateCam();
+        });
+        canvas.addEventListener('wheel', e => {
+            if (powered) return; // Disable zoom when in LCD mode
+            sph.r = Math.max(2.5, Math.min(11, sph.r + e.deltaY * 0.005));
+            updateCam();
+            e.preventDefault();
+        }, { passive: false });
+
+        let touch0 = null;
+        canvas.addEventListener('touchstart', e => { 
+            mouse.x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, cam);
+            const intersects = raycaster.intersectObject(G, true);
+            
+            if (intersects.length > 0) {
+                touch0 = { x: e.touches[0].clientX, y: e.touches[0].clientY }; 
+                userInteracted = true; 
+            }
+        });
+        canvas.addEventListener('touchmove', e => {
+            if (!touch0) return;
+            sph.theta -= (e.touches[0].clientX - touch0.x) * 0.008;
+            sph.phi = Math.max(0.15, Math.min(Math.PI - 0.15, sph.phi - (e.touches[0].clientY - touch0.y) * 0.006)); // Inverted Y-axis
+            touch0 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            updateCam();
+            e.preventDefault();
+        }, { passive: false });
+        canvas.addEventListener('touchend', () => { touch0 = null; });
+
+        // ── LIGHTING ─────────────────────────────────────────────
+        scene.add(new THREE.HemisphereLight(0x334466, 0x221100, 0.5));
+        const key = new THREE.DirectionalLight(0xffffff, 2.8);
+        key.position.set(4, 6, 5);
+        key.castShadow = true;
+        key.shadow.mapSize.set(2048, 2048);
+        key.shadow.bias = -0.001;
+        scene.add(key);
+
+        const fill = new THREE.DirectionalLight(0xaabbdd, 1.0);
+        fill.position.set(-5, 2, 3);
+        scene.add(fill);
+
+        const rim = new THREE.DirectionalLight(0xfff0e0, 2.0);
+        rim.position.set(0.5, 4, -6);
+        scene.add(rim);
+
+        const topL = new THREE.DirectionalLight(0xffffff, 0.8);
+        topL.position.set(0, 8, 0);
+        scene.add(topL);
+
+        const frontL = new THREE.PointLight(0xffffff, 0.5, 20);
+        frontL.position.set(0, 0, 7);
+        scene.add(frontL);
+
+        // ── MATERIALS ────────────────────────────────────────────
+        const M = {
+            rubber: new THREE.MeshStandardMaterial({ color: 0x0d0d0f, roughness: 0.96, metalness: 0.0 }),
+            body:   new THREE.MeshStandardMaterial({ color: 0x5a5f66, roughness: 0.35, metalness: 0.85 }),
+            top:    new THREE.MeshStandardMaterial({ color: 0x9ba2aa, roughness: 0.20, metalness: 0.95 }),
+            chrome: new THREE.MeshStandardMaterial({ color: 0x909aaa, roughness: 0.10, metalness: 1.00 }),
+            barrel: new THREE.MeshStandardMaterial({ color: 0x0b0b0d, roughness: 0.20, metalness: 0.90 }),
+            ring:   new THREE.MeshStandardMaterial({ color: 0x252529, roughness: 0.25, metalness: 0.94 }),
+            focus:  new THREE.MeshStandardMaterial({ color: 0x1a1a1e, roughness: 0.16, metalness: 0.96 }),
+            glass:  new THREE.MeshStandardMaterial({ color: 0x050c18, roughness: 0.01, metalness: 0.98, transparent: true, opacity: 0.90 }),
+            glassB: new THREE.MeshStandardMaterial({ color: 0x0e2244, roughness: 0.01, metalness: 1.00, transparent: true, opacity: 0.80, emissive: 0x061526, emissiveIntensity: 0.5 }),
+            glassC: new THREE.MeshStandardMaterial({ color: 0xaaccff, roughness: 0.00, metalness: 1.00, transparent: true, opacity: 0.15 }),
+            // LCD Screen Material starts solid, will fade to transparent!
+            screen: new THREE.MeshStandardMaterial({ color: 0x030306, roughness: 0.06, metalness: 0.3, emissive: 0x050712, emissiveIntensity: 0.9, transparent: true, opacity: 1.0 }),
+            bezel:  new THREE.MeshStandardMaterial({ color: 0x070710, roughness: 0.08, metalness: 0.55 }),
+            red:    new THREE.MeshStandardMaterial({ color: 0xcc1800, roughness: 0.5, metalness: 0.2, emissive: 0x3a0500, emissiveIntensity: 0.4 }),
+            green:  new THREE.MeshStandardMaterial({ color: 0x00cc44, roughness: 0.3, metalness: 0.0, emissive: 0x00cc44, emissiveIntensity: 1.5 }),
+            orange: new THREE.MeshStandardMaterial({ color: 0xff6600, roughness: 0.3, metalness: 0.1, emissive: 0xff3300, emissiveIntensity: 0.6 }),
+        };
+
+        // ── GEOMETRY ─────────────────────────────────────────────
+        const G = new THREE.Group();
+
+        function B(w, h, d, m, x, y, z) {
+            const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+            mesh.position.set(x, y, z);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            G.add(mesh);
+        }
+        function CY(rt, rb, h, s, m, x, y, z) { 
+            const mesh = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, s), m);
+            mesh.position.set(x, y, z);
+            mesh.castShadow = true;
+            G.add(mesh);
+        }
+        function CZ(rt, rb, h, s, m, x, y, z) { 
+            const mesh = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, s), m);
+            mesh.rotation.x = Math.PI / 2;
+            mesh.position.set(x, y, z);
+            mesh.castShadow = true;
+            G.add(mesh);
+        }
+
+        // Camera Body
+        B(2.15, 1.52, 0.94, M.body,   0,     0,      0);
+        B(0.54, 1.32, 1.05, M.rubber,-1.02, -0.08,  0.06);
+        B(0.44, 0.36, 1.00, M.rubber,-0.96,  0.64,  0.06);
+
+        // Top Plate
+        B(2.15, 0.09, 0.94, M.top,    0,     0.80,   0);
+        B(0.60, 0.36, 0.42, M.top,    0.12,  0.92,  -0.12);
+
+        // Dials
+        CY(0.27, 0.29, 0.14, 36, M.chrome,   0.56, 0.91,  0);
+        CY(0.21, 0.21, 0.03, 36, M.top,      0.56, 0.985, 0);
+        CY(0.17, 0.18, 0.11, 32, M.chrome,   0.89, 0.89,  0.16);
+        CY(0.09, 0.10, 0.09, 20, M.chrome,  -0.94, 0.95,  0.30);
+        CY(0.05, 0.05, 0.02, 12, M.red,     -0.94, 1.00,  0.30);
+        CY(0.055,0.055,0.04, 16, M.chrome,   0.25, 0.88,  0.40);
+        CY(0.055,0.055,0.04, 16, M.chrome,   0.45, 0.88,  0.40);
+
+        // Hot shoe
+        B(0.46, 0.05, 0.19, M.chrome,  0.12,  0.84, -0.04);
+        B(0.36, 0.03, 0.15, M.top,     0.12,  0.865,-0.04);
+        B(0.04, 0.03, 0.015,M.green,   0.52,  0.87,  0.43);
+
+        // Front Face
+        CZ(0.59, 0.61, 0.05, 54, M.chrome,  0.08, 0.05,  0.48);
+        CZ(0.51, 0.51, 0.07, 54, M.body,    0.08, 0.05,  0.482);
+        B(0.44, 1.06, 0.13, M.rubber,      -1.02,-0.08,  0.44);
+        B(0.06, 0.05, 0.02, M.orange,      -0.78,-0.08,  0.475);
+        CZ(0.05, 0.05, 0.03, 12, M.chrome, -0.62, 0.60,  0.475);
+
+        // Lens
+        CZ(0.60, 0.62, 0.04, 54, M.barrel,  0.08, 0.05, 0.515);
+        CZ(0.54, 0.57, 0.22, 54, M.barrel,  0.08, 0.05, 0.645);
+        CZ(0.55, 0.56, 0.20, 54, M.focus,   0.08, 0.05, 0.815);
+        CZ(0.52, 0.55, 0.28, 54, M.barrel,  0.08, 0.05, 0.985);
+        CZ(0.54, 0.56, 0.24, 54, M.ring,    0.08, 0.05, 1.185);
+        CZ(0.50, 0.52, 0.15, 54, M.barrel,  0.08, 0.05, 1.365);
+        CZ(0.47, 0.50, 0.10, 54, M.barrel,  0.08, 0.05, 1.475);
+        CZ(0.47, 0.47, 0.03, 54, M.chrome,  0.08, 0.05, 1.545);
+        CZ(0.44, 0.44, 0.04, 54, M.glass,   0.08, 0.05, 1.565);
+        CZ(0.30, 0.30, 0.03, 54, M.glassB,  0.08, 0.05, 1.560);
+        CZ(0.13, 0.13, 0.02, 36, M.glassC,  0.08, 0.05, 1.558);
+
+        // Back Face (LCD is at z = -0.48)
+        B(1.52, 1.00, 0.02, M.screen,  0.05,-0.05,-0.48);
+        B(1.64, 1.12, 0.012,M.bezel,   0.05,-0.05,-0.468);
+        B(0.52, 0.37, 0.17, M.top,     0.12, 0.62,-0.47);
+        CZ(0.12, 0.14, 0.10, 28, M.rubber,  0.12, 0.62,-0.56);
+        CZ(0.06, 0.07, 0.055,16, M.chrome,  0.36, 0.62,-0.48);
+        B(0.30, 0.58, 0.07, M.rubber, -0.70, 0.12,-0.48);
+        CZ(0.19, 0.21, 0.055,36, M.chrome, -0.70, 0.59,-0.472);
+
+        // Buttons on the back are removed as they overlap the LCD screen and block the view
+        CZ(0.065,0.065,0.028,18, M.red,      -0.70, 0.76,-0.488);
+
+        // Sides
+        B(0.04, 0.70, 0.76, M.top,    1.10,-0.28, 0);
+        B(0.04, 0.48, 0.40, M.top,   -1.10, 0.08, 0.08);
+        B(0.07, 0.22, 0.10, M.chrome,  1.10, 0.55,-0.10);
+        B(0.07, 0.22, 0.10, M.chrome, -1.10, 0.55,-0.10);
+        CZ(0.035,0.035,0.10,14, M.chrome,  1.10, 0.55,-0.06);
+        CZ(0.035,0.035,0.10,14, M.chrome, -1.10, 0.55,-0.06);
+        B(2.15, 0.06, 0.94, M.top,    0, -0.815,  0);
+        CZ(0.07, 0.07, 0.03, 18, M.chrome, 0.08,-0.848, 0.12);
+
+        const shadowPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(20, 20),
+            new THREE.ShadowMaterial({ opacity: 0.3 })
+        );
+        shadowPlane.rotation.x = -Math.PI / 2;
+        shadowPlane.position.y = -0.87;
+        shadowPlane.receiveShadow = true;
+        scene.add(shadowPlane);
+        
+        const hitBox = new THREE.Mesh(
+            new THREE.BoxGeometry(3.5, 2.8, 3.5), // Kameranın tamamını ve lensi içine alacak kadar çok daha büyük
+            new THREE.MeshBasicMaterial({ visible: false })
+        );
+        G.add(hitBox);
+
+        // ── BRAND LOGOS ──────────────────────────────────────────
+        function createLogoTexture(text, size=72) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'rgba(255, 255, 255, 0)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#f0f0f0';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = '800 ' + size + 'px "Inter", sans-serif';
+            ctx.letterSpacing = '2px';
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetY = 2;
+            ctx.fillText(text, canvas.width/2, canvas.height/2);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const logoTex = createLogoTexture("ShutterGallery");
+        const logoMat = new THREE.MeshStandardMaterial({ 
+            map: logoTex, 
+            transparent: true, 
+            opacity: 0.9,
+            roughness: 0.4,
+            metalness: 0.6
+        });
+
+        // Front Logo (above lens)
+        const frontLogo = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.2), logoMat);
+        frontLogo.position.set(0.08, 0.62, 0.472); // Center aligned with lens x=0.08
+        G.add(frontLogo);
+
+        // Back Logo (above LCD screen)
+        const backLogo = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.175), logoMat);
+        backLogo.position.set(0.05, 0.60, -0.472);
+        backLogo.rotation.y = Math.PI; // Face backwards
+        G.add(backLogo);
+
+        scene.add(G);
+
+        // ── UI INTERACTION & ANIMATION LOGIC ─────────────────────
+        let powered = false;
+        let targetSph = null;
+        let targetLook = new THREE.Vector3(0.05, -0.05, -0.48); // Center of LCD screen
+
+        const powerBtn = document.getElementById('power-btn');
+        const lcdUI    = document.getElementById('lcd-interface');
+        const bgEl     = document.getElementById('bg');
+        const hintEl   = document.getElementById('hint');
+        const introOverlay = document.getElementById('intro-overlay');
+
+        if (sessionStorage.getItem('camera_powered') === 'true') {
+            powered = true;
+            userInteracted = true;
+            sph = { theta: Math.PI, phi: Math.PI / 2, r: 0.1 };
+            currentLook.copy(targetLook);
+            
+            if (introOverlay) introOverlay.style.display = 'none';
+            if (hintEl) hintEl.style.display = 'none';
+            if (powerBtn) powerBtn.style.display = 'none';
+            
+            bgEl.style.transition = 'none';
+            bgEl.style.filter = 'blur(0px) brightness(40%)';
+            bgEl.style.transform = 'scale(1.0)';
+            
+            lcdUI.style.transition = 'none';
+            lcdUI.classList.add('show');
+            
+            canvas.style.transition = 'none';
+            canvas.style.opacity = '0';
+            canvas.style.display = 'none';
+            M.screen.opacity = 0;
+        }
+
+        powerBtn.addEventListener('click', () => {
+            if (powered) return;
+            powered = true;
+            userInteracted = true;
+            sessionStorage.setItem('camera_powered', 'true');
+            
+            if(introOverlay) introOverlay.style.opacity = '0';
+            
+            // Initiate camera animation to LCD screen
+            // theta=Math.PI means looking from -Z to +Z.
+            // phi=Math.PI/2 means horizontal.
+            // r=0.1 frames the 1.64x1.12 LCD perfectly in a standard viewport.
+            targetSph = { theta: Math.PI, phi: Math.PI / 2, r: 0.1 };
+            
+            // Sharpen background
+            bgEl.style.filter    = 'blur(0px) brightness(40%)';
+            bgEl.style.transform = 'scale(1.0)';
+            
+            // Delay showing HTML UI to wait for 3D camera zoom
+            setTimeout(() => {
+                lcdUI.classList.add('show');
+                canvas.style.opacity = '0'; // Tweak: Fade out 3D model to show true background fully
+                
+                // Unblur the background to act as the clear camera viewfinder
+                bgEl.style.filter = 'blur(0px) brightness(40%)';
+                bgEl.style.transform = 'scale(1.0)';
+            }, 800);
+            
+            powerBtn.classList.add('off');
+            hintEl.style.opacity = '0';
+        });
+
+        window.addEventListener('resize', resizeRenderer);
+
+        function lerpAngle(a, b, t) {
+            let delta = ((b - a) % (Math.PI * 2));
+            if (delta > Math.PI) delta -= Math.PI * 2;
+            if (delta < -Math.PI) delta += Math.PI * 2;
+            return a + delta * t;
+        }
+
+        // ── RENDER LOOP ──────────────────────────────────────────
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (targetSph) {
+                // Smooth interpolation towards target
+                sph.theta = lerpAngle(sph.theta, targetSph.theta, 0.04);
+                sph.phi += (targetSph.phi - sph.phi) * 0.04;
+                sph.r += (targetSph.r - sph.r) * 0.04;
+                currentLook.lerp(targetLook, 0.04);
+                updateCam();
+                
+                // Fade out LCD screen mesh to reveal background
+                if (M.screen.opacity > 0) {
+                    M.screen.opacity = Math.max(0, M.screen.opacity - 0.02);
+                }
+            } else if (!userInteracted) {
+                sph.theta += 0.004;
+                updateCam();
+            }
+            
+            renderer.render(scene, cam);
+        }
+        animate();
+    } catch(err) {
+        const eb = document.getElementById('error-box');
+        eb.style.display = 'block';
+        eb.innerHTML += "Kritik Hata: " + err.message + "<br>";
+    }
+    </script>
+</body>
+</html>

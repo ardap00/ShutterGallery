@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto text-white font-sans">
+    
+    <!-- Search Bar -->
+    <div class="max-w-xl mx-auto mb-8 relative">
+        <form action="{{ url_for('main.search') }}" method="GET">
+            <input type="text" name="q" placeholder="Temalarda, kullanıcılarda veya fotoğraf başlıklarında ara..." class="w-full bg-zinc-900/80 border border-white/10 rounded-full px-6 py-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-emerald-500/50 transition-colors backdrop-blur-md shadow-xl">
+            <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-emerald-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </button>
+        </form>
+    </div>
+
+    <!-- User Profile Header -->
+    <div class="flex flex-col md:flex-row items-center gap-8 mb-12 bg-zinc-900/50 p-8 rounded-3xl border border-white/5 backdrop-blur-sm">
+        <div class="relative group w-32 h-32 md:w-48 md:h-48 shrink-0">
+            {% set avatar_filename = user.avatar_file if user.avatar_file else 'default.jpg' %}
+            <img src="{{ url_for('static', filename='avatars/' + avatar_filename) }}" alt="{{ user.username }}" class="w-full h-full rounded-full object-cover border-4 border-zinc-800 shadow-2xl">
+            {% if current_user == user %}
+            <a href="{{ url_for('users.settings') }}" class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <span class="text-xs font-mono uppercase tracking-widest text-emerald-400">Düzenle</span>
+            </a>
+            {% endif %}
+        </div>
+        
+        <div class="text-center md:text-left flex-1">
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tighter mb-2">{{ user.username }}</h1>
+            <p class="text-emerald-400 font-mono text-xs uppercase tracking-[0.2em] mb-4">ShutterGallery Üyesi</p>
+            <p class="text-zinc-400 max-w-2xl leading-relaxed">
+                {{ user.bio if user.bio else 'Henüz bir biyografi eklenmedi.' }}
+            </p>
+            
+            <div class="mt-6 flex flex-wrap gap-4 justify-center md:justify-start items-center">
+                <a href="{{ url_for('users.profile', username=user.username, tab='photos') }}" class="px-6 py-2 rounded-full {% if tab == 'photos' %}bg-zinc-800 border-emerald-500/50{% else %}bg-black border-white/10 hover:bg-zinc-800{% endif %} border text-center transition-colors">
+                    <div class="text-lg font-bold">{{ post_count }}</div>
+                    <div class="text-[10px] uppercase font-mono tracking-widest text-zinc-500">Gönderi</div>
+                </a>
+                <a href="{{ url_for('users.profile', username=user.username, tab='followers') }}" class="px-6 py-2 rounded-full {% if tab == 'followers' %}bg-zinc-800 border-emerald-500/50{% else %}bg-black border-white/10 hover:bg-zinc-800{% endif %} border text-center transition-colors">
+                    <div class="text-lg font-bold">{{ user.followers.count() }}</div>
+                    <div class="text-[10px] uppercase font-mono tracking-widest text-zinc-500">Takipçi</div>
+                </a>
+                <a href="{{ url_for('users.profile', username=user.username, tab='following') }}" class="px-6 py-2 rounded-full {% if tab == 'following' %}bg-zinc-800 border-emerald-500/50{% else %}bg-black border-white/10 hover:bg-zinc-800{% endif %} border text-center transition-colors">
+                    <div class="text-lg font-bold">{{ user.followed.count() }}</div>
+                    <div class="text-[10px] uppercase font-mono tracking-widest text-zinc-500">Takip</div>
+                </a>
+                {% if current_user == user %}
+                <a href="{{ url_for('posts.new_post') }}" class="px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Hızlı Yükle
+                </a>
+                <a href="{{ url_for('users.settings') }}" class="px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                    Ayarlar
+                </a>
+                {% elif current_user.is_authenticated %}
+                    {% if current_user.is_following(user) %}
+                        <a href="{{ url_for('users.unfollow', username=user.username) }}" class="px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                            Takipten Çık
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('users.follow', username=user.username) }}" class="px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                            Takip Et
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    {% if tab == 'photos' %}
+        <h2 class="text-xl font-bold mb-6 tracking-tight border-b border-white/10 pb-4">Fotoğraflar</h2>
+        {% if posts %}
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {% for post in posts %}
+            <div class="relative group rounded-xl overflow-hidden bg-zinc-900 aspect-square border border-white/5">
+                <a href="{{ url_for('posts.post', post_id=post.id) }}" class="block w-full h-full">
+                    <img src="{{ url_for('static', filename='uploads/' + post.image_file) }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                        <h3 class="text-sm font-bold text-white truncate drop-shadow-md">{{ post.title }}</h3>
+                        <div class="flex gap-3 text-[10px] text-zinc-400 font-mono mt-1">
+                            <span>👁 {{ post.views }}</span>
+                            <span>💬 {{ post.comments|length }}</span>
+                            <span class="{% if current_user.is_authenticated and current_user.has_liked_post(post) %}text-red-500{% endif %}">
+                                ♥ {{ post.likers.count() }}
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-20 bg-zinc-900/30 rounded-3xl border border-white/5 border-dashed">
+            <p class="text-zinc-500 tracking-widest uppercase text-sm mb-4">Henüz fotoğraf yok</p>
+            {% if current_user == user %}
+            <a href="{{ url_for('posts.new_post') }}" class="text-emerald-400 hover:text-emerald-300 text-xs font-mono uppercase tracking-widest">İlk fotoğrafını yükle →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% elif tab == 'followers' %}
+        <h2 class="text-xl font-bold mb-6 tracking-tight border-b border-white/10 pb-4">Takipçiler</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for follower in user.followers %}
+            <a href="{{ url_for('users.profile', username=follower.username) }}" class="flex items-center gap-4 bg-zinc-900/50 p-4 rounded-xl border border-white/5 hover:border-emerald-500/30 hover:bg-zinc-900 transition-all">
+                {% set f_avatar = follower.avatar_file if follower.avatar_file else 'default.jpg' %}
+                <img src="{{ url_for('static', filename='avatars/' + f_avatar) }}" class="w-12 h-12 rounded-full object-cover">
+                <div>
+                    <h3 class="font-bold text-white">{{ follower.username }}</h3>
+                    <p class="text-xs text-zinc-500">{{ follower.followers.count() }} Takipçi</p>
+                </div>
+            </a>
+            {% else %}
+            <div class="col-span-full text-center py-12 text-zinc-500 uppercase tracking-widest text-xs">
+                Henüz takipçi yok
+            </div>
+            {% endfor %}
+        </div>
+    {% elif tab == 'following' %}
+        <h2 class="text-xl font-bold mb-6 tracking-tight border-b border-white/10 pb-4">Takip Edilenler</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for followed in user.followed %}
+            <a href="{{ url_for('users.profile', username=followed.username) }}" class="flex items-center gap-4 bg-zinc-900/50 p-4 rounded-xl border border-white/5 hover:border-emerald-500/30 hover:bg-zinc-900 transition-all">
+                {% set f_avatar = followed.avatar_file if followed.avatar_file else 'default.jpg' %}
+                <img src="{{ url_for('static', filename='avatars/' + f_avatar) }}" class="w-12 h-12 rounded-full object-cover">
+                <div>
+                    <h3 class="font-bold text-white">{{ followed.username }}</h3>
+                    <p class="text-xs text-zinc-500">{{ followed.followers.count() }} Takipçi</p>
+                </div>
+            </a>
+            {% else %}
+            <div class="col-span-full text-center py-12 text-zinc-500 uppercase tracking-widest text-xs">
+                Henüz kimseyi takip etmiyor
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}

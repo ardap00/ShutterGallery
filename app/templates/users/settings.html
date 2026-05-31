@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-white font-sans">
+    <div class="mb-10 text-center md:text-left">
+        <h1 class="text-3xl font-extrabold tracking-tighter mb-2">Ayarlar</h1>
+        <p class="text-emerald-400 font-mono text-xs uppercase tracking-[0.2em]">Profil & Hesap Yönetimi</p>
+    </div>
+
+    <div class="bg-zinc-900/50 p-6 md:p-10 rounded-3xl border border-white/5 backdrop-blur-sm">
+        <form method="POST" action="" enctype="multipart/form-data" class="space-y-8">
+            {{ form.hidden_tag() }}
+            
+            <div class="flex flex-col md:flex-row items-center gap-8 pb-8 border-b border-white/10">
+                <div class="relative w-32 h-32 shrink-0">
+                    <img src="{{ avatar_url }}" alt="Avatar" class="w-full h-full rounded-full object-cover border-4 border-zinc-800">
+                </div>
+                <div class="flex-1 w-full text-center md:text-left">
+                    {{ form.avatar.label(class="block text-sm font-medium text-zinc-300 mb-2") }}
+                    {{ form.avatar(class="block w-full text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:tracking-widest file:uppercase file:bg-emerald-600/20 file:text-emerald-400 hover:file:bg-emerald-600/30 transition-colors") }}
+                    {% if form.avatar.errors %}
+                        {% for error in form.avatar.errors %}
+                            <p class="text-red-400 text-xs mt-2">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    {{ form.username.label(class="block text-sm font-medium text-zinc-300 mb-2") }}
+                    {{ form.username(class="w-full bg-black/50 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors") }}
+                    {% if form.username.errors %}
+                        {% for error in form.username.errors %}
+                            <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div>
+                    {{ form.email.label(class="block text-sm font-medium text-zinc-300 mb-2") }}
+                    {{ form.email(class="w-full bg-black/50 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors") }}
+                    {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                {{ form.bio.label(class="block text-sm font-medium text-zinc-300 mb-2") }}
+                {{ form.bio(class="w-full bg-black/50 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors h-32 resize-none") }}
+                {% if form.bio.errors %}
+                    {% for error in form.bio.errors %}
+                        <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="pt-4 flex justify-end">
+                {{ form.submit(class="px-8 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs tracking-widest uppercase transition-colors shadow-lg shadow-emerald-900/20 cursor-pointer") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}
