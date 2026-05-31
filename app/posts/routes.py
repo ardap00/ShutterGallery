@@ -108,6 +108,18 @@ def new_post():
             
             exif_info = extract_exif(picture_path)
             
+            if current_app.config.get('CLOUDINARY_CLOUD_NAME'):
+                import cloudinary.uploader
+                try:
+                    upload_result = cloudinary.uploader.upload(picture_path)
+                    image_url = upload_result.get('secure_url')
+                    os.remove(picture_path)
+                except Exception as e:
+                    print(f"Cloudinary upload failed: {e}")
+                    image_url = unique_filename
+            else:
+                image_url = unique_filename
+            
             camera_model = exif_info.get('camera_model') or form.camera_model.data
             iso = exif_info.get('iso') or form.iso.data
             aperture = exif_info.get('aperture') or form.aperture.data
@@ -117,7 +129,7 @@ def new_post():
                 title=form.title.data,
                 description=form.description.data,
                 category=form.category.data,
-                image_file=unique_filename,
+                image_file=image_url,
                 camera_model=camera_model,
                 lens_model=form.lens_model.data,
                 iso=iso,
@@ -174,8 +186,8 @@ def delete_post(post_id):
         flash('Sadece kendi yüklediğiniz fotoğrafları silebilirsiniz.', 'danger')
         return redirect(url_for('posts.post', post_id=post.id))
     
-    # Delete the physical image file
-    if post.image_file:
+    # Delete the physical image file if not a URL
+    if post.image_file and not post.image_file.startswith('http'):
         picture_path = os.path.join(current_app.root_path, 'static', 'uploads', post.image_file)
         if os.path.exists(picture_path):
             os.remove(picture_path)

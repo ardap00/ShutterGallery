@@ -23,6 +23,17 @@ def save_avatar(form_picture):
     i.thumbnail(output_size)
     i.save(picture_path)
 
+    if current_app.config.get('CLOUDINARY_CLOUD_NAME'):
+        import cloudinary.uploader
+        try:
+            upload_result = cloudinary.uploader.upload(picture_path)
+            image_url = upload_result.get('secure_url')
+            os.remove(picture_path)
+            return image_url
+        except Exception as e:
+            print(f"Cloudinary upload error: {e}")
+            return picture_fn
+
     return picture_fn
 
 @users.route('/profile/<username>')
@@ -62,7 +73,10 @@ def account_settings():
         form.bio.data = current_user.bio
     
     avatar_file = current_user.avatar_file if current_user.avatar_file else 'default.jpg'
-    avatar_url = url_for('static', filename='avatars/' + avatar_file)
+    if avatar_file.startswith('http'):
+        avatar_url = avatar_file
+    else:
+        avatar_url = url_for('static', filename='avatars/' + avatar_file)
     return render_template('users/account_settings.html', form=form, avatar_url=avatar_url)
 
 @users.route('/settings', methods=['GET', 'POST'])

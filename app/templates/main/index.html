@@ -215,7 +215,11 @@
                 {% for post in posts.items %}
                 <div class="relative group rounded-lg overflow-hidden bg-zinc-900 aspect-square border border-white/5">
                     <a href="{{ url_for('posts.post', post_id=post.id) }}" class="block w-full h-full">
+                        {% if post.image_file.startswith('http') %}
+                        <img src="{{ post.image_file }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        {% else %}
                         <img src="{{ url_for('static', filename='uploads/' + post.image_file) }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        {% endif %}
                     </a>
                     
                     <!-- Overlay -->

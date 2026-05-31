@@ -1,11 +1,16 @@
 from flask import Flask, request, session
 from flask_migrate import Migrate
 from flask_babel import Babel
+from flask_mail import Mail
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 from app.models import db, login_manager
 from config import Config
 
 migrate = Migrate()
 babel = Babel()
+mail = Mail()
 
 def get_locale():
     from flask_login import current_user
@@ -23,6 +28,14 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     babel.init_app(app, locale_selector=get_locale)
+    mail.init_app(app)
+    
+    if app.config['CLOUDINARY_CLOUD_NAME']:
+        cloudinary.config(
+            cloud_name=app.config['CLOUDINARY_CLOUD_NAME'],
+            api_key=app.config['CLOUDINARY_API_KEY'],
+            api_secret=app.config['CLOUDINARY_API_SECRET']
+        )
     
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'

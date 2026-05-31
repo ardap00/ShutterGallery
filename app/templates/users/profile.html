@@ -17,7 +17,11 @@
     <div class="flex flex-col md:flex-row items-center gap-8 mb-12 bg-zinc-900/50 p-8 rounded-3xl border border-white/5 backdrop-blur-sm">
         <div class="relative group w-32 h-32 md:w-48 md:h-48 shrink-0">
             {% set avatar_filename = user.avatar_file if user.avatar_file else 'default.jpg' %}
+            {% if avatar_filename.startswith('http') %}
+            <img src="{{ avatar_filename }}" alt="{{ user.username }}" class="w-full h-full rounded-full object-cover border-4 border-zinc-800 shadow-2xl">
+            {% else %}
             <img src="{{ url_for('static', filename='avatars/' + avatar_filename) }}" alt="{{ user.username }}" class="w-full h-full rounded-full object-cover border-4 border-zinc-800 shadow-2xl">
+            {% endif %}
             {% if current_user == user %}
             <a href="{{ url_for('users.settings') }}" class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <span class="text-xs font-mono uppercase tracking-widest text-emerald-400">Düzenle</span>
@@ -76,7 +80,11 @@
             {% for post in posts %}
             <div class="relative group rounded-xl overflow-hidden bg-zinc-900 aspect-square border border-white/5">
                 <a href="{{ url_for('posts.post', post_id=post.id) }}" class="block w-full h-full">
+                    {% if post.image_file.startswith('http') %}
+                    <img src="{{ post.image_file }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    {% else %}
                     <img src="{{ url_for('static', filename='uploads/' + post.image_file) }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    {% endif %}
                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                         <h3 class="text-sm font-bold text-white truncate drop-shadow-md">{{ post.title }}</h3>
                         <div class="flex gap-3 text-[10px] text-zinc-400 font-mono mt-1">
@@ -105,7 +113,11 @@
             {% for follower in user.followers %}
             <a href="{{ url_for('users.profile', username=follower.username) }}" class="flex items-center gap-4 bg-zinc-900/50 p-4 rounded-xl border border-white/5 hover:border-emerald-500/30 hover:bg-zinc-900 transition-all">
                 {% set f_avatar = follower.avatar_file if follower.avatar_file else 'default.jpg' %}
+                {% if f_avatar.startswith('http') %}
+                <img src="{{ f_avatar }}" class="w-12 h-12 rounded-full object-cover">
+                {% else %}
                 <img src="{{ url_for('static', filename='avatars/' + f_avatar) }}" class="w-12 h-12 rounded-full object-cover">
+                {% endif %}
                 <div>
                     <h3 class="font-bold text-white">{{ follower.username }} <span class="text-xs text-zinc-500 font-mono ml-1">#{{ follower.unique_id }}</span></h3>
                     <p class="text-xs text-zinc-500">{{ follower.followers.count() }} Takipçi</p>
@@ -123,7 +135,11 @@
             {% for followed in user.followed %}
             <a href="{{ url_for('users.profile', username=followed.username) }}" class="flex items-center gap-4 bg-zinc-900/50 p-4 rounded-xl border border-white/5 hover:border-emerald-500/30 hover:bg-zinc-900 transition-all">
                 {% set f_avatar = followed.avatar_file if followed.avatar_file else 'default.jpg' %}
+                {% if f_avatar.startswith('http') %}
+                <img src="{{ f_avatar }}" class="w-12 h-12 rounded-full object-cover">
+                {% else %}
                 <img src="{{ url_for('static', filename='avatars/' + f_avatar) }}" class="w-12 h-12 rounded-full object-cover">
+                {% endif %}
                 <div>
                     <h3 class="font-bold text-white">{{ followed.username }} <span class="text-xs text-zinc-500 font-mono ml-1">#{{ followed.unique_id }}</span></h3>
                     <p class="text-xs text-zinc-500">{{ followed.followers.count() }} Takipçi</p>
