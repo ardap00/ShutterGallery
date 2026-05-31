@@ -57,6 +57,16 @@
                 {% endif %}
             </div>
 
+            <div>
+                {{ form.language.label(class="block text-sm font-medium text-zinc-300 mb-2") }}
+                {{ form.language(class="w-full bg-black/50 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors") }}
+                {% if form.language.errors %}
+                    {% for error in form.language.errors %}
+                        <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
             <div class="pt-4 flex justify-end">
                 {{ form.submit(class="px-8 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs tracking-widest uppercase transition-colors shadow-lg shadow-emerald-900/20 cursor-pointer") }}
             </div>

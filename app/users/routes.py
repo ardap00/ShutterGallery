@@ -52,13 +52,16 @@ def settings():
         current_user.username = form.username.data
         current_user.email = form.email.data
         current_user.bio = form.bio.data
+        current_user.language = form.language.data
         db.session.commit()
-        flash('Hesap bilgileriniz güncellendi!', 'success')
+        from flask_babel import _
+        flash(_('Hesap bilgileriniz güncellendi!'), 'success')
         return redirect(url_for('users.settings'))
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.email.data = current_user.email
         form.bio.data = current_user.bio
+        form.language.data = current_user.language
     
     avatar_file = current_user.avatar_file if current_user.avatar_file else 'default.jpg'
     avatar_url = url_for('static', filename='avatars/' + avatar_file)

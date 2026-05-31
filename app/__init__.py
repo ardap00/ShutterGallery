@@ -1,9 +1,20 @@
-from flask import Flask
+from flask import Flask, request, session
 from flask_migrate import Migrate
+from flask_babel import Babel
 from app.models import db, login_manager
 from config import Config
 
 migrate = Migrate()
+babel = Babel()
+
+def get_locale():
+    from flask_login import current_user
+    from flask import current_app
+    if current_user.is_authenticated and current_user.language:
+        return current_user.language
+    if 'language' in session:
+        return session['language']
+    return request.accept_languages.best_match(current_app.config['LANGUAGES'])
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -11,6 +22,7 @@ def create_app(config_class=Config):
     
     db.init_app(app)
     migrate.init_app(app, db)
+    babel.init_app(app, locale_selector=get_locale)
     
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'

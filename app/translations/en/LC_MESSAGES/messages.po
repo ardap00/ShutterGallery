@@ -1,0 +1,153 @@
+# English translations for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-05-31 14:10+0300\n"
+"PO-Revision-Date: 2026-05-31 14:08+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app/templates/main/index.html:63
+msgid "↔ Sürükle & Döndür &nbsp;·&nbsp; Scroll: Yakınlaş"
+msgstr ""
+
+#: app/templates/main/index.html:70
+msgid "Anı Yakala,"
+msgstr ""
+
+#: app/templates/main/index.html:70
+msgid "Dünyayla Paylaş."
+msgstr ""
+
+#: app/templates/main/index.html:73
+msgid ""
+"ShutterGallery, fotoğraf tutkunlarını bir araya getiren premium bir "
+"vitrindir. Sadece en iyi karelerin, en yüksek kalitede yer aldığı "
+"bağımsız fotoğrafçılık platformu."
+msgstr ""
+
+#: app/templates/main/index.html:76
+msgid "Sınırsız İlham"
+msgstr ""
+
+#: app/templates/main/index.html:77
+msgid "Teknik Detaylar (EXIF)"
+msgstr ""
+
+#: app/templates/main/index.html:78
+msgid "Profesyonel Topluluk"
+msgstr ""
+
+#: app/templates/main/index.html:84
+msgid "Hakkımızda"
+msgstr ""
+
+#: app/templates/main/index.html:86
+msgid ""
+"2026 yılında kurulan ShutterGallery, fotoğrafçıların yeteneklerini hiçbir"
+" algoritma baskısı olmadan sergileyebilmesi için özenle tasarlandı."
+msgstr ""
+
+#: app/templates/main/index.html:90
+msgid "Kuruluş"
+msgstr ""
+
+#: app/templates/main/index.html:108
+msgid "KAMERAYI ÇALIŞTIR"
+msgstr ""
+
+#: app/templates/main/index.html:126
+msgid "Menü"
+msgstr ""
+
+#: app/templates/main/index.html:132
+msgid "Profilim"
+msgstr ""
+
+#: app/templates/main/index.html:133
+msgid "Bildirimler"
+msgstr ""
+
+#: app/templates/main/index.html:134
+msgid "Ayarlar"
+msgstr ""
+
+#: app/templates/main/index.html:135
+msgid "Çıkış Yap"
+msgstr ""
+
+#: app/templates/main/index.html:137
+msgid "Giriş Yap"
+msgstr ""
+
+#: app/templates/main/index.html:138
+msgid "Kayıt Ol"
+msgstr ""
+
+#: app/templates/main/index.html:162
+msgid "FOTOĞRAF YÜKLE"
+msgstr ""
+
+#: app/templates/main/index.html:165
+msgid "Giriş"
+msgstr ""
+
+#: app/templates/main/index.html:166
+msgid "Kayıt"
+msgstr ""
+
+#: app/templates/main/index.html:195
+msgid "Takip Edilenler"
+msgstr ""
+
+#: app/templates/main/index.html:198
+msgid "Keşfet"
+msgstr ""
+
+#: app/users/forms.py:10
+msgid "Kullanıcı Adı"
+msgstr ""
+
+#: app/users/forms.py:11
+msgid "E-posta"
+msgstr ""
+
+#: app/users/forms.py:12
+msgid "Biyografi"
+msgstr ""
+
+#: app/users/forms.py:13
+msgid "Dil"
+msgstr ""
+
+#: app/users/forms.py:14
+msgid "Profil Fotoğrafı Güncelle"
+msgstr ""
+
+#: app/users/forms.py:15
+msgid "Güncelle"
+msgstr ""
+
+#: app/users/forms.py:21
+msgid "Bu kullanıcı adı alınmış. Lütfen başka bir tane seçin."
+msgstr ""
+
+#: app/users/forms.py:27
+msgid "Bu e-posta adresi zaten kullanımda."
+msgstr ""
+
+#: app/users/routes.py:58
+msgid "Hesap bilgileriniz güncellendi!"
+msgstr ""
+

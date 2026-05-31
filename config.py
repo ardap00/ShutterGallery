@@ -10,6 +10,9 @@ class Config:
     DEBUG = False
     TESTING = False
     PROPAGATE_EXCEPTIONS = False
+    LANGUAGES = ['tr', 'en']
+    BABEL_DEFAULT_LOCALE = 'tr'
+    BABEL_DEFAULT_TIMEZONE = 'UTC'
 
 class DevelopmentConfig(Config):
     DEBUG = True

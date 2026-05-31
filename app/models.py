@@ -34,6 +34,7 @@ class User(UserMixin, db.Model):
     password_hash: Mapped[str] = mapped_column(String(256), nullable=False)
     bio: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     avatar_file: Mapped[str] = mapped_column(String(256), default='default.jpg')
+    language: Mapped[str] = mapped_column(String(2), default='tr')
 
     posts: Mapped[List["PhotoPost"]] = relationship(back_populates='author', cascade="all, delete-orphan")
     comments: Mapped[List["Comment"]] = relationship(back_populates='author', cascade="all, delete-orphan")
