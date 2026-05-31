@@ -4,7 +4,7 @@ from flask import render_template, url_for, flash, redirect, request, current_ap
 from flask_login import current_user, login_required
 from app.users import users
 from app.users.forms import UpdateProfileForm, UserSettingsForm
-from app.models import User, PhotoPost, db
+from app.models import User, PhotoPost, db, Notification
 from werkzeug.utils import secure_filename
 from PIL import Image
 
@@ -97,7 +97,15 @@ def settings():
 @users.route('/notifications')
 @login_required
 def notifications():
-    return render_template('users/notifications.html')
+    notifications_list = current_user.notifications_received.order_by(Notification.timestamp.desc()).all()
+    
+    # Mark as read
+    for n in notifications_list:
+        if not n.is_read:
+            n.is_read = True
+    db.session.commit()
+    
+    return render_template('users/notifications.html', notifications=notifications_list)
 
 @users.route('/follow/<username>')
 @login_required
@@ -110,6 +118,14 @@ def follow(username):
         flash('Kendinizi takip edemezsiniz!', 'warning')
         return redirect(url_for('users.profile', username=username))
     current_user.follow(user)
+    
+    notification = Notification(
+        recipient_id=user.id,
+        sender_id=current_user.id,
+        type='follow'
+    )
+    db.session.add(notification)
+    
     db.session.commit()
     flash(f'{username} adlı kullanıcıyı takip ediyorsunuz.', 'success')
     return redirect(url_for('users.profile', username=username))

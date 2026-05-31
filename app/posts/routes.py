@@ -7,7 +7,7 @@ from PIL import Image
 
 from app.posts import posts
 from app.posts.forms import PhotoPostForm, CommentForm
-from app.models import PhotoPost, db, Comment
+from app.models import PhotoPost, db, Comment, Notification
 from flask import request
 
 def format_ratio(val):
@@ -171,6 +171,16 @@ def post(post_id):
             author=current_user
         )
         db.session.add(comment)
+        
+        if current_user != post.author:
+            notification = Notification(
+                recipient_id=post.author.id,
+                sender_id=current_user.id,
+                type='comment',
+                post_id=post.id
+            )
+            db.session.add(notification)
+            
         db.session.commit()
         
         flash('Yorumunuz eklendi!', 'success')
@@ -209,6 +219,14 @@ def like_post(post_id):
         current_user.unlike_post(post)
     else:
         current_user.like_post(post)
+        if current_user != post.author:
+            notification = Notification(
+                recipient_id=post.author.id,
+                sender_id=current_user.id,
+                type='like',
+                post_id=post.id
+            )
+            db.session.add(notification)
     
     db.session.commit()
     

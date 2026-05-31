@@ -41,6 +41,19 @@ class User(UserMixin, db.Model):
     posts: Mapped[List["PhotoPost"]] = relationship(back_populates='author', cascade="all, delete-orphan")
     comments: Mapped[List["Comment"]] = relationship(back_populates='author', cascade="all, delete-orphan")
 
+    notifications_received: Mapped[List["Notification"]] = relationship(
+        foreign_keys='Notification.recipient_id',
+        back_populates='recipient',
+        cascade="all, delete-orphan",
+        lazy='dynamic'
+    )
+    notifications_sent: Mapped[List["Notification"]] = relationship(
+        foreign_keys='Notification.sender_id',
+        back_populates='sender',
+        cascade="all, delete-orphan",
+        lazy='dynamic'
+    )
+
     followed: Mapped[List["User"]] = relationship(
         secondary=followers,
         primaryjoin=(followers.c.follower_id == id),
@@ -112,3 +125,19 @@ class Comment(db.Model):
 
     author: Mapped["User"] = relationship(back_populates='comments')
     post: Mapped["PhotoPost"] = relationship(back_populates='comments')
+
+
+class Notification(db.Model):
+    __tablename__ = 'notifications'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    recipient_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    sender_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    type: Mapped[str] = mapped_column(String(32), nullable=False) # 'like', 'follow', 'comment'
+    post_id: Mapped[Optional[int]] = mapped_column(ForeignKey('photo_posts.id'), nullable=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    is_read: Mapped[bool] = mapped_column(db.Boolean, default=False)
+
+    recipient: Mapped["User"] = relationship(foreign_keys=[recipient_id], back_populates='notifications_received')
+    sender: Mapped["User"] = relationship(foreign_keys=[sender_id], back_populates='notifications_sent')
+    post: Mapped[Optional["PhotoPost"]] = relationship()
