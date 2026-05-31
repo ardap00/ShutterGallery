@@ -1,4 +1,5 @@
 @echo off
-C:\Progra~1\Git\cmd\git.exe add .
-C:\Progra~1\Git\cmd\git.exe commit -m "Hesap ayarlari ve uygulama ayarlari birbirinden ayrildi"
-C:\Progra~1\Git\cmd\git.exe push origin main
+set GIT_EXE=C:\Users\ardap\AppData\Local\Programs\Git\cmd\git.exe
+%GIT_EXE% add .
+%GIT_EXE% commit -m "Update application theme to Art Gallery style (Pastel green and milky coffee colors, gallery wall backgrounds)"
+%GIT_EXE% push origin main
