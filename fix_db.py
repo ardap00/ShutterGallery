@@ -1,27 +1,29 @@
 import sqlite3
-import os
+import uuid
 
-db_path = os.path.join('instance', 'shuttergallery.db')
-if not os.path.exists(db_path):
-    print("DB not found at", db_path)
-else:
-    conn = sqlite3.connect(db_path)
-    c = conn.cursor()
-    try:
-        c.execute("ALTER TABLE users ADD COLUMN bio VARCHAR(200)")
-        print("Added bio")
-    except sqlite3.OperationalError as e:
-        print("Bio error:", e)
-        
-    try:
-        c.execute("ALTER TABLE users ADD COLUMN avatar_file VARCHAR(256) DEFAULT 'default.jpg'")
-        print("Added avatar_file")
-    except sqlite3.OperationalError as e:
-        print("Avatar error:", e)
-        
-    # Also we should update existing rows to have default.jpg
-    c.execute("UPDATE users SET avatar_file = 'default.jpg' WHERE avatar_file IS NULL")
+# 1. Kolonu ekle
+try:
+    conn = sqlite3.connect('instance/shuttergallery.db')
+    conn.execute("ALTER TABLE users ADD COLUMN unique_id VARCHAR(8)")
+    conn.commit()
+    print("Column added successfully.")
+except sqlite3.OperationalError as e:
+    print(f"Error adding column: {e}")
+
+# 2. Var olan kullanıcılara ID ata
+try:
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM users WHERE unique_id IS NULL")
+    users = cursor.fetchall()
+    
+    for (user_id,) in users:
+        uid = str(uuid.uuid4())[:6].upper()
+        cursor.execute("UPDATE users SET unique_id = ? WHERE id = ?", (uid, user_id))
+        print(f"Updated user_id {user_id} with unique_id {uid}")
         
     conn.commit()
+    print("IDs generated successfully.")
+except Exception as e:
+    print(f"Error updating users: {e}")
+finally:
     conn.close()
-    print("Done")

@@ -6,3 +6,4 @@ flask-wtf
 python-dotenv
 pytest
 Pillow
+gunicorn

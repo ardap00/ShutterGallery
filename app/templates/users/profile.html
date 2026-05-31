@@ -26,7 +26,7 @@
         </div>
         
         <div class="text-center md:text-left flex-1">
-            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tighter mb-2">{{ user.username }}</h1>
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tighter mb-2 flex items-baseline justify-center md:justify-start gap-2">{{ user.username }} <span class="text-lg md:text-2xl text-zinc-500 font-mono tracking-normal">#{{ user.unique_id }}</span></h1>
             <p class="text-emerald-400 font-mono text-xs uppercase tracking-[0.2em] mb-4">ShutterGallery Üyesi</p>
             <p class="text-zinc-400 max-w-2xl leading-relaxed">
                 {{ user.bio if user.bio else 'Henüz bir biyografi eklenmedi.' }}
@@ -107,7 +107,7 @@
                 {% set f_avatar = follower.avatar_file if follower.avatar_file else 'default.jpg' %}
                 <img src="{{ url_for('static', filename='avatars/' + f_avatar) }}" class="w-12 h-12 rounded-full object-cover">
                 <div>
-                    <h3 class="font-bold text-white">{{ follower.username }}</h3>
+                    <h3 class="font-bold text-white">{{ follower.username }} <span class="text-xs text-zinc-500 font-mono ml-1">#{{ follower.unique_id }}</span></h3>
                     <p class="text-xs text-zinc-500">{{ follower.followers.count() }} Takipçi</p>
                 </div>
             </a>
@@ -125,7 +125,7 @@
                 {% set f_avatar = followed.avatar_file if followed.avatar_file else 'default.jpg' %}
                 <img src="{{ url_for('static', filename='avatars/' + f_avatar) }}" class="w-12 h-12 rounded-full object-cover">
                 <div>
-                    <h3 class="font-bold text-white">{{ followed.username }}</h3>
+                    <h3 class="font-bold text-white">{{ followed.username }} <span class="text-xs text-zinc-500 font-mono ml-1">#{{ followed.unique_id }}</span></h3>
                     <p class="text-xs text-zinc-500">{{ followed.followers.count() }} Takipçi</p>
                 </div>
             </a>

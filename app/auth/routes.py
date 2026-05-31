@@ -1,3 +1,4 @@
+import uuid
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -14,7 +15,12 @@ def register():
         hashed_password = generate_password_hash(form.password.data)
         clean_username = form.username.data.strip()
         clean_email = form.email.data.lower()
-        user = User(username=clean_username, email=clean_email, password_hash=hashed_password)
+        
+        uid = str(uuid.uuid4())[:6].upper()
+        while db.session.execute(db.select(User).filter_by(unique_id=uid)).scalar_one_or_none():
+            uid = str(uuid.uuid4())[:6].upper()
+            
+        user = User(username=clean_username, email=clean_email, password_hash=hashed_password, unique_id=uid)
         db.session.add(user)
         db.session.commit()
         flash('Kayıt başarılı! Şimdi giriş yapabilirsiniz.', 'success')

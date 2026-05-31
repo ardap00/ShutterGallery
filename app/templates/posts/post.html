@@ -73,7 +73,7 @@
                                 {{ post.author.username[0] | upper }}
                             </div>
                             <div>
-                                <p class="text-sm font-bold">{{ post.author.username }}</p>
+                                <p class="text-sm font-bold">{{ post.author.username }} <span class="text-xs text-zinc-500 font-mono font-normal">#{{ post.author.unique_id }}</span></p>
                                 <p class="text-xs text-zinc-500">{{ post.timestamp.strftime('%d %b %Y') }}</p>
                             </div>
                         </div>
@@ -170,7 +170,7 @@
                         {% for comment in post.comments %}
                         <div class="bg-zinc-900/50 rounded-xl p-4">
                             <div class="flex justify-between items-start mb-2">
-                                <span class="text-sm font-bold text-emerald-400">{{ comment.author.username }}</span>
+                                <span class="text-sm font-bold text-emerald-400">{{ comment.author.username }} <span class="text-xs text-zinc-500 font-mono font-normal ml-1">#{{ comment.author.unique_id }}</span></span>
                                 <span class="text-[10px] text-zinc-600 uppercase">{{ comment.timestamp.strftime('%d %b, %H:%M') }}</span>
                             </div>
                             <p class="text-sm text-zinc-300">{{ comment.body }}</p>

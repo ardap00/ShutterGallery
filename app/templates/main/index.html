@@ -207,9 +207,9 @@
                 </form>
             </div>
 
-            {% if posts %}
+            {% if posts.items %}
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-7xl mx-auto pb-12">
-                {% for post in posts %}
+                {% for post in posts.items %}
                 <div class="relative group rounded-lg overflow-hidden bg-zinc-900 aspect-square border border-white/5">
                     <a href="{{ url_for('posts.post', post_id=post.id) }}" class="block w-full h-full">
                         <img src="{{ url_for('static', filename='uploads/' + post.image_file) }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
@@ -220,7 +220,7 @@
                         <div class="flex justify-between items-end w-full">
                             <div class="flex-1 truncate pr-2">
                                 <h3 class="text-sm font-bold text-white truncate drop-shadow-md">{{ post.title }}</h3>
-                                <p class="text-[10px] text-emerald-400 font-mono uppercase truncate drop-shadow-md">{{ post.author.username }}</p>
+                                <p class="text-[10px] text-emerald-400 font-mono uppercase truncate drop-shadow-md">{{ post.author.username }} <span class="text-[8px] text-zinc-400 ml-0.5">#{{ post.author.unique_id }}</span></p>
                             </div>
                             <div class="pointer-events-auto flex items-center gap-3">
                                 {% if current_user.is_authenticated %}
@@ -246,6 +246,24 @@
                 </div>
                 {% endfor %}
             </div>
+            
+            <!-- Pagination Controls -->
+            <div class="flex justify-center items-center gap-4 max-w-7xl mx-auto pb-16">
+                {% if posts.has_prev %}
+                <a href="{{ url_for('main.' + feed_type, page=posts.prev_num) }}" class="px-6 py-2 rounded-full border border-white/10 bg-black/40 text-zinc-300 hover:text-emerald-400 hover:border-emerald-500/50 transition-colors text-xs font-bold tracking-widest uppercase">
+                    &larr; Önceki
+                </a>
+                {% endif %}
+                
+                <span class="text-zinc-500 text-xs font-mono">Sayfa {{ posts.page }} / {{ posts.pages }}</span>
+                
+                {% if posts.has_next %}
+                <a href="{{ url_for('main.' + feed_type, page=posts.next_num) }}" class="px-6 py-2 rounded-full border border-white/10 bg-black/40 text-zinc-300 hover:text-emerald-400 hover:border-emerald-500/50 transition-colors text-xs font-bold tracking-widest uppercase">
+                    Sonraki &rarr;
+                </a>
+                {% endif %}
+            </div>
+            
             {% else %}
             <div class="flex flex-col items-center justify-center h-full text-center">
                 <p class="text-zinc-400 text-xs tracking-widest uppercase mb-4">Henüz fotoğraf yok</p>

@@ -2,6 +2,15 @@ from flask import render_template, request, redirect, url_for
 from app.main import main
 from app.models import PhotoPost, User, db
 
+@main.app_errorhandler(404)
+def not_found_error(error):
+    return render_template('errors/404.html'), 404
+
+@main.app_errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return render_template('errors/500.html'), 500
+
 @main.route('/search')
 def search():
     q = request.args.get('q', '').strip()
@@ -28,11 +37,13 @@ def index():
         followed_ids = [user.id for user in current_user.followed]
         followed_ids.append(current_user.id)
         
-        posts = db.session.execute(
+        page = request.args.get('page', 1, type=int)
+        posts = db.paginate(
             db.select(PhotoPost)
             .filter(PhotoPost.user_id.in_(followed_ids))
-            .order_by(PhotoPost.timestamp.desc())
-        ).scalars().all()
+            .order_by(PhotoPost.timestamp.desc()),
+            page=page, per_page=12, error_out=False
+        )
     else:
         return redirect(url_for('main.discover'))
         
@@ -41,7 +52,11 @@ def index():
 @main.route('/discover')
 def discover():
     # Random order for discover
-    posts = db.session.execute(db.select(PhotoPost).order_by(func.random())).scalars().all()
+    page = request.args.get('page', 1, type=int)
+    posts = db.paginate(
+        db.select(PhotoPost).order_by(func.random()),
+        page=page, per_page=12, error_out=False
+    )
     return render_template('main/index.html', posts=posts, feed_type='discover')
 
 @main.route('/gallery')

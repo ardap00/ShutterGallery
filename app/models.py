@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from typing import Optional, List
+import uuid
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager
@@ -27,6 +28,7 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    unique_id: Mapped[str] = mapped_column(String(8), unique=True, nullable=True)
     username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(256), nullable=False)
