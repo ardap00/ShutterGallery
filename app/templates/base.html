@@ -10,8 +10,8 @@
     <meta name="theme-color" content="#10b981">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='shuttergallerylogo.jpeg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='shuttergallerylogo.jpeg') }}">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -39,8 +39,9 @@
 
     <!-- Uygulama Logosu -->
     <div class="fixed top-4 md:top-8 left-1/2 -translate-x-1/2 z-40 pointer-events-none text-center">
-        <a href="{{ url_for('main.index') }}" class="pointer-events-auto text-base md:text-xl font-bold tracking-widest text-white hover:text-emerald-400 transition-colors drop-shadow-lg inline-block">
-            Shutter<span class="text-emerald-500">Gallery</span>
+        <a href="{{ url_for('main.index') }}" class="pointer-events-auto flex items-center gap-2 hover:opacity-80 transition-opacity drop-shadow-lg">
+            <img src="{{ url_for('static', filename='shuttergallerylogo.jpeg') }}" alt="ShutterGallery Logo" class="h-8 md:h-12 w-auto object-contain rounded-md shadow-lg">
+            <span class="text-base md:text-xl font-bold tracking-widest text-white">Shutter<span class="text-emerald-500">Gallery</span></span>
         </a>
     </div>
 
