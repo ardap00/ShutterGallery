@@ -1,5 +1,6 @@
 import os
 import uuid
+import json
 from flask import render_template, url_for, flash, redirect, request, current_app
 from flask_login import current_user, login_required
 from app.users import users
@@ -145,3 +146,22 @@ def unfollow(username):
     flash(f'{username} adlı kullanıcıyı takipten çıktınız.', 'info')
     return redirect(url_for('users.profile', username=username))
 
+@users.route('/gallery/<username>')
+def gallery3d(username):
+    user = db.session.execute(db.select(User).filter_by(username=username)).scalar_one_or_none()
+    if not user:
+        flash('Kullanıcı bulunamadı.', 'danger')
+        return redirect(url_for('main.index'))
+        
+    posts = db.session.execute(db.select(PhotoPost).filter_by(user_id=user.id).order_by(PhotoPost.timestamp.desc())).scalars().all()
+    
+    photos_data = []
+    for post in posts:
+        image_url = post.image_file if post.image_file.startswith('http') else url_for('static', filename='uploads/' + post.image_file)
+        photos_data.append({
+            'id': post.id,
+            'title': post.title or 'İsimsiz',
+            'image_url': image_url
+        })
+        
+    return render_template('users/3d_gallery.html', user=user, photos_json=json.dumps(photos_data))
