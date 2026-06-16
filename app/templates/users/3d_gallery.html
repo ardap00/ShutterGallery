@@ -260,6 +260,12 @@
                     // FBX models often need scale adjustments.
                     object.scale.set(0.012, 0.012, 0.012);
                     
+                    // Yere yatık görünüyorsa düzeltmek için:
+                    // Genelde FBX'ler Z-up gelir, X ekseninde -90 derece döndürmek gerekir.
+                    // Ayrıca sırtı kameraya dönük olması için (FPS açısı) Z veya Y etrafında 180 derece döndürülebilir.
+                    object.rotation.x = -Math.PI / 2;
+                    object.rotation.z = Math.PI; // Kamerayla aynı yöne bakması için
+                    
                     avatarGroup.add(object);
                 });
 

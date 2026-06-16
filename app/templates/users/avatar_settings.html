@@ -17,26 +17,10 @@
         
         <form id="avatar-form" class="space-y-6">
             <div>
-                <label class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-2">Gövde Rengi</label>
+                <label class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-2">Avatar Rengi</label>
                 <div class="flex items-center gap-4">
                     <input type="color" id="color-body" value="#2196F3" class="w-12 h-12 rounded cursor-pointer bg-transparent border-0 p-0">
                     <span id="hex-body" class="text-zinc-500 font-mono text-sm uppercase">#2196F3</span>
-                </div>
-            </div>
-            
-            <div>
-                <label class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-2">Kol Rengi</label>
-                <div class="flex items-center gap-4">
-                    <input type="color" id="color-arms" value="#4CAF50" class="w-12 h-12 rounded cursor-pointer bg-transparent border-0 p-0">
-                    <span id="hex-arms" class="text-zinc-500 font-mono text-sm uppercase">#4CAF50</span>
-                </div>
-            </div>
-            
-            <div>
-                <label class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-2">Bacak Rengi</label>
-                <div class="flex items-center gap-4">
-                    <input type="color" id="color-legs" value="#FFC107" class="w-12 h-12 rounded cursor-pointer bg-transparent border-0 p-0">
-                    <span id="hex-legs" class="text-zinc-500 font-mono text-sm uppercase">#FFC107</span>
                 </div>
             </div>
             
@@ -85,19 +69,10 @@
 
     // HTML elementlerini güncelle
     const inBody = document.getElementById('color-body');
-    const inArms = document.getElementById('color-arms');
-    const inLegs = document.getElementById('color-legs');
     const hBody = document.getElementById('hex-body');
-    const hArms = document.getElementById('hex-arms');
-    const hLegs = document.getElementById('hex-legs');
 
     inBody.value = currentConfig.body || '#2196F3';
-    inArms.value = currentConfig.arms || '#4CAF50';
-    inLegs.value = currentConfig.legs || '#FFC107';
-    
     hBody.textContent = inBody.value.toUpperCase();
-    hArms.textContent = inArms.value.toUpperCase();
-    hLegs.textContent = inLegs.value.toUpperCase();
 
     // ── 3D ÖNİZLEME SAHNESİ ───────────────────────────────────────
     const canvas = document.getElementById('avatar-canvas');
@@ -176,7 +151,10 @@
         } );
 
         object.scale.set(0.02, 0.02, 0.02);
-        object.position.y = -1; // Center it vertically
+        object.position.y = -1.5; // Center it vertically (adjusted)
+        
+        object.rotation.x = -Math.PI / 2;
+        object.rotation.z = Math.PI; 
         
         avatarGroup.add(object);
         document.getElementById('loading').style.display = 'none';
@@ -190,17 +168,10 @@
     // Renk Değişim Eventleri
     function updateColors() {
         matBody.color.set(inBody.value);
-        matArms.color.set(inArms.value);
-        matLegs.color.set(inLegs.value);
-        
         hBody.textContent = inBody.value.toUpperCase();
-        hArms.textContent = inArms.value.toUpperCase();
-        hLegs.textContent = inLegs.value.toUpperCase();
     }
 
     inBody.addEventListener('input', updateColors);
-    inArms.addEventListener('input', updateColors);
-    inLegs.addEventListener('input', updateColors);
 
     // Resize Handle
     function resize() {
@@ -246,8 +217,8 @@
         
         const payload = {
             body: inBody.value,
-            arms: inArms.value,
-            legs: inLegs.value
+            arms: inBody.value,
+            legs: inBody.value
         };
 
         try {
