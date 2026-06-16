@@ -98,6 +98,61 @@
         init();
         animate();
 
+        function createTextTexture(photo) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Border
+            ctx.strokeStyle = '#222222';
+            ctx.lineWidth = 10;
+            ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
+            
+            ctx.fillStyle = '#111111';
+            ctx.textAlign = 'left';
+            
+            // Title
+            ctx.font = 'bold 70px sans-serif';
+            ctx.fillText(photo.title || 'İsimsiz', 60, 120);
+            
+            // Description (word wrap)
+            ctx.font = '40px sans-serif';
+            const desc = photo.description || '';
+            const words = desc.split(' ');
+            let line = '';
+            let y = 200;
+            for(let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                let metrics = ctx.measureText(testLine);
+                if (metrics.width > canvas.width - 120 && n > 0) {
+                    ctx.fillText(line, 60, y);
+                    line = words[n] + ' ';
+                    y += 55;
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, 60, y);
+            
+            // EXIF Info
+            y += 100;
+            ctx.font = 'bold 40px monospace';
+            ctx.fillStyle = '#444444';
+            if (photo.camera_model) { ctx.fillText(`Kamera: ${photo.camera_model}`, 60, y); y += 60; }
+            if (photo.lens_model) { ctx.fillText(`Lens: ${photo.lens_model}`, 60, y); y += 60; }
+            if (photo.iso) { ctx.fillText(`ISO: ${photo.iso}`, 60, y); y += 60; }
+            if (photo.aperture) { ctx.fillText(`Diyafram: ${photo.aperture}`, 60, y); y += 60; }
+            if (photo.shutter_speed) { ctx.fillText(`Enstantane: ${photo.shutter_speed}`, 60, y); y += 60; }
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            return texture;
+        }
+
         function init() {
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
             camera.position.y = 8;
@@ -215,6 +270,19 @@
             startWall.position.y = roomHeight / 2;
             scene.add(startWall);
 
+            // Ceiling Lamps
+            for (let z = 20; z > -totalZ + 40; z -= zSpacing) {
+                const lampGeo = new THREE.CylinderGeometry(0.8, 1, 0.4, 16);
+                const lampMat = new THREE.MeshStandardMaterial({ color: 0x333333, emissive: 0xffffff, emissiveIntensity: 1 });
+                const lamp = new THREE.Mesh(lampGeo, lampMat);
+                lamp.position.set(0, roomHeight - 0.2, z);
+                scene.add(lamp);
+                
+                const pointLight = new THREE.PointLight(0xffffee, 0.5, 60);
+                pointLight.position.set(0, roomHeight - 1, z);
+                scene.add(pointLight);
+            }
+
             // Add Photos
             const textureLoader = new THREE.TextureLoader();
             
@@ -268,6 +336,23 @@
                     
                     scene.add(imgMesh);
                     scene.add(frameMesh);
+                    
+                    // Create Plaque
+                    const plaqueTex = createTextTexture(photo);
+                    plaqueTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                    
+                    const plaqueGeo = new THREE.PlaneGeometry(3, 3);
+                    const plaqueMat = new THREE.MeshBasicMaterial({ map: plaqueTex });
+                    const plaqueMesh = new THREE.Mesh(plaqueGeo, plaqueMat);
+                    
+                    if (side === 'left') {
+                        plaqueMesh.position.set(-roomWidth / 2 + 0.35, roomHeight / 2 - 2, zPos - pWidth / 2 - 2.5);
+                        plaqueMesh.rotation.y = Math.PI / 2;
+                    } else {
+                        plaqueMesh.position.set(roomWidth / 2 - 0.35, roomHeight / 2 - 2, zPos - pWidth / 2 - 2.5);
+                        plaqueMesh.rotation.y = -Math.PI / 2;
+                    }
+                    scene.add(plaqueMesh);
                     
                     // Spotlight above the painting
                     const spotLight = new THREE.SpotLight(0xffffff, 2.5);

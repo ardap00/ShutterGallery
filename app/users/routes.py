@@ -161,6 +161,12 @@ def gallery3d(username):
         photos_data.append({
             'id': post.id,
             'title': post.title or 'İsimsiz',
+            'description': post.description or '',
+            'camera_model': post.camera_model or '',
+            'lens_model': post.lens_model or '',
+            'iso': post.iso or '',
+            'aperture': post.aperture or '',
+            'shutter_speed': post.shutter_speed or '',
             'image_url': image_url
         })
         
