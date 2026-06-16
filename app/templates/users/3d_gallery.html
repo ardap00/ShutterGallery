@@ -88,6 +88,7 @@
         import * as THREE from 'three';
         import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
 
@@ -228,41 +229,39 @@
             scene.add(light);
 
             function createAvatar() {
-                const matBody = new THREE.MeshStandardMaterial({ color: avatarConfig.body, roughness: 0.7 });
-                const matArms = new THREE.MeshStandardMaterial({ color: avatarConfig.arms, roughness: 0.7 });
-                const matLegs = new THREE.MeshStandardMaterial({ color: avatarConfig.legs, roughness: 0.7 });
-
                 avatarGroup = new THREE.Group();
-                avatarGroup.scale.set(2.2, 2.2, 2.2); 
+                avatarGroup.scale.set(1.5, 1.5, 1.5); 
 
-                const geoBody = new THREE.BoxGeometry(1.2, 1.5, 0.6);
-                const geoArm = new THREE.BoxGeometry(0.4, 1.4, 0.4);
-                const geoLeg = new THREE.BoxGeometry(0.4, 1.6, 0.4);
+                const loader = new FBXLoader();
+                loader.load("{{ url_for('static', filename='models/hff/HumanBody.fbx') }}", function ( object ) {
+                    const matBody = new THREE.MeshStandardMaterial({ color: avatarConfig.body, roughness: 0.7 });
+                    
+                    object.traverse( function ( child ) {
+                        if ( child.isMesh ) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                            child.material = matBody; 
+                            
+                            const n = child.name.toLowerCase();
+                            if (n.includes("arm") && n.includes("l")) armL = child;
+                            if (n.includes("arm") && n.includes("r")) armR = child;
+                            if (n.includes("leg") && n.includes("l")) legL = child;
+                            if (n.includes("leg") && n.includes("r")) legR = child;
+                        }
+                        if ( child.isBone ) {
+                            const n = child.name.toLowerCase();
+                            if ((n.includes("arm") || n.includes("shoulder")) && n.includes("l")) armL = child;
+                            if ((n.includes("arm") || n.includes("shoulder")) && n.includes("r")) armR = child;
+                            if ((n.includes("leg") || n.includes("thigh")) && n.includes("l")) legL = child;
+                            if ((n.includes("leg") || n.includes("thigh")) && n.includes("r")) legR = child;
+                        }
+                    } );
 
-                const body = new THREE.Mesh(geoBody, matBody);
-                body.position.y = 2.4;
-                body.castShadow = true;
-                avatarGroup.add(body);
-
-                armL = new THREE.Mesh(geoArm, matArms);
-                armL.position.set(0.8, 2.4, 0);
-                armL.castShadow = true;
-                avatarGroup.add(armL);
-
-                armR = new THREE.Mesh(geoArm, matArms);
-                armR.position.set(-0.8, 2.4, 0);
-                armR.castShadow = true;
-                avatarGroup.add(armR);
-
-                legL = new THREE.Mesh(geoLeg, matLegs);
-                legL.position.set(0.3, 0.8, 0);
-                legL.castShadow = true;
-                avatarGroup.add(legL);
-
-                legR = new THREE.Mesh(geoLeg, matLegs);
-                legR.position.set(-0.3, 0.8, 0);
-                legR.castShadow = true;
-                avatarGroup.add(legR);
+                    // FBX models often need scale adjustments.
+                    object.scale.set(0.012, 0.012, 0.012);
+                    
+                    avatarGroup.add(object);
+                });
 
                 scene.add(avatarGroup);
             }
@@ -727,18 +726,20 @@
                 // Walking Animation
                 const isMoving = (moveForward || moveBackward || moveLeft || moveRight) || (isMobile && (fwdValue !== 0 || bkdValue !== 0 || lftValue !== 0 || rgtValue !== 0));
                 
-                if (isMoving) {
-                    const walkSpeed = 10;
-                    armL.rotation.x = Math.sin(time * walkSpeed * 0.001) * 0.8;
-                    armR.rotation.x = Math.sin(time * walkSpeed * 0.001 + Math.PI) * 0.8;
-                    legL.rotation.x = Math.sin(time * walkSpeed * 0.001 + Math.PI) * 0.8;
-                    legR.rotation.x = Math.sin(time * walkSpeed * 0.001) * 0.8;
-                } else {
-                    // Smooth return to idle
-                    armL.rotation.x += (0 - armL.rotation.x) * 0.1;
-                    armR.rotation.x += (0 - armR.rotation.x) * 0.1;
-                    legL.rotation.x += (0 - legL.rotation.x) * 0.1;
-                    legR.rotation.x += (0 - legR.rotation.x) * 0.1;
+                if (armL && armR && legL && legR) {
+                    if (isMoving) {
+                        const walkSpeed = 10;
+                        armL.rotation.x = Math.sin(time * walkSpeed * 0.001) * 0.8;
+                        armR.rotation.x = Math.sin(time * walkSpeed * 0.001 + Math.PI) * 0.8;
+                        legL.rotation.x = Math.sin(time * walkSpeed * 0.001 + Math.PI) * 0.8;
+                        legR.rotation.x = Math.sin(time * walkSpeed * 0.001) * 0.8;
+                    } else {
+                        // Smooth return to idle
+                        armL.rotation.x += (0 - armL.rotation.x) * 0.1;
+                        armR.rotation.x += (0 - armR.rotation.x) * 0.1;
+                        legL.rotation.x += (0 - legL.rotation.x) * 0.1;
+                        legR.rotation.x += (0 - legR.rotation.x) * 0.1;
+                    }
                 }
             }
 

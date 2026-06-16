@@ -69,6 +69,8 @@
 <!-- Three.js -->
 <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
 <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/libs/fflate.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
 
 <script>
     // Kullanıcının mevcut konfigürasyonu
@@ -144,45 +146,44 @@
 
     // Avatar Grubu
     const avatarGroup = new THREE.Group();
+    avatarGroup.scale.set(1.5, 1.5, 1.5);
     scene.add(avatarGroup);
 
-    // Geometriler
-    // Human Fall Flat tarzı kapsüller / silindirler
-    const geoHead = new THREE.BoxGeometry(0.8, 0.8, 0.8);
-    const geoBody = new THREE.BoxGeometry(1.2, 1.5, 0.6);
-    const geoArm = new THREE.BoxGeometry(0.4, 1.4, 0.4);
-    const geoLeg = new THREE.BoxGeometry(0.4, 1.6, 0.4);
+    let armL, armR, legL, legR;
 
-    // Parçalar
-    const head = new THREE.Mesh(geoHead, matHead);
-    head.position.y = 3.6;
-    head.castShadow = true;
-    avatarGroup.add(head);
+    const loader = new THREE.FBXLoader();
+    loader.load("{{ url_for('static', filename='models/hff/HumanBody.fbx') }}", function ( object ) {
+        
+        object.traverse( function ( child ) {
+            if ( child.isMesh ) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.material = matBody; 
+                
+                const n = child.name.toLowerCase();
+                if (n.includes("arm") && n.includes("l")) armL = child;
+                if (n.includes("arm") && n.includes("r")) armR = child;
+                if (n.includes("leg") && n.includes("l")) legL = child;
+                if (n.includes("leg") && n.includes("r")) legR = child;
+            }
+            if ( child.isBone ) {
+                const n = child.name.toLowerCase();
+                if ((n.includes("arm") || n.includes("shoulder")) && n.includes("l")) armL = child;
+                if ((n.includes("arm") || n.includes("shoulder")) && n.includes("r")) armR = child;
+                if ((n.includes("leg") || n.includes("thigh")) && n.includes("l")) legL = child;
+                if ((n.includes("leg") || n.includes("thigh")) && n.includes("r")) legR = child;
+            }
+        } );
 
-    const body = new THREE.Mesh(geoBody, matBody);
-    body.position.y = 2.4;
-    body.castShadow = true;
-    avatarGroup.add(body);
-
-    const armL = new THREE.Mesh(geoArm, matArms);
-    armL.position.set(0.8, 2.4, 0);
-    armL.castShadow = true;
-    avatarGroup.add(armL);
-
-    const armR = new THREE.Mesh(geoArm, matArms);
-    armR.position.set(-0.8, 2.4, 0);
-    armR.castShadow = true;
-    avatarGroup.add(armR);
-
-    const legL = new THREE.Mesh(geoLeg, matLegs);
-    legL.position.set(0.3, 0.8, 0);
-    legL.castShadow = true;
-    avatarGroup.add(legL);
-
-    const legR = new THREE.Mesh(geoLeg, matLegs);
-    legR.position.set(-0.3, 0.8, 0);
-    legR.castShadow = true;
-    avatarGroup.add(legR);
+        object.scale.set(0.02, 0.02, 0.02);
+        object.position.y = -1; // Center it vertically
+        
+        avatarGroup.add(object);
+        document.getElementById('loading').style.display = 'none';
+    }, undefined, function ( error ) {
+        console.error( error );
+        document.getElementById('loading').innerHTML = '<span class="text-red-500">Model yüklenemedi</span>';
+    });
 
     document.getElementById('loading').style.display = 'none';
 
@@ -219,11 +220,13 @@
         requestAnimationFrame(animate);
         
         // Hafif yürüme animasyonu (Önizleme için)
-        const t = clock.getElapsedTime() * 3;
-        armL.rotation.x = Math.sin(t) * 0.5;
-        armR.rotation.x = Math.sin(t + Math.PI) * 0.5;
-        legL.rotation.x = Math.sin(t + Math.PI) * 0.5;
-        legR.rotation.x = Math.sin(t) * 0.5;
+        if (armL && armR && legL && legR) {
+            const t = clock.getElapsedTime() * 3;
+            armL.rotation.x = Math.sin(t) * 0.5;
+            armR.rotation.x = Math.sin(t + Math.PI) * 0.5;
+            legL.rotation.x = Math.sin(t + Math.PI) * 0.5;
+            legR.rotation.x = Math.sin(t) * 0.5;
+        }
         
         controls.update();
         renderer.render(scene, camera);
