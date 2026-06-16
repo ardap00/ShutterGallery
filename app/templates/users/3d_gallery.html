@@ -108,6 +108,9 @@
         const zSpacing = 30; // Distance between photos
         const totalZ = Math.max(100, Math.ceil(photosData.length / 2) * zSpacing + 80);
 
+        // Obstacles array for collision
+        const obstacles = [];
+
         init();
         animate();
 
@@ -556,9 +559,6 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
-
-        // Obstacles array for collision
-        const obstacles = [];
 
         function animate() {
             requestAnimationFrame(animate);
