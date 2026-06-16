@@ -87,8 +87,7 @@
     <script type="module">
         import * as THREE from 'three';
         import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-        import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+        import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
 
@@ -235,8 +234,8 @@
                 avatarGroup = new THREE.Group();
                 avatarGroup.scale.set(1.5, 1.5, 1.5); 
 
-                const loader = new OBJLoader();
-                loader.load("{{ url_for('static', filename='models/hff/HumanBody.obj') }}", function ( object ) {
+                const loader = new FBXLoader();
+                loader.load("{{ url_for('static', filename='models/hff/HumanBody.fbx') }}", function ( object ) {
                     const matBody = new THREE.MeshStandardMaterial({ color: avatarConfig.body, roughness: 0.7 });
                     
                     object.traverse( function ( child ) {
@@ -244,26 +243,27 @@
                             child.castShadow = true;
                             child.receiveShadow = true;
                             child.material = matBody; 
-                            
+                        }
+                        if ( child.isBone ) {
                             const n = child.name.toLowerCase();
-                            if (n.includes("arm") && n.includes("l")) armL = child;
-                            if (n.includes("arm") && n.includes("r")) armR = child;
-                            if (n.includes("leg") && n.includes("l")) legL = child;
-                            if (n.includes("leg") && n.includes("r")) legR = child;
-                            if (n.includes("head") || n.includes("kafa") || n.includes("neck")) {
-                                headMesh = child;
-                                // Pivot noktasını merkeze al
-                                child.geometry.computeBoundingBox();
-                                const center = new THREE.Vector3();
-                                child.geometry.boundingBox.getCenter(center);
-                                child.geometry.translate(-center.x, -center.y, -center.z);
-                                child.position.copy(center);
-                            }
+                            if ((n.includes("arm") || n.includes("shoulder")) && n.includes("l")) armL = child;
+                            if ((n.includes("arm") || n.includes("shoulder")) && n.includes("r")) armR = child;
+                            if ((n.includes("leg") || n.includes("thigh")) && n.includes("l")) legL = child;
+                            if ((n.includes("leg") || n.includes("thigh")) && n.includes("r")) legR = child;
+                            if (n.includes("head") || n.includes("neck") || n.includes("kafa")) headMesh = child;
                         }
                     } );
                     
-                    // OBJ modelleri genelde Y-up olarak gelir.
-                    object.scale.set(1, 1, 1);
+                    // Başlangıç pozu düzeltme (Korkuluk duruşunu indirmek için kolları aşağı çek)
+                    // FBX kemik rotasyonları Z veya X ekseninde olabilir, genellikle Z veya X'tir.
+                    // Kolların aşağı inmesi için tahmini bir açı veriyoruz (1.0 radyan ~ 60 derece)
+                    if (armL) armL.rotation.z -= 1.2;
+                    if (armR) armR.rotation.z += 1.2;
+
+                    // Eski boyutu (0.012) 6 katına çıkarıyoruz: 0.072
+                    object.scale.set(0.072, 0.072, 0.072);
+                    
+                    // FBX genelde Y-up olarak dik gelir, bu yüzden X rotasyonu yapmıyoruz.
                     object.rotation.y = Math.PI; // Kamerayla aynı yöne bakması için (sırtı bize dönük)
                     
                     avatarGroup.add(object);
