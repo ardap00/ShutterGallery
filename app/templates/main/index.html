@@ -345,7 +345,8 @@
         resizeRenderer();
 
         // ── ORBITAL CAMERA ───────────────────────────────────────
-        let sph = { theta: 0.6, phi: 1.25, r: 5.5 };
+        let isMobileWidth = window.innerWidth <= 768;
+        let sph = { theta: 0.6, phi: 1.25, r: isMobileWidth ? 10.0 : 5.5 };
         let currentLook = new THREE.Vector3(0, 0.05, 0);
         
         function updateCam() {
@@ -385,7 +386,9 @@
         });
         canvas.addEventListener('wheel', e => {
             if (powered) return; // Disable zoom when in LCD mode
-            sph.r = Math.max(2.5, Math.min(11, sph.r + e.deltaY * 0.005));
+            let minR = isMobileWidth ? 4.5 : 2.5;
+            let maxR = isMobileWidth ? 16.0 : 11.0;
+            sph.r = Math.max(minR, Math.min(maxR, sph.r + e.deltaY * 0.005));
             updateCam();
             e.preventDefault();
         }, { passive: false });
@@ -649,7 +652,8 @@
             // theta=Math.PI means looking from -Z to +Z.
             // phi=Math.PI/2 means horizontal.
             // r=0.1 frames the 1.64x1.12 LCD perfectly in a standard viewport.
-            targetSph = { theta: Math.PI, phi: Math.PI / 2, r: 0.1 };
+            // On mobile, we use a slightly larger r to fit the wide LCD into the narrow portrait screen.
+            targetSph = { theta: Math.PI, phi: Math.PI / 2, r: isMobileWidth ? 0.4 : 0.1 };
             
             // Sharpen background
             bgEl.style.filter    = 'blur(0px) brightness(40%)';
