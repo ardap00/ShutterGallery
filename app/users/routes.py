@@ -171,3 +171,17 @@ def gallery3d(username):
         })
         
     return render_template('users/3d_gallery.html', user=user, photos_json=json.dumps(photos_data))
+
+
+@bp.route('/avatar-settings', methods=['GET', 'POST'])
+@login_required
+def avatar_settings():
+    if request.method == 'POST':
+        data = request.get_json()
+        if data:
+            current_user.avatar_config = json.dumps(data)
+            db.session.commit()
+            return {'status': 'success'}
+        return {'status': 'error', 'message': 'Invalid data'}, 400
+        
+    return render_template('users/avatar_settings.html')

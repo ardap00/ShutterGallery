@@ -54,8 +54,11 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Hızlı Yükle
                 </a>
-                <a href="{{ url_for('users.settings') }}" class="px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
-                    Ayarlar
+                <a href="{{ url_for('users.account_settings') }}" class="px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                    Profili Düzenle
+                </a>
+                <a href="{{ url_for('users.avatar_settings') }}" class="px-6 py-3 rounded-full bg-[#829A73]/20 hover:bg-[#829A73]/40 border border-[#829A73]/50 text-[#A3B18A] transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                    Avatarı Düzenle
                 </a>
                 {% elif current_user.is_authenticated %}
                     {% if current_user.is_following(user) %}

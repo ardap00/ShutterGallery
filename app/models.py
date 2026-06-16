@@ -34,6 +34,7 @@ class User(UserMixin, db.Model):
     password_hash: Mapped[str] = mapped_column(String(256), nullable=False)
     bio: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     avatar_file: Mapped[str] = mapped_column(String(256), default='default.jpg')
+    avatar_config: Mapped[str] = mapped_column(String(512), default='{"body":"#2196F3","arms":"#4CAF50","legs":"#FFC107"}')
     language: Mapped[str] = mapped_column(String(2), default='tr')
     reset_code: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     reset_expiration: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
