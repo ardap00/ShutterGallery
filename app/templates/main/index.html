@@ -17,6 +17,10 @@
         .feed-container { padding-bottom: 5rem; }
         @media (min-width: 768px) { .feed-container { padding-bottom: 0; } }
 
+        /* Mobil alt bar sadece kamera açıldığında gelsin */
+        #mobile-bottom-nav { transform: translateY(100%); transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; pointer-events: none; }
+        body.camera-powered #mobile-bottom-nav { transform: translateY(0); opacity: 1; pointer-events: auto; }
+
         #bg {
             position: fixed; inset: 0; z-index: 0;
             background: url('https://images.unsplash.com/photo-1536924940846-227afb31e2a5?q=80&w=1920') center/cover no-repeat;
@@ -642,8 +646,7 @@
             canvas.style.display = 'none';
             M.screen.opacity = 0;
             
-            const mobileNav = document.getElementById('mobile-bottom-nav');
-            if (mobileNav) mobileNav.style.display = 'none';
+            document.body.classList.add('camera-powered');
         }
 
         powerBtn.addEventListener('click', () => {
@@ -678,8 +681,7 @@
             powerBtn.classList.add('off');
             hintEl.style.opacity = '0';
             
-            const mobileNav = document.getElementById('mobile-bottom-nav');
-            if (mobileNav) mobileNav.style.display = 'none';
+            document.body.classList.add('camera-powered');
         });
 
         window.addEventListener('resize', resizeRenderer);
