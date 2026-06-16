@@ -227,7 +227,7 @@
             </div>
 
             {% if posts.items %}
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-7xl mx-auto pb-12">
+            <div id="posts-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-7xl mx-auto pb-12">
                 {% for post in posts.items %}
                 <div class="relative group rounded-lg overflow-hidden bg-zinc-900 aspect-square border border-white/5">
                     <a href="{{ url_for('posts.post', post_id=post.id) }}" class="block w-full h-full">
@@ -271,7 +271,7 @@
             </div>
             
             <!-- Pagination Controls -->
-            <div class="flex justify-center items-center gap-4 max-w-7xl mx-auto pb-16">
+            <div id="pagination-controls" class="flex justify-center items-center gap-4 max-w-7xl mx-auto pb-16">
                 {% if posts.has_prev %}
                 <a href="{{ url_for('main.' + feed_type, page=posts.prev_num) }}" class="px-6 py-2 rounded-full border border-white/10 bg-black/40 text-zinc-300 hover:text-[#A3B18A] hover:border-[#A3B18A]/50 transition-colors text-xs font-bold tracking-widest uppercase">
                     &larr; Önceki
@@ -286,6 +286,8 @@
                 </a>
                 {% endif %}
             </div>
+            
+            <div id="load-more-trigger" class="h-10 w-full"></div>
             
             {% else %}
             <div class="flex flex-col items-center justify-center h-full text-center">
@@ -700,6 +702,68 @@
             renderer.render(scene, cam);
         }
         animate();
+        
+        // ── INFINITE SCROLL LOGIC ────────────────────────────────
+        let currentPage = {{ posts.page if posts else 1 }};
+        let hasNextPage = {{ 'true' if posts and posts.has_next else 'false' }};
+        let isLoading = false;
+
+        const loadMoreTrigger = document.getElementById('load-more-trigger');
+        const postsContainer = document.getElementById('posts-container');
+        const paginationControls = document.getElementById('pagination-controls');
+
+        if (loadMoreTrigger && hasNextPage) {
+            // Hide standard pagination since we will use infinite scroll
+            if (paginationControls) {
+                paginationControls.style.display = 'none';
+            }
+
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && !isLoading && hasNextPage) {
+                    loadMorePosts();
+                }
+            }, { rootMargin: '200px' });
+
+            observer.observe(loadMoreTrigger);
+        }
+
+        async function loadMorePosts() {
+            if (isLoading || !hasNextPage) return;
+            isLoading = true;
+            currentPage++;
+
+            try {
+                const url = new URL(window.location.href);
+                url.searchParams.set('page', currentPage);
+                
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    if (html.trim()) {
+                        postsContainer.insertAdjacentHTML('beforeend', html);
+                        
+                        // Check if we fetched a full page, otherwise there's no next page
+                        // In a real scenario, we might pass a header X-Has-Next: true/false
+                        // Here we just assume if we got less content, it might be the end.
+                        // For safety, we will just rely on empty responses to stop.
+                    } else {
+                        hasNextPage = false;
+                    }
+                } else {
+                    hasNextPage = false;
+                }
+            } catch (error) {
+                console.error("Fotoğraflar yüklenirken hata oluştu:", error);
+            } finally {
+                isLoading = false;
+            }
+        }
+        
     } catch(err) {
         const eb = document.getElementById('error-box');
         eb.style.display = 'block';

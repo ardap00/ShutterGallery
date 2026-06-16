@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 
 from app.posts import posts
-from app.posts.forms import PhotoPostForm, CommentForm
+from app.posts.forms import PhotoPostForm, CommentForm, EditPostForm
 from app.models import PhotoPost, db, Comment, Notification
 from flask import request
 
@@ -232,3 +232,53 @@ def like_post(post_id):
     
     # Redirect back to where the user came from (feed, profile, or post detail)
     return redirect(request.referrer or url_for('posts.post', post_id=post.id))
+
+@posts.route('/post/<int:post_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_post(post_id):
+    post = db.get_or_404(PhotoPost, post_id)
+    if post.author != current_user:
+        flash('Sadece kendi yüklediğiniz fotoğrafları düzenleyebilirsiniz.', 'danger')
+        return redirect(url_for('posts.post', post_id=post.id))
+    
+    form = EditPostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.description = form.description.data
+        post.category = form.category.data
+        post.camera_model = form.camera_model.data
+        post.lens_model = form.lens_model.data
+        post.iso = form.iso.data
+        post.aperture = form.aperture.data
+        post.shutter_speed = form.shutter_speed.data
+        post.editing_software = form.editing_software.data
+        db.session.commit()
+        flash('Fotoğraf detayları başarıyla güncellendi.', 'success')
+        return redirect(url_for('posts.post', post_id=post.id))
+    elif request.method == 'GET':
+        form.title.data = post.title
+        form.description.data = post.description
+        form.category.data = post.category
+        form.camera_model.data = post.camera_model
+        form.lens_model.data = post.lens_model
+        form.iso.data = post.iso
+        form.aperture.data = post.aperture
+        form.shutter_speed.data = post.shutter_speed
+        form.editing_software.data = post.editing_software
+        
+    return render_template('posts/edit_post.html', form=form, post=post)
+
+@posts.route('/comment/<int:comment_id>/delete', methods=['POST'])
+@login_required
+def delete_comment(comment_id):
+    comment = db.get_or_404(Comment, comment_id)
+    # Both the comment author and the post author can delete a comment
+    if comment.author != current_user and comment.post.author != current_user:
+        flash('Bu yorumu silme yetkiniz yok.', 'danger')
+        return redirect(url_for('posts.post', post_id=comment.post.id))
+    
+    post_id = comment.post.id
+    db.session.delete(comment)
+    db.session.commit()
+    flash('Yorum silindi.', 'success')
+    return redirect(url_for('posts.post', post_id=post_id))

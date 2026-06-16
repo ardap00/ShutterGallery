@@ -32,3 +32,24 @@ class PhotoPostForm(FlaskForm):
 class CommentForm(FlaskForm):
     body = TextAreaField('Yorumunuz', validators=[DataRequired()])
     submit = SubmitField('Gönder')
+
+class EditPostForm(FlaskForm):
+    title = StringField('Başlık', validators=[DataRequired()])
+    description = TextAreaField('Açıklama', validators=[Optional()])
+    category = SelectField('Kategori', choices=[
+        ('Doga', 'Doğa'),
+        ('Sokak', 'Sokak'),
+        ('Mimari', 'Mimari'),
+        ('Portre', 'Portre'),
+        ('Astrofotografi', 'Astrofotoğrafi'),
+        ('Diger', 'Diğer')
+    ], validators=[DataRequired()])
+    
+    camera_model = StringField('Kamera Modeli', validators=[Optional()])
+    lens_model = StringField('Lens Modeli', validators=[Optional()])
+    iso = IntegerField('ISO', validators=[Optional()])
+    aperture = StringField('Diyafram (örn: f/2.8)', validators=[Optional()])
+    shutter_speed = StringField('Enstantane (örn: 1/250)', validators=[Optional()])
+    editing_software = StringField('Düzenleme Yazılımı', validators=[Optional()])
+    
+    submit = SubmitField('Değişiklikleri Kaydet')

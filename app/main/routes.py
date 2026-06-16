@@ -47,6 +47,9 @@ def index():
     else:
         return redirect(url_for('main.discover'))
         
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template('main/_posts_partial.html', posts=posts)
+        
     return render_template('main/index.html', posts=posts, feed_type='feed')
 
 @main.route('/discover')
@@ -57,5 +60,8 @@ def discover():
         db.select(PhotoPost).order_by(func.random()),
         page=page, per_page=12, error_out=False
     )
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template('main/_posts_partial.html', posts=posts)
+        
     return render_template('main/index.html', posts=posts, feed_type='discover')
 

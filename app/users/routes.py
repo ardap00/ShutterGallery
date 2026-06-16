@@ -144,3 +144,4 @@ def unfollow(username):
     db.session.commit()
     flash(f'{username} adlı kullanıcıyı takipten çıktınız.', 'info')
     return redirect(url_for('users.profile', username=username))
+
