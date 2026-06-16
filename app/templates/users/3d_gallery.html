@@ -104,10 +104,10 @@
             camera.position.z = 20;
 
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x050505);
-            scene.fog = new THREE.Fog(0x050505, 10, Math.min(150, totalZ));
+            scene.background = new THREE.Color(0xf5f5f5);
+            scene.fog = new THREE.Fog(0xf5f5f5, 10, Math.min(150, totalZ));
 
-            const light = new THREE.HemisphereLight(0xeeeeff, 0x111122, 0.2);
+            const light = new THREE.HemisphereLight(0xffffff, 0xdddddd, 0.6);
             scene.add(light);
 
             controls = new PointerLockControls(camera, document.body);
@@ -166,7 +166,7 @@
             // Architecture
             // Floor
             const floorGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
-            const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8, metalness: 0.2 });
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, roughness: 0.8, metalness: 0.1 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
             floor.position.z = -totalZ / 2 + 40;
@@ -174,7 +174,7 @@
             
             // Ceiling
             const ceilGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
-            const ceilMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 1 });
+            const ceilMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1 });
             const ceiling = new THREE.Mesh(ceilGeo, ceilMat);
             ceiling.rotation.x = Math.PI / 2;
             ceiling.position.y = roomHeight;
@@ -182,7 +182,7 @@
             scene.add(ceiling);
 
             // Walls
-            const wallMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
             const wallGeo = new THREE.PlaneGeometry(totalZ, roomHeight);
             
             // Left Wall
@@ -245,17 +245,21 @@
                     
                     // Frame
                     const frameGeo = new THREE.BoxGeometry(pWidth + 0.8, pHeight + 0.8, 0.4);
-                    const frameMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.2 });
+                    const frameMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2 }); // Siyah çerçeve güzel durur
                     const frameMesh = new THREE.Mesh(frameGeo, frameMat);
                     
                     if (side === 'left') {
-                        imgMesh.position.set(-roomWidth / 2 + 0.3, roomHeight / 2, zPos);
+                        // Frame center at -19.9, front face is at -19.7
+                        // Place image at -19.65 to be slightly in front of the frame face
+                        imgMesh.position.set(-roomWidth / 2 + 0.35, roomHeight / 2, zPos);
                         imgMesh.rotation.y = Math.PI / 2;
                         
                         frameMesh.position.set(-roomWidth / 2 + 0.1, roomHeight / 2, zPos);
                         frameMesh.rotation.y = Math.PI / 2;
                     } else {
-                        imgMesh.position.set(roomWidth / 2 - 0.3, roomHeight / 2, zPos);
+                        // Frame center at 19.9, front face is at 19.7
+                        // Place image at 19.65 to be slightly in front of the frame face
+                        imgMesh.position.set(roomWidth / 2 - 0.35, roomHeight / 2, zPos);
                         imgMesh.rotation.y = -Math.PI / 2;
                         
                         frameMesh.position.set(roomWidth / 2 - 0.1, roomHeight / 2, zPos);
@@ -266,7 +270,7 @@
                     scene.add(frameMesh);
                     
                     // Spotlight above the painting
-                    const spotLight = new THREE.SpotLight(0xffffff, 3);
+                    const spotLight = new THREE.SpotLight(0xffffff, 2.5);
                     spotLight.position.set(side === 'left' ? -roomWidth/2 + 6 : roomWidth/2 - 6, roomHeight - 1, zPos);
                     spotLight.target = imgMesh;
                     spotLight.angle = Math.PI / 5;
