@@ -123,7 +123,7 @@
 
         // Avatar variables
         let avatarGroup, armL, armR, legL, legR;
-        const rawConfig = '{{ current_user.avatar_config|safe }}';
+        const rawConfig = '{{ current_user.avatar_config|safe if current_user.is_authenticated else "" }}';
         let avatarConfig = { body: '#2196F3', arms: '#4CAF50', legs: '#FFC107' };
         try {
             if (rawConfig && rawConfig !== 'None') {
