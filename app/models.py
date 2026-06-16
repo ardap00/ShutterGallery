@@ -55,6 +55,19 @@ class User(UserMixin, db.Model):
         lazy='dynamic'
     )
 
+    messages_sent: Mapped[List["Message"]] = relationship(
+        foreign_keys='Message.sender_id',
+        back_populates='sender',
+        cascade="all, delete-orphan",
+        lazy='dynamic'
+    )
+    messages_received: Mapped[List["Message"]] = relationship(
+        foreign_keys='Message.recipient_id',
+        back_populates='recipient',
+        cascade="all, delete-orphan",
+        lazy='dynamic'
+    )
+
     followed: Mapped[List["User"]] = relationship(
         secondary=followers,
         primaryjoin=(followers.c.follower_id == id),
@@ -79,6 +92,9 @@ class User(UserMixin, db.Model):
 
     def is_following(self, user):
         return self.followed.filter(followers.c.followed_id == user.id).count() > 0
+
+    def unread_message_count(self):
+        return self.messages_received.filter_by(is_read=False).count()
 
     def like_post(self, post):
         if not self.has_liked_post(post):
@@ -142,3 +158,16 @@ class Notification(db.Model):
     recipient: Mapped["User"] = relationship(foreign_keys=[recipient_id], back_populates='notifications_received')
     sender: Mapped["User"] = relationship(foreign_keys=[sender_id], back_populates='notifications_sent')
     post: Mapped[Optional["PhotoPost"]] = relationship()
+
+class Message(db.Model):
+    __tablename__ = 'messages'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    sender_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    recipient_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    is_read: Mapped[bool] = mapped_column(db.Boolean, default=False)
+
+    sender: Mapped["User"] = relationship(foreign_keys=[sender_id], back_populates='messages_sent')
+    recipient: Mapped["User"] = relationship(foreign_keys=[recipient_id], back_populates='messages_received')

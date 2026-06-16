@@ -26,6 +26,22 @@
             </div>
         </a>
 
+        <!-- Mesajlar -->
+        <a href="{{ url_for('messages.inbox') }}" class="flex flex-col items-center justify-center w-full h-full text-white hover:text-emerald-400 active:scale-90 transition-all duration-75 relative">
+            <div class="relative">
+                <svg class="w-6 h-6" fill="{% if request.blueprint == 'messages' %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                </svg>
+                {% set unread = current_user.unread_message_count() %}
+                {% if unread > 0 %}
+                <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 border border-black"></span>
+                </span>
+                {% endif %}
+            </div>
+        </a>
+
         <!-- Profil -->
         <a href="{{ url_for('users.profile', username=current_user.username) }}" class="flex flex-col items-center justify-center w-full h-full active:scale-90 transition-all duration-75">
             {% set avatar_file = current_user.avatar_file if current_user.avatar_file else 'default.jpg' %}

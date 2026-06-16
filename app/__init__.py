@@ -54,6 +54,9 @@ def create_app(config_class=Config):
     from app.users import users as users_bp
     app.register_blueprint(users_bp, url_prefix='/users')
 
+    from app.messages import messages as messages_bp
+    app.register_blueprint(messages_bp, url_prefix='/messages')
+
     # Güvenli hata işleyiciler — stack trace asla client'a gönderilmez
     @app.errorhandler(404)
     def not_found(e):
