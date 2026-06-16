@@ -53,8 +53,7 @@
 <!-- Three.js -->
 <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
 <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://unpkg.com/three@0.128.0/examples/js/libs/fflate.min.js"></script>
-<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
 
 <script>
     // Kullanıcının mevcut konfigürasyonu
@@ -126,8 +125,8 @@
 
     let armL, armR, legL, legR;
 
-    const loader = new THREE.FBXLoader();
-    loader.load("{{ url_for('static', filename='models/hff/HumanBody.fbx') }}", function ( object ) {
+    const loader = new THREE.OBJLoader();
+    loader.load("{{ url_for('static', filename='models/hff/HumanBody.obj') }}", function ( object ) {
         
         object.traverse( function ( child ) {
             if ( child.isMesh ) {
@@ -140,13 +139,6 @@
                 if (n.includes("arm") && n.includes("r")) armR = child;
                 if (n.includes("leg") && n.includes("l")) legL = child;
                 if (n.includes("leg") && n.includes("r")) legR = child;
-            }
-            if ( child.isBone ) {
-                const n = child.name.toLowerCase();
-                if ((n.includes("arm") || n.includes("shoulder")) && n.includes("l")) armL = child;
-                if ((n.includes("arm") || n.includes("shoulder")) && n.includes("r")) armR = child;
-                if ((n.includes("leg") || n.includes("thigh")) && n.includes("l")) legL = child;
-                if ((n.includes("leg") || n.includes("thigh")) && n.includes("r")) legR = child;
             }
         } );
 
@@ -191,12 +183,14 @@
         requestAnimationFrame(animate);
         
         // Hafif yürüme animasyonu (Önizleme için)
+        const t = clock.getElapsedTime() * 3;
         if (armL && armR && legL && legR) {
-            const t = clock.getElapsedTime() * 3;
             armL.rotation.x = Math.sin(t) * 0.5;
             armR.rotation.x = Math.sin(t + Math.PI) * 0.5;
             legL.rotation.x = Math.sin(t + Math.PI) * 0.5;
             legR.rotation.x = Math.sin(t) * 0.5;
+        } else {
+            avatarGroup.position.y = -1.5 + Math.abs(Math.sin(t * 1.5) * 0.2);
         }
         
         controls.update();
