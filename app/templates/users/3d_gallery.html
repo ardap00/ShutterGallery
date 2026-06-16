@@ -412,44 +412,31 @@
             const gltfLoader = new GLTFLoader();
             
             const decorPositions = [];
-            let itemCounter = 0;
-            
-            for (let i = 0; i < photosData.length; i += 2) {
-                const zPos = 20 - (Math.floor(i / 2) + 1) * zSpacing;
-                
-                // Sadece büst (biblo) kullanıyoruz, sandalye yok.
-                decorPositions.push({ type: 'bust', z: zPos });
+            // Odayı dolu göstermek için fotoğraf sayısından bağımsız olarak koridor boyunca heykel dizelim
+            for (let z = -10; z > -totalZ + 30; z -= zSpacing) {
+                decorPositions.push({ type: 'bust', z: z });
             }
 
             // Load Bust (Nefertiti) on a Pedestal
             gltfLoader.load('/static/models/Nefertiti.glb', function(gltf) {
                 try {
                     const bustModel = gltf.scene;
-                    const box = new THREE.Box3().setFromObject(bustModel);
-                    const size = box.getSize(new THREE.Vector3());
-                    const scale = size.y > 0 ? 2.5 / size.y : 1.0; // 2.5 meter tall bust (BÜYÜTÜLDÜ)
-                    bustModel.scale.set(scale, scale, scale);
                     
-                    const center = box.getCenter(new THREE.Vector3());
-                    
-                    // Daha büyük kaide
+                    // Beyaz oda içinde fark edilmesi için Koyu renk kaide (Siyah mermer/metal hissi)
                     const pedGeo = new THREE.BoxGeometry(2.0, 4.0, 2.0);
-                    const pedMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.1 });
+                    const pedMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, metalness: 0.2 });
                     
                     decorPositions.forEach(pos => {
                         const group = new THREE.Group();
                         
+                        // Kaide (Zemine oturtuluyor, y = 2.0 yani alt noktası 0)
                         const pedestal = new THREE.Mesh(pedGeo, pedMat);
-                        pedestal.position.y = 2.0; // Yarı yüksekliği kadar yukarı (zemine otursun)
+                        pedestal.position.y = 2.0; 
                         pedestal.castShadow = true;
                         pedestal.receiveShadow = true;
                         group.add(pedestal);
                         
                         const clone = bustModel.clone();
-                        clone.position.x = -center.x * scale;
-                        clone.position.z = -center.z * scale;
-                        clone.position.y = 4.0 - (center.y - size.y/2) * scale; // Kaidenin tam üstüne oturttuk
-                        clone.rotation.y = Math.PI; 
                         
                         clone.traverse(function(child) {
                             if (child.isMesh) {
@@ -460,20 +447,44 @@
                                 });
                             }
                         });
-                        group.add(clone);
                         
-                        const spotLight = new THREE.SpotLight(0xffffff, 3.0);
-                        spotLight.position.set(0, 9, 0); // Işığı da biraz yukarı kaldırdık
-                        spotLight.target = clone;
+                        // Modelin orijinal boyutunu ve kaymalarını sıfırlamak için kesin Box3 hesabı
+                        const cloneBox = new THREE.Box3().setFromObject(clone);
+                        const cloneSize = cloneBox.getSize(new THREE.Vector3());
+                        const cloneCenter = cloneBox.getCenter(new THREE.Vector3());
+                        
+                        // Geometriyi tam olarak (0,0,0) merkezine çek
+                        clone.position.x -= cloneCenter.x;
+                        clone.position.y -= cloneBox.min.y; // alt sınır 0'a gelsin
+                        clone.position.z -= cloneCenter.z;
+                        
+                        // Bir sarıcı (Wrapper) oluşturarak temiz scale uygulayalım
+                        const bustWrapper = new THREE.Group();
+                        bustWrapper.add(clone);
+                        
+                        // Modeli tam 2.5 metre yap
+                        const scale = cloneSize.y > 0 ? 2.5 / cloneSize.y : 1.0;
+                        bustWrapper.scale.set(scale, scale, scale);
+                        
+                        // Wrapper'ı 4.0 metre yüksekliğindeki kaidenin tam üstüne yerleştir
+                        bustWrapper.position.set(0, 4.0, 0);
+                        bustWrapper.rotation.y = Math.PI; 
+                        
+                        group.add(bustWrapper);
+                        
+                        // Spot Işığı
+                        const spotLight = new THREE.SpotLight(0xffffff, 4.0);
+                        spotLight.position.set(0, 9, 0); 
+                        spotLight.target = bustWrapper;
                         spotLight.angle = Math.PI / 5;
                         spotLight.penumbra = 0.5;
+                        spotLight.distance = 20;
                         group.add(spotLight);
                         scene.add(spotLight.target);
                         
                         group.position.set(0, 0, pos.z);
                         scene.add(group);
                         
-                        // Çarpışma kutusunu kaideye göre büyüttük
                         obstacles.push({ x: 0, z: pos.z, width: 3.0, depth: 3.0 });
                     });
                 } catch (err) {
