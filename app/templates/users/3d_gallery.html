@@ -57,6 +57,7 @@
             <div class="grid grid-cols-2 gap-x-12 gap-y-4 text-left text-sm text-gray-300 font-medium">
                 <div><strong class="text-white">Hareket:</strong> W, A, S, D</div>
                 <div><strong class="text-white">Etrafı İncele:</strong> Mouse</div>
+                <div><strong class="text-white">Bakış Açısı:</strong> C tuşu</div>
                 <div><strong class="text-white">Çıkış:</strong> ESC tuşu</div>
             </div>
         </div>
@@ -812,6 +813,13 @@
                 dir.applyAxisAngle(new THREE.Vector3(0,1,0), avatarGroup.rotation.y);
                 tpCamera.position.copy(camera.position).add(dir.multiplyScalar(dist));
                 tpCamera.position.y = camera.position.y + 4;
+                
+                // Duvarların dışına çıkmasını engelle (Kamera sınırlandırma)
+                const marginX = 1.5; // Duvardan ne kadar uzak kalacağı
+                const marginZ = 1.5;
+                tpCamera.position.x = Math.max(-roomWidth / 2 + marginX, Math.min(roomWidth / 2 - marginX, tpCamera.position.x));
+                tpCamera.position.z = Math.max(-totalZ + 40 + marginZ, Math.min(40 - marginZ, tpCamera.position.z));
+                
                 tpCamera.lookAt(camera.position);
             }
 
