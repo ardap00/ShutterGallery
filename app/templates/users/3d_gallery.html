@@ -215,16 +215,6 @@
             return texture;
         }
 
-        // Avatar variables
-        let avatarGroup, armL, armR, legL, legR;
-        const rawConfig = '{{ current_user.avatar_config|safe }}';
-        let avatarConfig = { body: '#2196F3', arms: '#4CAF50', legs: '#FFC107' };
-        try {
-            if (rawConfig && rawConfig !== 'None') {
-                avatarConfig = JSON.parse(rawConfig);
-            }
-        } catch(e) {}
-
         function init() {
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
             camera.position.y = 8;
