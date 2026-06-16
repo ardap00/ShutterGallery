@@ -191,8 +191,8 @@
             const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imgData.data;
             for(let i = 0; i < data.length; i += 4) {
-                // Subtle noise for plaster effect
-                const noise = Math.random() * 12; 
+                // Daha belirgin sıva/duvar efekti için gürültüyü artırdık
+                const noise = Math.random() * 35; 
                 data[i] = Math.max(0, data[i] - noise);
                 data[i+1] = Math.max(0, data[i+1] - noise);
                 data[i+2] = Math.max(0, data[i+2] - noise);
@@ -326,9 +326,9 @@
                 }, {passive: false});
             }
 
-            // Floor
+            // Floor (Zemin koyu beton/granit rengi yapıldı)
             const floorGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
-            const floorMat = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, roughness: 0.8, metalness: 0.1 });
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x2c2c2c, roughness: 0.5, metalness: 0.2 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
             floor.position.z = -totalZ / 2 + 40;
@@ -401,7 +401,7 @@
                 roughness: 1.0,
                 map: wallTexture,
                 bumpMap: wallTexture,
-                bumpScale: 0.05
+                bumpScale: 0.4
             });
             const wallGeo = new THREE.PlaneGeometry(totalZ, roomHeight);
             
@@ -427,7 +427,7 @@
             const backWallTexture = wallTexture.clone();
             backWallTexture.repeat.set(roomWidth / 20, roomHeight / 20);
             const backWallMat = new THREE.MeshStandardMaterial({
-                color: 0xffffff, roughness: 1.0, map: backWallTexture, bumpMap: backWallTexture, bumpScale: 0.05
+                color: 0xffffff, roughness: 1.0, map: backWallTexture, bumpMap: backWallTexture, bumpScale: 0.4
             });
 
             const backWall = new THREE.Mesh(backWallGeo, backWallMat);
@@ -455,92 +455,8 @@
                 scene.add(pointLight);
             }
 
-            // Add Photos and GLTF Decorations
+            // Add Photos
             const textureLoader = new THREE.TextureLoader();
-            const gltfLoader = new GLTFLoader();
-            
-            const decorPositions = [];
-            // Odayı dolu göstermek için fotoğraf sayısından bağımsız olarak koridor boyunca heykel dizelim
-            for (let z = -10; z > -totalZ + 30; z -= zSpacing) {
-                decorPositions.push({ type: 'bust', z: z });
-            }
-
-            // Load AntiqueCamera on a Pedestal
-            gltfLoader.load('/static/models/AntiqueCamera.glb', function(gltf) {
-                try {
-                    const bustModel = gltf.scene;
-                    
-                    // Beyaz oda içinde fark edilmesi için Koyu renk kaide (Siyah mermer/metal hissi)
-                    const pedGeo = new THREE.BoxGeometry(2.0, 4.0, 2.0);
-                    const pedMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, metalness: 0.2 });
-                    
-                    decorPositions.forEach(pos => {
-                        const group = new THREE.Group();
-                        
-                        // Kaide (Zemine oturtuluyor, y = 2.0 yani alt noktası 0)
-                        const pedestal = new THREE.Mesh(pedGeo, pedMat);
-                        pedestal.position.y = 2.0; 
-                        pedestal.castShadow = true;
-                        pedestal.receiveShadow = true;
-                        group.add(pedestal);
-                        
-                        const clone = bustModel.clone();
-                        
-                        // Kamera modelinin kendi renklerini koruyoruz, sadece gölge ekliyoruz
-                        clone.traverse(function(child) {
-                            if (child.isMesh) {
-                                child.castShadow = true;
-                                child.receiveShadow = true;
-                            }
-                        });
-                        
-                        // Modelin orijinal boyutunu ve kaymalarını sıfırlamak için kesin Box3 hesabı
-                        const cloneBox = new THREE.Box3().setFromObject(clone);
-                        const cloneSize = cloneBox.getSize(new THREE.Vector3());
-                        const cloneCenter = cloneBox.getCenter(new THREE.Vector3());
-                        
-                        // Geometriyi tam olarak (0,0,0) merkezine çek
-                        clone.position.x -= cloneCenter.x;
-                        clone.position.y -= cloneBox.min.y; // alt sınır 0'a gelsin
-                        clone.position.z -= cloneCenter.z;
-                        
-                        // Bir sarıcı (Wrapper) oluşturarak temiz scale uygulayalım
-                        const bustWrapper = new THREE.Group();
-                        bustWrapper.add(clone);
-                        
-                        // Modeli kaideye uygun şekilde tam 2.5 metre yap
-                        const scale = cloneSize.y > 0 ? 2.5 / cloneSize.y : 1.0;
-                        bustWrapper.scale.set(scale, scale, scale);
-                        
-                        // Wrapper'ı 4.0 metre yüksekliğindeki kaidenin tam üstüne yerleştir
-                        bustWrapper.position.set(0, 4.0, 0);
-                        
-                        // Kamerayı izleyicilere dönük olacak şekilde döndür
-                        bustWrapper.rotation.y = -Math.PI / 2; 
-                        
-                        group.add(bustWrapper);
-                        
-                        // Spot Işığı
-                        const spotLight = new THREE.SpotLight(0xffffff, 4.0);
-                        spotLight.position.set(0, 9, 0); 
-                        spotLight.target = bustWrapper;
-                        spotLight.angle = Math.PI / 5;
-                        spotLight.penumbra = 0.5;
-                        spotLight.distance = 20;
-                        group.add(spotLight);
-                        scene.add(spotLight.target);
-                        
-                        group.position.set(0, 0, pos.z);
-                        scene.add(group);
-                        
-                        obstacles.push({ x: 0, z: pos.z, width: 3.0, depth: 3.0 });
-                    });
-                } catch (err) {
-                    console.error('Error processing Camera model:', err);
-                }
-            }, undefined, function(error) {
-                console.error('Failed to load AntiqueCamera:', error);
-            });
 
             photosData.forEach((photo, index) => {
                 const side = index % 2 === 0 ? 'left' : 'right';
@@ -597,14 +513,25 @@
                     const plaqueMat = new THREE.MeshBasicMaterial({ map: plaqueTex });
                     const plaqueMesh = new THREE.Mesh(plaqueGeo, plaqueMat);
                     
+                    const plaqueFrameGeo = new THREE.BoxGeometry(3.2, 3.2, 0.2);
+                    const plaqueFrameMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3 });
+                    const plaqueFrameMesh = new THREE.Mesh(plaqueFrameGeo, plaqueFrameMat);
+                    
                     if (side === 'left') {
                         plaqueMesh.position.set(-roomWidth / 2 + 0.35, roomHeight / 2 - 2, zPos - pWidth / 2 - 2.5);
                         plaqueMesh.rotation.y = Math.PI / 2;
+                        
+                        plaqueFrameMesh.position.set(-roomWidth / 2 + 0.15, roomHeight / 2 - 2, zPos - pWidth / 2 - 2.5);
+                        plaqueFrameMesh.rotation.y = Math.PI / 2;
                     } else {
                         plaqueMesh.position.set(roomWidth / 2 - 0.35, roomHeight / 2 - 2, zPos - pWidth / 2 - 2.5);
                         plaqueMesh.rotation.y = -Math.PI / 2;
+                        
+                        plaqueFrameMesh.position.set(roomWidth / 2 - 0.15, roomHeight / 2 - 2, zPos - pWidth / 2 - 2.5);
+                        plaqueFrameMesh.rotation.y = -Math.PI / 2;
                     }
                     scene.add(plaqueMesh);
+                    scene.add(plaqueFrameMesh);
                     
                     // Spotlight above the painting
                     const spotLight = new THREE.SpotLight(0xffffff, 2.5);
