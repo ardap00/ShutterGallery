@@ -260,8 +260,8 @@
                     if (armL) armL.rotation.z -= 1.2;
                     if (armR) armR.rotation.z += 1.2;
 
-                    // Eski boyutu (0.012) 6 katına çıkarıyoruz: 0.072
-                    object.scale.set(0.072, 0.072, 0.072);
+                    // Kullanıcının isteği üzerine boyutu 0.030 yapıyoruz
+                    object.scale.set(0.030, 0.030, 0.030);
                     
                     // FBX genelde Y-up olarak dik gelir, bu yüzden X rotasyonu yapmıyoruz.
                     object.rotation.y = Math.PI; // Kamerayla aynı yöne bakması için (sırtı bize dönük)
