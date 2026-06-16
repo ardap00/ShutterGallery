@@ -64,6 +64,7 @@
     
     <div id="crosshair"></div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
     <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
     <script type="importmap">
       {
@@ -78,6 +79,8 @@
         import * as THREE from 'three';
         import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
+
         const photosData = {{ photos_json | safe }};
         
         let camera, scene, renderer, controls;
@@ -88,6 +91,16 @@
         let prevTime = performance.now();
         const velocity = new THREE.Vector3();
         const direction = new THREE.Vector3();
+
+        // Mobile control variables
+        let fwdValue = 0;
+        let bkdValue = 0;
+        let rgtValue = 0;
+        let lftValue = 0;
+        let touchLook = { x: 0, y: 0 };
+        let previousTouchLook = { x: 0, y: 0 };
+        let lon = -90, lat = 0;
+        let phi = 0, theta = 0;
         
         // Gallery dimensions
         const roomWidth = 40;
@@ -191,58 +204,114 @@
             const light = new THREE.HemisphereLight(0xffffff, 0xdddddd, 0.6);
             scene.add(light);
 
-            controls = new PointerLockControls(camera, document.body);
-            
-            const blocker = document.getElementById('blocker');
-            const instructions = document.getElementById('instructions');
-            const crosshair = document.getElementById('crosshair');
+            if (!isMobile) {
+                controls = new PointerLockControls(camera, document.body);
+                
+                const blocker = document.getElementById('blocker');
+                const instructions = document.getElementById('instructions');
+                const crosshair = document.getElementById('crosshair');
 
-            instructions.addEventListener('click', function() {
-                controls.lock();
-            });
+                instructions.addEventListener('click', function() {
+                    controls.lock();
+                });
 
-            controls.addEventListener('lock', function() {
-                instructions.style.display = 'none';
-                blocker.style.display = 'none';
-                crosshair.style.display = 'block';
-            });
+                controls.addEventListener('lock', function() {
+                    instructions.style.display = 'none';
+                    blocker.style.display = 'none';
+                    crosshair.style.display = 'block';
+                });
 
-            controls.addEventListener('unlock', function() {
-                blocker.style.display = 'flex';
-                instructions.style.display = '';
-                crosshair.style.display = 'none';
-            });
+                controls.addEventListener('unlock', function() {
+                    blocker.style.display = 'flex';
+                    instructions.style.display = '';
+                    crosshair.style.display = 'none';
+                });
 
-            scene.add(controls.getObject());
+                scene.add(controls.getObject());
 
-            const onKeyDown = function (event) {
-                switch (event.code) {
-                    case 'ArrowUp':
-                    case 'KeyW': moveForward = true; break;
-                    case 'ArrowLeft':
-                    case 'KeyA': moveLeft = true; break;
-                    case 'ArrowDown':
-                    case 'KeyS': moveBackward = true; break;
-                    case 'ArrowRight':
-                    case 'KeyD': moveRight = true; break;
-                }
-            };
+                const onKeyDown = function (event) {
+                    switch (event.code) {
+                        case 'ArrowUp': case 'KeyW': moveForward = true; break;
+                        case 'ArrowLeft': case 'KeyA': moveLeft = true; break;
+                        case 'ArrowDown': case 'KeyS': moveBackward = true; break;
+                        case 'ArrowRight': case 'KeyD': moveRight = true; break;
+                    }
+                };
 
-            const onKeyUp = function (event) {
-                switch (event.code) {
-                    case 'ArrowUp':
-                    case 'KeyW': moveForward = false; break;
-                    case 'ArrowLeft':
-                    case 'KeyA': moveLeft = false; break;
-                    case 'ArrowDown':
-                    case 'KeyS': moveBackward = false; break;
-                    case 'ArrowRight':
-                    case 'KeyD': moveRight = false; break;
-                }
-            };
+                const onKeyUp = function (event) {
+                    switch (event.code) {
+                        case 'ArrowUp': case 'KeyW': moveForward = false; break;
+                        case 'ArrowLeft': case 'KeyA': moveLeft = false; break;
+                        case 'ArrowDown': case 'KeyS': moveBackward = false; break;
+                        case 'ArrowRight': case 'KeyD': moveRight = false; break;
+                    }
+                };
 
-            document.addEventListener('keydown', onKeyDown);
-            document.addEventListener('keyup', onKeyUp);
+                document.addEventListener('keydown', onKeyDown);
+                document.addEventListener('keyup', onKeyUp);
+            } else {
+                // Mobile Setup
+                document.getElementById('instructions').style.display = 'none';
+                document.getElementById('blocker').style.display = 'none';
+                document.getElementById('crosshair').style.display = 'none';
+
+                const joystickZone = document.createElement('div');
+                joystickZone.style.position = 'absolute';
+                joystickZone.style.bottom = '50px';
+                joystickZone.style.left = '50px';
+                joystickZone.style.width = '120px';
+                joystickZone.style.height = '120px';
+                joystickZone.style.zIndex = '100';
+                document.body.appendChild(joystickZone);
+
+                const manager = nipplejs.create({
+                    zone: joystickZone,
+                    mode: 'static',
+                    position: { left: '50%', top: '50%' },
+                    color: 'white',
+                    size: 100
+                });
+
+                manager.on('move', function (evt, data) {
+                    const forward = data.vector.y;
+                    const turn = data.vector.x;
+
+                    if (forward > 0) { fwdValue = Math.abs(forward); bkdValue = 0; }
+                    else if (forward < 0) { fwdValue = 0; bkdValue = Math.abs(forward); }
+                    
+                    if (turn > 0) { rgtValue = Math.abs(turn); lftValue = 0; }
+                    else if (turn < 0) { rgtValue = 0; lftValue = Math.abs(turn); }
+                });
+
+                manager.on('end', function () {
+                    fwdValue = 0; bkdValue = 0; lftValue = 0; rgtValue = 0;
+                });
+
+                document.body.addEventListener('touchstart', function(e) {
+                    for(let i=0; i<e.changedTouches.length; i++) {
+                        if(e.changedTouches[i].clientX > window.innerWidth / 2) {
+                            previousTouchLook.x = e.changedTouches[i].clientX;
+                            previousTouchLook.y = e.changedTouches[i].clientY;
+                        }
+                    }
+                }, {passive: false});
+
+                document.body.addEventListener('touchmove', function(e) {
+                    for(let i=0; i<e.changedTouches.length; i++) {
+                        if(e.changedTouches[i].clientX > window.innerWidth / 2) {
+                            let movementX = e.changedTouches[i].clientX - previousTouchLook.x;
+                            let movementY = e.changedTouches[i].clientY - previousTouchLook.y;
+                            
+                            lon += movementX * 0.4;
+                            lat -= movementY * 0.4;
+                            lat = Math.max(-85, Math.min(85, lat));
+
+                            previousTouchLook.x = e.changedTouches[i].clientX;
+                            previousTouchLook.y = e.changedTouches[i].clientY;
+                        }
+                    }
+                }, {passive: false});
+            }
 
             // Architecture
             // Floor
@@ -426,10 +495,9 @@
             requestAnimationFrame(animate);
 
             const time = performance.now();
+            const delta = (time - prevTime) / 1000;
 
-            if (controls.isLocked === true) {
-                const delta = (time - prevTime) / 1000;
-
+            if (!isMobile && controls && controls.isLocked === true) {
                 velocity.x -= velocity.x * 10.0 * delta;
                 velocity.z -= velocity.z * 10.0 * delta;
 
@@ -451,7 +519,38 @@
                 if (pos.z > 40 - 2) pos.z = 40 - 2; 
                 if (pos.z < -totalZ + 40 + 2) pos.z = -totalZ + 40 + 2; 
                 
-                // Keep player at constant height
+                pos.y = 8;
+            } else if (isMobile) {
+                // Mobile Look
+                phi = THREE.MathUtils.degToRad(90 - lat);
+                theta = THREE.MathUtils.degToRad(lon);
+                const targetPosition = new THREE.Vector3();
+                targetPosition.x = camera.position.x + 100 * Math.sin(phi) * Math.cos(theta);
+                targetPosition.y = camera.position.y + 100 * Math.cos(phi);
+                targetPosition.z = camera.position.z + 100 * Math.sin(phi) * Math.sin(theta);
+                camera.lookAt(targetPosition);
+
+                // Mobile Move
+                const speed = 30.0;
+                
+                const forwardVec = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+                forwardVec.y = 0; forwardVec.normalize();
+                
+                const rightVec = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+                rightVec.y = 0; rightVec.normalize();
+
+                if (fwdValue > 0) camera.position.addScaledVector(forwardVec, speed * delta * fwdValue);
+                if (bkdValue > 0) camera.position.addScaledVector(forwardVec, -speed * delta * bkdValue);
+                if (rgtValue > 0) camera.position.addScaledVector(rightVec, speed * delta * rgtValue);
+                if (lftValue > 0) camera.position.addScaledVector(rightVec, -speed * delta * lftValue);
+
+                // Mobile Collision
+                const pos = camera.position;
+                if (pos.x < -roomWidth / 2 + 2) pos.x = -roomWidth / 2 + 2;
+                if (pos.x > roomWidth / 2 - 2) pos.x = roomWidth / 2 - 2;
+                if (pos.z > 40 - 2) pos.z = 40 - 2; 
+                if (pos.z < -totalZ + 40 + 2) pos.z = -totalZ + 40 + 2; 
+                
                 pos.y = 8;
             }
 
