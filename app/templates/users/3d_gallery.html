@@ -417,45 +417,9 @@
             for (let i = 0; i < photosData.length; i += 2) {
                 const zPos = 20 - (Math.floor(i / 2) + 1) * zSpacing;
                 
-                // Add decoration in the middle
-                itemCounter++;
-                decorPositions.push({ type: itemCounter % 2 === 1 ? 'chair' : 'bust', z: zPos });
+                // Sadece büst (biblo) kullanıyoruz, sandalye yok.
+                decorPositions.push({ type: 'bust', z: zPos });
             }
-
-            // Load Chair
-            gltfLoader.load('/static/models/SheenChair.glb', function(gltf) {
-                try {
-                    const chairModel = gltf.scene;
-                    const box = new THREE.Box3().setFromObject(chairModel);
-                    const size = box.getSize(new THREE.Vector3());
-                    const scale = size.y > 0 ? 2.0 / size.y : 1.0; // 2 meters tall, prevent infinity
-                    chairModel.scale.set(scale, scale, scale);
-                    
-                    const center = box.getCenter(new THREE.Vector3());
-                    chairModel.position.y = -(center.y - size.y/2) * scale;
-                    
-                    decorPositions.forEach(pos => {
-                        if (pos.type === 'chair') {
-                            const clone = chairModel.clone();
-                            clone.position.set(0, 0, pos.z);
-                            clone.rotation.y = Math.PI / 2; // Face sideways
-                            
-                            clone.traverse(function(child) {
-                                if (child.isMesh) {
-                                    child.castShadow = true;
-                                    child.receiveShadow = true;
-                                }
-                            });
-                            scene.add(clone);
-                            obstacles.push({ x: 0, z: pos.z, width: 3.5, depth: 3.5 });
-                        }
-                    });
-                } catch (err) {
-                    console.error('Error processing Chair model:', err);
-                }
-            }, undefined, function(error) {
-                console.error('Failed to load SheenChair:', error);
-            });
 
             // Load Bust (Nefertiti) on a Pedestal
             gltfLoader.load('/static/models/Nefertiti.glb', function(gltf) {
@@ -463,52 +427,54 @@
                     const bustModel = gltf.scene;
                     const box = new THREE.Box3().setFromObject(bustModel);
                     const size = box.getSize(new THREE.Vector3());
-                    const scale = size.y > 0 ? 1.0 / size.y : 1.0; // 1 meter tall bust, prevent infinity
+                    const scale = size.y > 0 ? 2.5 / size.y : 1.0; // 2.5 meter tall bust (BÜYÜTÜLDÜ)
                     bustModel.scale.set(scale, scale, scale);
                     
                     const center = box.getCenter(new THREE.Vector3());
-                    const pedGeo = new THREE.BoxGeometry(1.2, 3.5, 1.2);
+                    
+                    // Daha büyük kaide
+                    const pedGeo = new THREE.BoxGeometry(2.0, 4.0, 2.0);
                     const pedMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.1 });
                     
                     decorPositions.forEach(pos => {
-                        if (pos.type === 'bust') {
-                            const group = new THREE.Group();
-                            
-                            const pedestal = new THREE.Mesh(pedGeo, pedMat);
-                            pedestal.position.y = 1.75;
-                            pedestal.castShadow = true;
-                            pedestal.receiveShadow = true;
-                            group.add(pedestal);
-                            
-                            const clone = bustModel.clone();
-                            clone.position.x = -center.x * scale;
-                            clone.position.z = -center.z * scale;
-                            clone.position.y = 3.5 - (center.y - size.y/2) * scale;
-                            clone.rotation.y = Math.PI; 
-                            
-                            clone.traverse(function(child) {
-                                if (child.isMesh) {
-                                    child.castShadow = true;
-                                    child.receiveShadow = true;
-                                    child.material = new THREE.MeshStandardMaterial({
-                                        color: 0xd4af37, roughness: 0.2, metalness: 0.8 // Golden
-                                    });
-                                }
-                            });
-                            group.add(clone);
-                            
-                            const spotLight = new THREE.SpotLight(0xffffff, 2.0);
-                            spotLight.position.set(0, 7, 0);
-                            spotLight.target = clone;
-                            spotLight.angle = Math.PI / 6;
-                            spotLight.penumbra = 0.5;
-                            group.add(spotLight);
-                            scene.add(spotLight.target);
-                            
-                            group.position.set(0, 0, pos.z);
-                            scene.add(group);
-                            obstacles.push({ x: 0, z: pos.z, width: 2.0, depth: 2.0 });
-                        }
+                        const group = new THREE.Group();
+                        
+                        const pedestal = new THREE.Mesh(pedGeo, pedMat);
+                        pedestal.position.y = 2.0; // Yarı yüksekliği kadar yukarı (zemine otursun)
+                        pedestal.castShadow = true;
+                        pedestal.receiveShadow = true;
+                        group.add(pedestal);
+                        
+                        const clone = bustModel.clone();
+                        clone.position.x = -center.x * scale;
+                        clone.position.z = -center.z * scale;
+                        clone.position.y = 4.0 - (center.y - size.y/2) * scale; // Kaidenin tam üstüne oturttuk
+                        clone.rotation.y = Math.PI; 
+                        
+                        clone.traverse(function(child) {
+                            if (child.isMesh) {
+                                child.castShadow = true;
+                                child.receiveShadow = true;
+                                child.material = new THREE.MeshStandardMaterial({
+                                    color: 0xd4af37, roughness: 0.2, metalness: 0.8 // Golden
+                                });
+                            }
+                        });
+                        group.add(clone);
+                        
+                        const spotLight = new THREE.SpotLight(0xffffff, 3.0);
+                        spotLight.position.set(0, 9, 0); // Işığı da biraz yukarı kaldırdık
+                        spotLight.target = clone;
+                        spotLight.angle = Math.PI / 5;
+                        spotLight.penumbra = 0.5;
+                        group.add(spotLight);
+                        scene.add(spotLight.target);
+                        
+                        group.position.set(0, 0, pos.z);
+                        scene.add(group);
+                        
+                        // Çarpışma kutusunu kaideye göre büyüttük
+                        obstacles.push({ x: 0, z: pos.z, width: 3.0, depth: 3.0 });
                     });
                 } catch (err) {
                     console.error('Error processing Bust model:', err);
