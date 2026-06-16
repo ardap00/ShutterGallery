@@ -124,7 +124,7 @@
         const obstacles = [];
 
         // Avatar variables
-        let avatarGroup, armL, armR, legL, legR;
+        let avatarGroup, armL, armR, legL, legR, headMesh;
         const rawConfig = '{{ current_user.avatar_config|safe if current_user.is_authenticated else "" }}';
         let avatarConfig = { body: '#2196F3', arms: '#4CAF50', legs: '#FFC107' };
         try {
@@ -250,6 +250,15 @@
                             if (n.includes("arm") && n.includes("r")) armR = child;
                             if (n.includes("leg") && n.includes("l")) legL = child;
                             if (n.includes("leg") && n.includes("r")) legR = child;
+                            if (n.includes("head") || n.includes("kafa") || n.includes("neck")) {
+                                headMesh = child;
+                                // Pivot noktasını merkeze al
+                                child.geometry.computeBoundingBox();
+                                const center = new THREE.Vector3();
+                                child.geometry.boundingBox.getCenter(center);
+                                child.geometry.translate(-center.x, -center.y, -center.z);
+                                child.position.copy(center);
+                            }
                         }
                     } );
                     
@@ -743,6 +752,13 @@
                         legR.rotation.x += (0 - legR.rotation.x) * 0.1;
                     }
                 }
+            }
+
+            // Head rotation
+            if (headMesh) {
+                // Kamera nereye bakıyorsa kafa da o yöne (pitch - yukarı/aşağı) baksın.
+                // Modelin Y rotasyonu Math.PI olduğu için kameranın x rotasyonunun tersini veriyoruz.
+                headMesh.rotation.x = -camera.rotation.x;
             }
 
             let activeCamera = isThirdPerson ? tpCamera : camera;
