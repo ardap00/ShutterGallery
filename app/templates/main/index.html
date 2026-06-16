@@ -13,6 +13,10 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #020204; overflow: hidden; }
 
+        /* Mobil alt bar için ekstra padding (scroll olan kısımlarda) */
+        .feed-container { padding-bottom: 5rem; }
+        @media (min-width: 768px) { .feed-container { padding-bottom: 0; } }
+
         #bg {
             position: fixed; inset: 0; z-index: 0;
             background: url('https://images.unsplash.com/photo-1536924940846-227afb31e2a5?q=80&w=1920') center/cover no-repeat;
@@ -123,7 +127,7 @@
         </div>
         
         <!-- Top Left Dropdown Panel -->
-        <div class="absolute top-4 left-4 sm:top-8 sm:left-8 z-50 pointer-events-auto group">
+        <div class="hidden sm:block absolute top-4 left-4 sm:top-8 sm:left-8 z-50 pointer-events-auto group">
             {% set unread_count = 0 %}
             
             <button class="text-white hover:text-[#A3B18A] transition-colors flex items-center gap-2 sm:gap-3 bg-black/30 px-3 py-2 sm:px-4 rounded-full backdrop-blur-sm border border-white/5 relative">
@@ -164,7 +168,7 @@
         </div>
         
         <!-- Top Right Info & Auth -->
-        <div class="absolute top-4 right-4 sm:top-8 sm:right-8 flex flex-col items-end gap-3 z-50">
+        <div class="hidden sm:flex absolute top-4 right-4 sm:top-8 sm:right-8 flex-col items-end gap-3 z-50">
             <div class="hidden sm:flex text-white font-mono text-xs tracking-widest drop-shadow-md gap-6 bg-black/30 px-4 py-2 rounded-full backdrop-blur-sm pointer-events-none">
                 <span>ISO 800</span>
                 <span>F/1.4</span>
@@ -637,6 +641,9 @@
             canvas.style.opacity = '0';
             canvas.style.display = 'none';
             M.screen.opacity = 0;
+            
+            const mobileNav = document.getElementById('mobile-bottom-nav');
+            if (mobileNav) mobileNav.style.display = 'none';
         }
 
         powerBtn.addEventListener('click', () => {
@@ -670,6 +677,9 @@
             
             powerBtn.classList.add('off');
             hintEl.style.opacity = '0';
+            
+            const mobileNav = document.getElementById('mobile-bottom-nav');
+            if (mobileNav) mobileNav.style.display = 'none';
         });
 
         window.addEventListener('resize', resizeRenderer);
@@ -773,5 +783,8 @@
         eb.innerHTML += "Kritik Hata: " + err.message + "<br>";
     }
     </script>
+    
+    <!-- Mobile Bottom Navigation Bar -->
+    {% include "main/_mobile_nav.html" %}
 </body>
 </html>
