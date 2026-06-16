@@ -50,7 +50,7 @@ def index():
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render_template('main/_posts_partial.html', posts=posts)
         
-    return render_template('main/index.html', posts=posts, feed_type='feed')
+    return render_template('main/index.html', posts=posts, feed_type='index')
 
 @main.route('/discover')
 def discover():
