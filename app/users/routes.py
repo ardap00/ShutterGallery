@@ -173,7 +173,7 @@ def gallery3d(username):
     return render_template('users/3d_gallery.html', user=user, photos_json=json.dumps(photos_data))
 
 
-@bp.route('/avatar-settings', methods=['GET', 'POST'])
+@users.route('/avatar-settings', methods=['GET', 'POST'])
 @login_required
 def avatar_settings():
     if request.method == 'POST':
