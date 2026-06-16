@@ -121,11 +121,7 @@
         
         <!-- Top Left Dropdown Panel -->
         <div class="absolute top-4 left-4 sm:top-8 sm:left-8 z-50 pointer-events-auto group">
-            {% if current_user.is_authenticated %}
-                {% set unread_count = current_user.notifications_received.filter_by(is_read=False).count() %}
-            {% else %}
-                {% set unread_count = 0 %}
-            {% endif %}
+            {% set unread_count = 0 %}
             
             <button class="text-white hover:text-[#A3B18A] transition-colors flex items-center gap-2 sm:gap-3 bg-black/30 px-3 py-2 sm:px-4 rounded-full backdrop-blur-sm border border-white/5 relative">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
