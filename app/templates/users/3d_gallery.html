@@ -253,10 +253,9 @@
                         }
                     } );
                     
-                    // OBJ modelleri genelde metre cinsindendir, FBX gibi 100 kat küçültmeye gerek olmayabilir.
+                    // OBJ modelleri genelde Y-up olarak gelir.
                     object.scale.set(1, 1, 1);
-                    object.rotation.x = -Math.PI / 2;
-                    object.rotation.z = Math.PI;
+                    object.rotation.y = Math.PI; // Kamerayla aynı yöne bakması için (sırtı bize dönük)
                     
                     avatarGroup.add(object);
                 });

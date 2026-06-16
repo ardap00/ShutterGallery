@@ -142,12 +142,11 @@
             }
         } );
 
-        // OBJ modelleri genelde metre cinsindendir
+        // OBJ modelleri genelde metre cinsindendir ve Y-up gelir
         object.scale.set(1, 1, 1);
-        object.position.y = -1.5; // Center it vertically (adjusted)
+        object.position.y = -1.5; // Center it vertically
         
-        object.rotation.x = -Math.PI / 2;
-        object.rotation.z = Math.PI; 
+        object.rotation.y = Math.PI;
         
         avatarGroup.add(object);
         document.getElementById('loading').style.display = 'none';
