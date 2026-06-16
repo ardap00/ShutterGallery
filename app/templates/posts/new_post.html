@@ -6,6 +6,9 @@
     <title>Fotoğraf Yükle — ShutterGallery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
     </style>
@@ -37,6 +40,7 @@
 
         <form method="POST" action="" enctype="multipart/form-data" class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 md:p-10 shadow-2xl backdrop-blur-sm">
             {{ form.hidden_tag() }}
+            <input type="hidden" name="cropped_image" id="cropped_image">
             
             <div class="space-y-8">
                 <!-- Temel Bilgiler -->
@@ -49,6 +53,18 @@
                         {% if form.image_file.errors %}
                             <p class="text-red-400 text-xs mt-2">{{ form.image_file.errors[0] }}</p>
                         {% endif %}
+                    </div>
+
+                    <!-- Cropper Preview Area -->
+                    <div id="cropperContainer" class="hidden mb-5 flex flex-col items-center">
+                        <div class="w-full max-w-lg mb-4 bg-black border border-zinc-700 rounded-xl overflow-hidden" style="max-height: 400px;">
+                            <img id="cropperImage" src="" alt="Önizleme" style="max-width: 100%; display: block;">
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="button" id="rotateLeft" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">↺ Sola Döndür</button>
+                            <button type="button" id="rotateRight" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">↻ Sağa Döndür</button>
+                            <button type="button" id="resetCrop" class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">Sıfırla</button>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
@@ -114,5 +130,103 @@
             </div>
         </form>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('image_file');
+            const cropperContainer = document.getElementById('cropperContainer');
+            const cropperImage = document.getElementById('cropperImage');
+            const croppedImageInput = document.getElementById('cropped_image');
+            const form = document.querySelector('form');
+            let cropper = null;
+
+            function formatRatio(val) {
+                if(Array.isArray(val) && val.length === 2) {
+                    return val[1] !== 0 ? val[0] / val[1] : val[0];
+                }
+                return val;
+            }
+            function formatShutterSpeed(val) {
+                if(Array.isArray(val) && val.length === 2) {
+                    return `${val[0]}/${val[1]}`;
+                }
+                return val;
+            }
+
+            if(imageInput) {
+                imageInput.addEventListener('change', async function(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    // EXIF extraction before cropping
+                    try {
+                        const exif = await exifr.parse(file, ['Make', 'Model', 'ISO', 'FNumber', 'ExposureTime']);
+                        if (exif) {
+                            const make = exif.Make ? String(exif.Make).trim() : '';
+                            const model = exif.Model ? String(exif.Model).trim() : '';
+                            let cameraModel = '';
+                            if (make && model) {
+                                cameraModel = model.toLowerCase().includes(make.toLowerCase()) ? model : `${make} ${model}`;
+                            } else if (model) {
+                                cameraModel = model;
+                            }
+                            
+                            const elCameraModel = document.getElementById('camera_model');
+                            const elIso = document.getElementById('iso');
+                            const elAperture = document.getElementById('aperture');
+                            const elShutter = document.getElementById('shutter_speed');
+                            
+                            if(cameraModel && elCameraModel && !elCameraModel.value) elCameraModel.value = cameraModel;
+                            if(exif.ISO && elIso && !elIso.value) elIso.value = exif.ISO;
+                            if(exif.FNumber && elAperture && !elAperture.value) elAperture.value = `f/${formatRatio(exif.FNumber)}`;
+                            if(exif.ExposureTime && elShutter && !elShutter.value) elShutter.value = formatShutterSpeed(exif.ExposureTime);
+                        }
+                    } catch (err) {
+                        console.error('EXIF okuma hatası:', err);
+                    }
+
+                    // Initialize Cropper
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        cropperImage.src = event.target.result;
+                        cropperContainer.classList.remove('hidden');
+
+                        if (cropper) cropper.destroy();
+
+                        cropper = new Cropper(cropperImage, {
+                            viewMode: 1,
+                            background: false,
+                            zoomable: true,
+                            responsive: true,
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            document.getElementById('rotateLeft')?.addEventListener('click', () => {
+                if(cropper) cropper.rotate(-90);
+            });
+            document.getElementById('rotateRight')?.addEventListener('click', () => {
+                if(cropper) cropper.rotate(90);
+            });
+            document.getElementById('resetCrop')?.addEventListener('click', () => {
+                if(cropper) cropper.reset();
+            });
+
+            form.addEventListener('submit', function(e) {
+                if (cropper) {
+                    const canvas = cropper.getCroppedCanvas({
+                        maxWidth: 1920,
+                        maxHeight: 1920,
+                        fillColor: '#fff' // Fallback for transparent PNGs
+                    });
+                    if (canvas) {
+                        croppedImageInput.value = canvas.toDataURL('image/jpeg', 0.9);
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

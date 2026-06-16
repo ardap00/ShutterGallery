@@ -4,6 +4,7 @@ from flask import render_template, url_for, flash, redirect, current_app
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 from PIL import Image
+import base64
 
 from app.posts import posts
 from app.posts.forms import PhotoPostForm, CommentForm, EditPostForm
@@ -94,18 +95,33 @@ def extract_exif(image_path):
 def new_post():
     form = PhotoPostForm()
     if form.validate_on_submit():
-        if form.image_file.data:
-            picture_file = form.image_file.data
+        cropped_data = request.form.get('cropped_image')
+        picture_path = None
+        unique_filename = None
+        
+        if cropped_data and cropped_data.startswith('data:image'):
+            header, encoded = cropped_data.split(",", 1)
+            file_ext = header.split('/')[1].split(';')[0]
+            if file_ext == 'jpeg': file_ext = 'jpg'
             
-            filename = secure_filename(picture_file.filename)
-            unique_filename = f"{uuid.uuid4().hex}_{filename}"
-            
+            unique_filename = f"{uuid.uuid4().hex}.{file_ext}"
             upload_dir = os.path.join(current_app.root_path, 'static', 'uploads')
             os.makedirs(upload_dir, exist_ok=True)
+            picture_path = os.path.join(upload_dir, unique_filename)
             
+            with open(picture_path, "wb") as fh:
+                fh.write(base64.b64decode(encoded))
+                
+        elif form.image_file.data:
+            picture_file = form.image_file.data
+            filename = secure_filename(picture_file.filename)
+            unique_filename = f"{uuid.uuid4().hex}_{filename}"
+            upload_dir = os.path.join(current_app.root_path, 'static', 'uploads')
+            os.makedirs(upload_dir, exist_ok=True)
             picture_path = os.path.join(upload_dir, unique_filename)
             picture_file.save(picture_path)
             
+        if picture_path:
             exif_info = extract_exif(picture_path)
             
             if current_app.config.get('CLOUDINARY_CLOUD_NAME'):
