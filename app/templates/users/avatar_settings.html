@@ -53,8 +53,6 @@
 <!-- Three.js -->
 <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
 <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://unpkg.com/three@0.128.0/examples/js/libs/fflate.min.js"></script>
-<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
 
 <script>
     // Kullanıcının mevcut konfigürasyonu
@@ -124,42 +122,68 @@
     avatarGroup.scale.set(1.5, 1.5, 1.5);
     scene.add(avatarGroup);
 
-    let armL, armR, legL, legR;
+    // Sevimli, yumuşak "Jellybean" tarzı karakter
+    const limbGeo = new THREE.SphereGeometry(1, 32, 32);
+    
+    // Gövde (Torso)
+    const torso = new THREE.Mesh(limbGeo, matBody);
+    torso.scale.set(1.1, 1.6, 0.9);
+    torso.position.y = 3.2; 
 
-    const loader = new THREE.FBXLoader();
-    loader.load("{{ url_for('static', filename='models/hff/HumanBody.fbx') }}", function ( object ) {
-        
-        object.traverse( function ( child ) {
-            if ( child.isMesh ) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-                child.material = matBody; 
-            }
-            if ( child.isBone ) {
-                const n = child.name.toLowerCase();
-                if ((n.includes("arm") || n.includes("shoulder")) && n.includes("l")) armL = child;
-                if ((n.includes("arm") || n.includes("shoulder")) && n.includes("r")) armR = child;
-                if ((n.includes("leg") || n.includes("thigh")) && n.includes("l")) legL = child;
-                if ((n.includes("leg") || n.includes("thigh")) && n.includes("r")) legR = child;
-            }
-        } );
+    // Kafa
+    const head = new THREE.Mesh(new THREE.SphereGeometry(1.1, 32, 32), matBody);
+    head.position.y = 1.6; 
+    head.position.z = 0.2; 
+    torso.add(head);
 
-        // Korkuluk duruşunu düzelt (kolları indir)
-        if (armL) armL.rotation.z -= 1.2;
-        if (armR) armR.rotation.z += 1.2;
+    // Kollar
+    armL = new THREE.Group();
+    armL.position.set(-1.4, 1.2, 0); 
+    const armLMesh = new THREE.Mesh(limbGeo, matBody);
+    armLMesh.scale.set(0.35, 1.2, 0.35);
+    armLMesh.position.y = -1.0; 
+    armL.add(armLMesh);
+    torso.add(armL);
 
-        // Galeride 0.030 olan boyutu burada daha iyi görünmesi için 0.050 yapıyoruz
-        object.scale.set(0.050, 0.050, 0.050);
-        object.position.y = -2.5; // Biraz daha aşağı aldık büyüdüğü için
-        
-        object.rotation.y = Math.PI;
-        
-        avatarGroup.add(object);
-        document.getElementById('loading').style.display = 'none';
-    }, undefined, function ( error ) {
-        console.error( error );
-        document.getElementById('loading').innerHTML = '<span class="text-red-500">Model yüklenemedi</span>';
+    armR = new THREE.Group();
+    armR.position.set(1.4, 1.2, 0); 
+    const armRMesh = new THREE.Mesh(limbGeo, matBody);
+    armRMesh.scale.set(0.35, 1.2, 0.35);
+    armRMesh.position.y = -1.0;
+    armR.add(armRMesh);
+    torso.add(armR);
+
+    // Bacaklar
+    legL = new THREE.Group();
+    legL.position.set(-0.5, -1.2, 0); 
+    const legLMesh = new THREE.Mesh(limbGeo, matBody);
+    legLMesh.scale.set(0.4, 1.2, 0.4);
+    legLMesh.position.y = -1.0;
+    legL.add(legLMesh);
+    torso.add(legL);
+
+    legR = new THREE.Group();
+    legR.position.set(0.5, -1.2, 0); 
+    const legRMesh = new THREE.Mesh(limbGeo, matBody);
+    legRMesh.scale.set(0.4, 1.2, 0.4);
+    legRMesh.position.y = -1.0;
+    legR.add(legRMesh);
+    torso.add(legR);
+
+    torso.traverse(child => {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
     });
+
+    torso.rotation.y = Math.PI;
+    
+    // Boyutlandırma (Görsel için biraz küçült)
+    avatarGroup.add(torso);
+    avatarGroup.scale.set(0.3, 0.3, 0.3);
+    avatarGroup.position.y = -1.5;
+    avatarGroup.userData.torso = torso;
 
     document.getElementById('loading').style.display = 'none';
 
@@ -191,14 +215,15 @@
         // Hafif yürüme animasyonu (Önizleme için)
         const t = clock.getElapsedTime() * 3;
         if (armL && armR && legL && legR) {
-            // FBX kemikleri olduğu için orijinal pozisyonlarının (z eksenindeki düşürmenin) üstüne eklememiz gerekiyor.
-            // Ama basitçe x ekseninde sallanması yeterli.
             armL.rotation.x = Math.sin(t) * 0.5;
             armR.rotation.x = Math.sin(t + Math.PI) * 0.5;
             legL.rotation.x = Math.sin(t + Math.PI) * 0.5;
             legR.rotation.x = Math.sin(t) * 0.5;
-        } else {
-            avatarGroup.position.y = -2.5 + Math.abs(Math.sin(t * 1.5) * 0.2);
+            
+            if (avatarGroup.userData.torso) {
+                avatarGroup.userData.torso.rotation.z = Math.sin(t) * 0.1;
+                avatarGroup.userData.torso.position.y = 3.2 + Math.abs(Math.sin(t)) * 0.3;
+            }
         }
         
         controls.update();
