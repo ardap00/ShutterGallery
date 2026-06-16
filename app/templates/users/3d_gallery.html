@@ -46,9 +46,9 @@
     </style>
 </head>
 <body>
-    <a id="back-btn" href="{{ url_for('users.profile', username=user.username) }}" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-all font-bold text-xs tracking-widest uppercase border border-white/10 shadow-lg">
+    <button id="back-btn" onclick="if(document.referrer) { history.back(); } else { window.location.href='{{ url_for('users.profile', username=user.username) }}'; }" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-all font-bold text-xs tracking-widest uppercase border border-white/10 shadow-lg cursor-pointer">
         &larr; Profile Dön
-    </a>
+    </button>
 
     <div id="blocker">
         <div id="instructions">
