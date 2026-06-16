@@ -326,14 +326,62 @@
                 }, {passive: false});
             }
 
-            // Architecture
             // Floor
             const floorGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
             const floorMat = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, roughness: 0.8, metalness: 0.1 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
             floor.position.z = -totalZ / 2 + 40;
+            floor.receiveShadow = true;
             scene.add(floor);
+            
+            // Red Carpet
+            const carpetWidth = 6;
+            const carpetGeo = new THREE.PlaneGeometry(carpetWidth, totalZ);
+            
+            const carpetCanvas = document.createElement('canvas');
+            carpetCanvas.width = 512;
+            carpetCanvas.height = 512;
+            const cCtx = carpetCanvas.getContext('2d');
+            
+            cCtx.fillStyle = '#7a0000'; // Dark red
+            cCtx.fillRect(0, 0, 512, 512);
+            
+            // Gold borders
+            cCtx.fillStyle = '#d4af37';
+            cCtx.fillRect(20, 0, 15, 512);
+            cCtx.fillRect(477, 0, 15, 512);
+            
+            // Central subtle diamond pattern
+            cCtx.strokeStyle = '#520000';
+            cCtx.lineWidth = 6;
+            for(let i = 0; i <= 512; i += 64) {
+                cCtx.beginPath();
+                cCtx.moveTo(256, i);
+                cCtx.lineTo(320, i + 32);
+                cCtx.lineTo(256, i + 64);
+                cCtx.lineTo(192, i + 32);
+                cCtx.closePath();
+                cCtx.stroke();
+            }
+            
+            const carpetTex = new THREE.CanvasTexture(carpetCanvas);
+            carpetTex.wrapS = THREE.RepeatWrapping;
+            carpetTex.wrapT = THREE.RepeatWrapping;
+            carpetTex.repeat.set(1, totalZ / 10); // scale pattern
+            
+            const carpetMat = new THREE.MeshStandardMaterial({ 
+                color: 0xffffff,
+                map: carpetTex, 
+                roughness: 0.95, 
+                metalness: 0.0
+            });
+            const carpet = new THREE.Mesh(carpetGeo, carpetMat);
+            carpet.rotation.x = -Math.PI / 2;
+            carpet.position.z = -totalZ / 2 + 40;
+            carpet.position.y = 0.02; // Z-fighting prevention
+            carpet.receiveShadow = true;
+            scene.add(carpet);
             
             // Ceiling
             const ceilGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
@@ -417,8 +465,8 @@
                 decorPositions.push({ type: 'bust', z: z });
             }
 
-            // Load Bust (Nefertiti) on a Pedestal
-            gltfLoader.load('/static/models/Nefertiti.glb', function(gltf) {
+            // Load AntiqueCamera on a Pedestal
+            gltfLoader.load('/static/models/AntiqueCamera.glb', function(gltf) {
                 try {
                     const bustModel = gltf.scene;
                     
@@ -438,13 +486,11 @@
                         
                         const clone = bustModel.clone();
                         
+                        // Kamera modelinin kendi renklerini koruyoruz, sadece gölge ekliyoruz
                         clone.traverse(function(child) {
                             if (child.isMesh) {
                                 child.castShadow = true;
                                 child.receiveShadow = true;
-                                child.material = new THREE.MeshStandardMaterial({
-                                    color: 0xd4af37, roughness: 0.2, metalness: 0.8 // Golden
-                                });
                             }
                         });
                         
@@ -462,13 +508,15 @@
                         const bustWrapper = new THREE.Group();
                         bustWrapper.add(clone);
                         
-                        // Modeli tam 2.5 metre yap
+                        // Modeli kaideye uygun şekilde tam 2.5 metre yap
                         const scale = cloneSize.y > 0 ? 2.5 / cloneSize.y : 1.0;
                         bustWrapper.scale.set(scale, scale, scale);
                         
                         // Wrapper'ı 4.0 metre yüksekliğindeki kaidenin tam üstüne yerleştir
                         bustWrapper.position.set(0, 4.0, 0);
-                        bustWrapper.rotation.y = Math.PI; 
+                        
+                        // Kamerayı izleyicilere dönük olacak şekilde döndür
+                        bustWrapper.rotation.y = -Math.PI / 2; 
                         
                         group.add(bustWrapper);
                         
@@ -488,10 +536,10 @@
                         obstacles.push({ x: 0, z: pos.z, width: 3.0, depth: 3.0 });
                     });
                 } catch (err) {
-                    console.error('Error processing Bust model:', err);
+                    console.error('Error processing Camera model:', err);
                 }
             }, undefined, function(error) {
-                console.error('Failed to load Nefertiti:', error);
+                console.error('Failed to load AntiqueCamera:', error);
             });
 
             photosData.forEach((photo, index) => {
