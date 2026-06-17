@@ -687,7 +687,20 @@
             document.body.classList.add('camera-powered');
         });
 
-        window.addEventListener('resize', resizeRenderer);
+        let resizeTimeout;
+        function handleResize() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                isMobileWidth = window.innerWidth <= 768;
+                resizeRenderer();
+                // Update target radius if we are in powered mode to keep LCD fitted
+                if (typeof powered !== 'undefined' && powered && typeof targetSph !== 'undefined') {
+                    targetSph.r = isMobileWidth ? 0.4 : 0.1;
+                }
+            }, 100);
+        }
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', handleResize);
 
         function lerpAngle(a, b, t) {
             let delta = ((b - a) % (Math.PI * 2));
