@@ -19,8 +19,8 @@
         body { font-family: 'Inter', sans-serif; }
         #bg {
             position: fixed; inset: 0; z-index: -1;
-            background: url('https://images.unsplash.com/photo-1536924940846-227afb31e2a5?q=80&w=1920') center/cover;
-            filter: brightness(25%) blur(2px);
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ url_for("static", filename="global-bg.jpg") }}') center/cover no-repeat;
+            filter: blur(2px);
             transform: scale(1.02);
         }
     </style>

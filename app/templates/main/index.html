@@ -25,8 +25,8 @@
 
         #bg {
             position: fixed; inset: 0; z-index: 0;
-            background: url('https://images.unsplash.com/photo-1536924940846-227afb31e2a5?q=80&w=1920') center/cover no-repeat;
-            filter: blur(28px) brightness(30%);
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('{{ url_for("static", filename="global-bg.jpg") }}') center/cover no-repeat;
+            filter: blur(28px);
             transform: scale(1.1);
             transition: filter 2.5s cubic-bezier(0.4, 0, 0.2, 1), transform 2.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -668,7 +668,7 @@
             targetSph = { theta: Math.PI, phi: Math.PI / 2, r: isMobileWidth ? 0.4 : 0.1 };
             
             // Sharpen background
-            bgEl.style.filter    = 'blur(0px) brightness(40%)';
+            bgEl.style.filter    = 'blur(0px)';
             bgEl.style.transform = 'scale(1.0)';
             
             // Delay showing HTML UI to wait for 3D camera zoom
@@ -677,7 +677,7 @@
                 canvas.style.opacity = '0'; // Tweak: Fade out 3D model to show true background fully
                 
                 // Unblur the background to act as the clear camera viewfinder
-                bgEl.style.filter = 'blur(0px) brightness(40%)';
+                bgEl.style.filter = 'blur(0px)';
                 bgEl.style.transform = 'scale(1.0)';
             }, 800);
             
