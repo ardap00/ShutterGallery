@@ -1,16 +1,16 @@
 <!-- Mobil Alt Gezinme Çubuğu (Instagram Style) -->
-<nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 w-full bg-white/90 backdrop-blur-xl border-t border-[#7B9A74]/20 z-[100] pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+<nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 w-full bg-black/80 backdrop-blur-xl border-t border-white/10 z-[100] pb-safe">
     <div class="flex justify-around items-center h-16 px-4">
         
         <!-- Ana Sayfa -->
-        <a href="{{ url_for('main.index') }}" class="flex flex-col items-center justify-center w-full h-full text-[#6B7A68] hover:text-[#7B9A74] active:scale-90 transition-all duration-75">
+        <a href="{{ url_for('main.index') }}" class="flex flex-col items-center justify-center w-full h-full text-white hover:text-emerald-400 active:scale-90 transition-all duration-75">
             <svg class="w-6 h-6" fill="{% if request.endpoint == 'main.index' %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
             </svg>
         </a>
 
         <!-- Keşfet / Arama -->
-        <a href="{{ url_for('main.discover') }}" class="flex flex-col items-center justify-center w-full h-full text-[#6B7A68] hover:text-[#7B9A74] active:scale-90 transition-all duration-75">
+        <a href="{{ url_for('main.discover') }}" class="flex flex-col items-center justify-center w-full h-full text-white hover:text-emerald-400 active:scale-90 transition-all duration-75">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="{% if request.endpoint == 'main.discover' or request.endpoint == 'main.search' %}3{% else %}2{% endif %}">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
@@ -18,8 +18,8 @@
 
         {% if current_user.is_authenticated %}
         <!-- Yeni Gönderi (+) -->
-        <a href="{{ url_for('posts.new_post') }}" class="flex flex-col items-center justify-center w-full h-full text-[#6B7A68] hover:text-[#7B9A74] active:scale-90 transition-all duration-75">
-            <div class="w-8 h-8 rounded-lg border-2 border-[#6B7A68] flex items-center justify-center {% if request.endpoint == 'posts.new_post' %}border-[#7B9A74] text-[#7B9A74]{% endif %}">
+        <a href="{{ url_for('posts.new_post') }}" class="flex flex-col items-center justify-center w-full h-full text-white hover:text-emerald-400 active:scale-90 transition-all duration-75">
+            <div class="w-8 h-8 rounded-lg border-2 border-white flex items-center justify-center {% if request.endpoint == 'posts.new_post' %}border-emerald-400 text-emerald-400{% endif %}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -27,7 +27,7 @@
         </a>
 
         <!-- Mesajlar -->
-        <a href="{{ url_for('messages.inbox') }}" class="flex flex-col items-center justify-center w-full h-full text-[#6B7A68] hover:text-[#7B9A74] active:scale-90 transition-all duration-75 relative">
+        <a href="{{ url_for('messages.inbox') }}" class="flex flex-col items-center justify-center w-full h-full text-white hover:text-emerald-400 active:scale-90 transition-all duration-75 relative">
             <div class="relative">
                 <svg class="w-6 h-6" fill="{% if request.blueprint == 'messages' %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
@@ -35,8 +35,8 @@
                 {% set unread = current_user.unread_message_count() %}
                 {% if unread > 0 %}
                 <span class="absolute -top-1 -right-1 flex h-3 w-3">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4A373] opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-[#D4A373] border border-white"></span>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 border border-black"></span>
                 </span>
                 {% endif %}
             </div>
@@ -50,13 +50,13 @@
             {% else %}
                 {% set avatar_url = url_for('static', filename='avatars/' + avatar_file) %}
             {% endif %}
-            <div class="w-7 h-7 rounded-full overflow-hidden border-2 {% if request.endpoint == 'users.profile' and request.view_args.get('username') == current_user.username %}border-[#7B9A74]{% else %}border-transparent{% endif %}">
+            <div class="w-7 h-7 rounded-full overflow-hidden border-2 {% if request.endpoint == 'users.profile' and request.view_args.get('username') == current_user.username %}border-emerald-500{% else %}border-transparent{% endif %}">
                 <img src="{{ avatar_url }}" alt="Profile" class="w-full h-full object-cover">
             </div>
         </a>
         {% else %}
         <!-- Giriş Yap (Ziyaretçiler için) -->
-        <a href="{{ url_for('auth.login') }}" class="flex flex-col items-center justify-center w-full h-full text-[#6B7A68] hover:text-[#7B9A74] active:scale-90 transition-all duration-75">
+        <a href="{{ url_for('auth.login') }}" class="flex flex-col items-center justify-center w-full h-full text-white hover:text-emerald-400 active:scale-90 transition-all duration-75">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
             </svg>

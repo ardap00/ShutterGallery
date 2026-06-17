@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-[#2D3A2A] font-sans">
+<div class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-white font-sans">
     <div class="mb-10 text-center md:text-left flex justify-between items-center">
         <div>
             <h1 class="text-3xl font-extrabold tracking-tighter mb-2">{{ _('Ayarlar') }}</h1>
-            <p class="text-[#7B9A74] font-mono text-xs uppercase tracking-[0.2em]">{{ _('Uygulama Ayarları') }}</p>
+            <p class="text-emerald-400 font-mono text-xs uppercase tracking-[0.2em]">{{ _('Uygulama Ayarları') }}</p>
         </div>
         <div>
             <a href="{{ url_for('auth.logout') }}" onclick="sessionStorage.removeItem('camera_powered')" class="px-6 py-3 rounded-xl bg-red-600/20 hover:bg-red-600/40 border border-red-500/50 text-red-400 font-bold text-xs tracking-widest uppercase transition-colors shadow-lg shadow-red-900/20 inline-block">
@@ -14,13 +14,13 @@
         </div>
     </div>
 
-    <div class="bg-[#FDFBF7]/50 p-6 md:p-10 rounded-3xl border border-[#7B9A74]/10 backdrop-blur-sm">
+    <div class="bg-zinc-900/50 p-6 md:p-10 rounded-3xl border border-white/5 backdrop-blur-sm">
         <form method="POST" action="" class="space-y-8">
             {{ form.hidden_tag() }}
             
             <div class="max-w-md">
-                {{ form.language.label(class="block text-sm font-medium text-[#586B5A] mb-2") }}
-                {{ form.language(class="w-full bg-white/50 border border-zinc-800 rounded-lg px-4 py-3 text-[#2D3A2A] focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors") }}
+                {{ form.language.label(class="block text-sm font-medium text-zinc-300 mb-2") }}
+                {{ form.language(class="w-full bg-black/50 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors") }}
                 {% if form.language.errors %}
                     {% for error in form.language.errors %}
                         <p class="text-red-400 text-xs mt-1">{{ error }}</p>
@@ -29,7 +29,7 @@
             </div>
 
             <div class="pt-4 flex justify-start">
-                {{ form.submit(class="px-8 py-3 rounded-xl bg-[#7B9A74] hover:bg-[#506B4D] text-[#2D3A2A] font-bold text-xs tracking-widest uppercase transition-colors shadow-lg shadow-emerald-900/20 cursor-pointer") }}
+                {{ form.submit(class="px-8 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs tracking-widest uppercase transition-colors shadow-lg shadow-emerald-900/20 cursor-pointer") }}
             </div>
         </form>
     </div>

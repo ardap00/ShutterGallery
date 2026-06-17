@@ -13,18 +13,18 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="min-h-screen bg-[#020204] text-[#2D3A2A] selection:bg-[#7B9A74]/30 overflow-x-hidden">
+<body class="min-h-screen bg-[#020204] text-white selection:bg-emerald-500/30 overflow-x-hidden">
     <!-- Navbar -->
-    <nav class="fixed top-0 inset-x-0 z-50 bg-white/50 backdrop-blur-md border-b border-[#7B9A74]/10">
+    <nav class="fixed top-0 inset-x-0 z-50 bg-black/50 backdrop-blur-md border-b border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex-shrink-0">
-                    <a href="{{ url_for('main.index') }}" class="text-xl font-bold tracking-tighter text-[#2D3A2A]">Shutter<span class="text-[#506B4D]">Gallery</span></a>
+                    <a href="{{ url_for('main.index') }}" class="text-xl font-bold tracking-tighter text-white">Shutter<span class="text-emerald-500">Gallery</span></a>
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4 text-xs font-bold tracking-widest uppercase">
-                        <a href="{{ url_for('posts.new_post') }}" class="text-[#2D3A2A] hover:text-[#7B9A74] transition-colors px-3 py-2">Fotoğraf Yükle</a>
-                        <a href="{{ url_for('auth.logout') }}" class="text-[#6B7A68] hover:text-red-400 transition-colors px-3 py-2">Çıkış Yap</a>
+                        <a href="{{ url_for('posts.new_post') }}" class="text-white hover:text-emerald-400 transition-colors px-3 py-2">Fotoğraf Yükle</a>
+                        <a href="{{ url_for('auth.logout') }}" class="text-zinc-400 hover:text-red-400 transition-colors px-3 py-2">Çıkış Yap</a>
                     </div>
                 </div>
             </div>
@@ -35,21 +35,21 @@
     <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
         <div class="mb-10">
             <h1 class="text-3xl font-extrabold tracking-tighter mb-2">Fotoğraf Yükle</h1>
-            <p class="text-[#6B7A68] text-sm">Dünyanı bizimle paylaş. (EXIF verileri otomatik olarak fotoğraftan çekilecektir, ancak dilediğiniz gibi düzenleyebilirsiniz.)</p>
+            <p class="text-zinc-400 text-sm">Dünyanı bizimle paylaş. (EXIF verileri otomatik olarak fotoğraftan çekilecektir, ancak dilediğiniz gibi düzenleyebilirsiniz.)</p>
         </div>
 
-        <form method="POST" action="" enctype="multipart/form-data" class="bg-[#FDFBF7]/50 border border-zinc-800 rounded-2xl p-6 md:p-10 shadow-2xl backdrop-blur-sm">
+        <form method="POST" action="" enctype="multipart/form-data" class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 md:p-10 shadow-2xl backdrop-blur-sm">
             {{ form.hidden_tag() }}
             <input type="hidden" name="cropped_image" id="cropped_image">
             
             <div class="space-y-8">
                 <!-- Temel Bilgiler -->
                 <div>
-                    <h2 class="text-xs font-bold tracking-[0.2em] text-[#506B4D] uppercase mb-4">Temel Bilgiler</h2>
+                    <h2 class="text-xs font-bold tracking-[0.2em] text-emerald-500 uppercase mb-4">Temel Bilgiler</h2>
                     
                     <div class="mb-5">
-                        <label class="block text-xs text-[#6B7A68] font-medium mb-2 tracking-wider uppercase">Fotoğraf Seç</label>
-                        {{ form.image_file(class="block w-full text-sm text-[#6B7A68] file:mr-4 file:py-2.5 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:tracking-widest file:uppercase file:bg-[#7B9A74] file:text-[#2D3A2A] hover:file:bg-[#7B9A74] transition-all cursor-pointer bg-[#EAE6D9]/60 border border-zinc-700 rounded-xl px-4 py-2") }}
+                        <label class="block text-xs text-zinc-400 font-medium mb-2 tracking-wider uppercase">Fotoğraf Seç</label>
+                        {{ form.image_file(class="block w-full text-sm text-zinc-400 file:mr-4 file:py-2.5 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:tracking-widest file:uppercase file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 transition-all cursor-pointer bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-2") }}
                         {% if form.image_file.errors %}
                             <p class="text-red-400 text-xs mt-2">{{ form.image_file.errors[0] }}</p>
                         {% endif %}
@@ -57,75 +57,75 @@
 
                     <!-- Cropper Preview Area -->
                     <div id="cropperContainer" class="hidden mb-5 flex flex-col items-center">
-                        <div class="w-full max-w-lg mb-4 bg-white border border-zinc-700 rounded-xl overflow-hidden" style="max-height: 400px;">
+                        <div class="w-full max-w-lg mb-4 bg-black border border-zinc-700 rounded-xl overflow-hidden" style="max-height: 400px;">
                             <img id="cropperImage" src="" alt="Önizleme" style="max-width: 100%; display: block;">
                         </div>
                         <div class="flex gap-2">
-                            <button type="button" id="rotateLeft" class="px-4 py-2 bg-[#EAE6D9] hover:bg-zinc-700 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">↺ Sola Döndür</button>
-                            <button type="button" id="rotateRight" class="px-4 py-2 bg-[#EAE6D9] hover:bg-zinc-700 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">↻ Sağa Döndür</button>
+                            <button type="button" id="rotateLeft" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">↺ Sola Döndür</button>
+                            <button type="button" id="rotateRight" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">↻ Sağa Döndür</button>
                             <button type="button" id="resetCrop" class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">Sıfırla</button>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                         <div>
-                            <label class="block text-xs text-[#6B7A68] font-medium mb-2 tracking-wider uppercase">Başlık</label>
-                            {{ form.title(class="w-full bg-[#EAE6D9]/60 border border-zinc-700 rounded-xl px-4 py-3 text-[#2D3A2A] text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-[#EAE6D9] transition-all") }}
+                            <label class="block text-xs text-zinc-400 font-medium mb-2 tracking-wider uppercase">Başlık</label>
+                            {{ form.title(class="w-full bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-zinc-800 transition-all") }}
                             {% if form.title.errors %}<p class="text-red-400 text-xs mt-1.5">{{ form.title.errors[0] }}</p>{% endif %}
                         </div>
                         <div>
-                            <label class="block text-xs text-[#6B7A68] font-medium mb-2 tracking-wider uppercase">Kategori</label>
-                            {{ form.category(class="w-full bg-[#EAE6D9]/60 border border-zinc-700 rounded-xl px-4 py-3 text-[#2D3A2A] text-sm focus:outline-none focus:border-emerald-500/60 focus:bg-[#EAE6D9] transition-all") }}
+                            <label class="block text-xs text-zinc-400 font-medium mb-2 tracking-wider uppercase">Kategori</label>
+                            {{ form.category(class="w-full bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-500/60 focus:bg-zinc-800 transition-all") }}
                             {% if form.category.errors %}<p class="text-red-400 text-xs mt-1.5">{{ form.category.errors[0] }}</p>{% endif %}
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-xs text-[#6B7A68] font-medium mb-2 tracking-wider uppercase">Açıklama (Opsiyonel)</label>
-                        {{ form.description(class="w-full bg-[#EAE6D9]/60 border border-zinc-700 rounded-xl px-4 py-3 text-[#2D3A2A] text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-[#EAE6D9] transition-all", rows="3") }}
+                        <label class="block text-xs text-zinc-400 font-medium mb-2 tracking-wider uppercase">Açıklama (Opsiyonel)</label>
+                        {{ form.description(class="w-full bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-zinc-800 transition-all", rows="3") }}
                     </div>
                 </div>
 
-                <div class="h-px bg-[#EAE6D9] w-full"></div>
+                <div class="h-px bg-zinc-800 w-full"></div>
 
                 <!-- Teknik Ekipman -->
                 <div>
-                    <h2 class="text-xs font-bold tracking-[0.2em] text-[#506B4D] uppercase mb-4">Teknik Ekipman & EXIF</h2>
+                    <h2 class="text-xs font-bold tracking-[0.2em] text-emerald-500 uppercase mb-4">Teknik Ekipman & EXIF</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                         <div>
-                            <label class="block text-xs text-[#6B7A68] font-medium mb-2 tracking-wider uppercase">Kamera Modeli</label>
-                            {{ form.camera_model(class="w-full bg-[#EAE6D9]/60 border border-zinc-700 rounded-xl px-4 py-3 text-[#2D3A2A] text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-[#EAE6D9] transition-all") }}
+                            <label class="block text-xs text-zinc-400 font-medium mb-2 tracking-wider uppercase">Kamera Modeli</label>
+                            {{ form.camera_model(class="w-full bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-zinc-800 transition-all") }}
                         </div>
                         <div>
-                            <label class="block text-xs text-[#6B7A68] font-medium mb-2 tracking-wider uppercase">Lens Modeli</label>
-                            {{ form.lens_model(class="w-full bg-[#EAE6D9]/60 border border-zinc-700 rounded-xl px-4 py-3 text-[#2D3A2A] text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-[#EAE6D9] transition-all") }}
+                            <label class="block text-xs text-zinc-400 font-medium mb-2 tracking-wider uppercase">Lens Modeli</label>
+                            {{ form.lens_model(class="w-full bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-zinc-800 transition-all") }}
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
                         <div>
-                            <label class="block text-xs text-[#6B7A68] font-medium mb-2 tracking-wider uppercase">ISO</label>
-                            {{ form.iso(class="w-full bg-[#EAE6D9]/60 border border-zinc-700 rounded-xl px-4 py-3 text-[#2D3A2A] text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-[#EAE6D9] transition-all") }}
+                            <label class="block text-xs text-zinc-400 font-medium mb-2 tracking-wider uppercase">ISO</label>
+                            {{ form.iso(class="w-full bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-zinc-800 transition-all") }}
                         </div>
                         <div>
-                            <label class="block text-xs text-[#6B7A68] font-medium mb-2 tracking-wider uppercase">Diyafram</label>
-                            {{ form.aperture(class="w-full bg-[#EAE6D9]/60 border border-zinc-700 rounded-xl px-4 py-3 text-[#2D3A2A] text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-[#EAE6D9] transition-all") }}
+                            <label class="block text-xs text-zinc-400 font-medium mb-2 tracking-wider uppercase">Diyafram</label>
+                            {{ form.aperture(class="w-full bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-zinc-800 transition-all") }}
                         </div>
                         <div>
-                            <label class="block text-xs text-[#6B7A68] font-medium mb-2 tracking-wider uppercase">Enstantane</label>
-                            {{ form.shutter_speed(class="w-full bg-[#EAE6D9]/60 border border-zinc-700 rounded-xl px-4 py-3 text-[#2D3A2A] text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-[#EAE6D9] transition-all") }}
+                            <label class="block text-xs text-zinc-400 font-medium mb-2 tracking-wider uppercase">Enstantane</label>
+                            {{ form.shutter_speed(class="w-full bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-zinc-800 transition-all") }}
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-xs text-[#6B7A68] font-medium mb-2 tracking-wider uppercase">Düzenleme Yazılımı</label>
-                        {{ form.editing_software(class="w-full bg-[#EAE6D9]/60 border border-zinc-700 rounded-xl px-4 py-3 text-[#2D3A2A] text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-[#EAE6D9] transition-all") }}
+                        <label class="block text-xs text-zinc-400 font-medium mb-2 tracking-wider uppercase">Düzenleme Yazılımı</label>
+                        {{ form.editing_software(class="w-full bg-zinc-800/60 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:bg-zinc-800 transition-all") }}
                     </div>
                 </div>
 
                 <div class="pt-4">
-                    {{ form.submit(class="w-full py-4 rounded-xl bg-[#7B9A74] hover:bg-[#506B4D] text-[#2D3A2A] text-sm font-bold tracking-[0.2em] uppercase transition-all duration-300 shadow-[0_0_20px_rgba(5,150,105,0.3)] hover:shadow-[0_0_30px_rgba(5,150,105,0.5)] cursor-pointer") }}
+                    {{ form.submit(class="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold tracking-[0.2em] uppercase transition-all duration-300 shadow-[0_0_20px_rgba(5,150,105,0.3)] hover:shadow-[0_0_30px_rgba(5,150,105,0.5)] cursor-pointer") }}
                 </div>
             </div>
         </form>

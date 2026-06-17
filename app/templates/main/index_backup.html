@@ -33,18 +33,18 @@
     <canvas id="c" class="fixed inset-0 w-full h-full" style="z-index:10;"></canvas>
     <div id="top-nav" class="fixed top-0 left-0 right-0 flex items-center justify-between px-6 py-4" style="z-index:40;">
         <div class="flex items-center gap-2">
-            <span class="text-[#2D3A2A]/50 text-xs tracking-[0.25em] uppercase font-light">ShutterGallery</span>
+            <span class="text-white/50 text-xs tracking-[0.25em] uppercase font-light">ShutterGallery</span>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ url_for('main.index') }}" class="text-[#2D3A2A]/50 text-xs tracking-wider hover:text-[#2D3A2A]/80 transition-colors duration-200">Misafir Olarak Gez →</a>
+            <a href="{{ url_for('main.index') }}" class="text-white/50 text-xs tracking-wider hover:text-white/80 transition-colors duration-200">Misafir Olarak Gez →</a>
             <div class="w-px h-3.5 bg-white/20"></div>
-            <a href="{{ url_for('auth.login') }}" class="text-[#2D3A2A]/70 text-xs tracking-wider hover:text-[#2D3A2A] transition-colors duration-200 font-medium">Giriş Yap</a>
-            <a href="{{ url_for('auth.register') }}" class="px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-[#2D3A2A] text-xs tracking-wider font-medium transition-all duration-200 border border-white/15 hover:border-white/30">Kayıt Ol</a>
+            <a href="{{ url_for('auth.login') }}" class="text-white/70 text-xs tracking-wider hover:text-white transition-colors duration-200 font-medium">Giriş Yap</a>
+            <a href="{{ url_for('auth.register') }}" class="px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs tracking-wider font-medium transition-all duration-200 border border-white/15 hover:border-white/30">Kayıt Ol</a>
         </div>
     </div>
     <div class="fixed bottom-10 inset-x-0 flex flex-col items-center gap-4" style="z-index:30;">
-        <p id="tagline" class="text-[#2D3A2A]/30 text-xs tracking-[0.35em] uppercase font-light">Fotoğrafın Kalbi</p>
-        <button id="power-btn" class="flex items-center gap-2.5 px-6 py-2.5 rounded-full border border-green-500/50 bg-white/50 text-green-400 text-xs font-semibold tracking-[0.2em] uppercase hover:bg-green-500/10 hover:border-green-400 transition-colors duration-300" style="backdrop-filter:blur(10px);">
+        <p id="tagline" class="text-white/30 text-xs tracking-[0.35em] uppercase font-light">Fotoğrafın Kalbi</p>
+        <button id="power-btn" class="flex items-center gap-2.5 px-6 py-2.5 rounded-full border border-green-500/50 bg-black/50 text-green-400 text-xs font-semibold tracking-[0.2em] uppercase hover:bg-green-500/10 hover:border-green-400 transition-colors duration-300" style="backdrop-filter:blur(10px);">
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9"/></svg>
             Sistemi Başlat
         </button>
