@@ -75,6 +75,11 @@
 
     <div id="hint">{{ _('↔ Sürükle & Döndür &nbsp;·&nbsp; Scroll: Yakınlaş') }}</div>
 
+    <!-- View Switcher Button (Visible before powering camera) -->
+    <button id="view-switch-btn" class="fixed top-24 right-4 md:top-8 md:right-8 z-40 flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-black/60 rounded-full border border-white/20 text-white backdrop-blur-md shadow-lg hover:bg-black/80 transition-all cursor-pointer" title="Kamera Bakış Açısını Değiştir (C)">
+        <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+    </button>
+
     <!-- Intro Text Overlay -->
     <div id="intro-overlay" class="fixed inset-0 pointer-events-none z-20 flex flex-col md:flex-row items-center justify-between py-16 md:py-0 px-6 md:px-16 lg:px-32 transition-opacity duration-1000">
         <!-- Left Side (Top on Mobile): Motto & Vision -->
@@ -636,6 +641,8 @@
             if (introOverlay) introOverlay.style.display = 'none';
             if (hintEl) hintEl.style.display = 'none';
             if (powerBtn) powerBtn.style.display = 'none';
+            const viewSwitchBtn = document.getElementById('view-switch-btn');
+            if (viewSwitchBtn) viewSwitchBtn.style.display = 'none';
             
             bgEl.style.transition = 'none';
             bgEl.style.filter = 'blur(0px) brightness(40%)';
@@ -651,6 +658,38 @@
             
             document.body.classList.add('camera-powered');
         }
+
+        const viewSwitchBtn = document.getElementById('view-switch-btn');
+        let currentAngleIndex = 0;
+        
+        function cycleCameraAngle() {
+            if (powered) return;
+            userInteracted = true;
+            
+            const cameraAngles = [
+                { theta: 0.6, phi: 1.25, r: isMobileWidth ? 10.0 : 5.5 }, // Default
+                { theta: Math.PI, phi: 1.25, r: isMobileWidth ? 10.0 : 5.5 }, // Back LCD
+                { theta: Math.PI/2, phi: 1.25, r: isMobileWidth ? 10.0 : 5.5 }, // Side
+                { theta: 0, phi: 0.15, r: isMobileWidth ? 13.0 : 8.0 } // Top
+            ];
+            
+            currentAngleIndex = (currentAngleIndex + 1) % cameraAngles.length;
+            const target = cameraAngles[currentAngleIndex];
+            
+            sph.theta = target.theta;
+            sph.phi = target.phi;
+            sph.r = target.r;
+        }
+
+        if (viewSwitchBtn) {
+            viewSwitchBtn.addEventListener('click', cycleCameraAngle);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'c' && !powered) {
+                cycleCameraAngle();
+            }
+        });
 
         powerBtn.addEventListener('click', () => {
             if (powered) return;
@@ -683,6 +722,7 @@
             
             powerBtn.classList.add('off');
             hintEl.style.opacity = '0';
+            if (viewSwitchBtn) viewSwitchBtn.style.opacity = '0';
             
             document.body.classList.add('camera-powered');
         });
