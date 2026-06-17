@@ -25,7 +25,7 @@
 
         #bg {
             position: fixed; inset: 0; z-index: 0;
-            background: radial-gradient(circle at top, #FFFFFF 0%, #F5F3EB 40%, #E6E1D3 100%);
+            background: #FDFBF7;
         }
 
         #hint {
@@ -665,8 +665,8 @@
             // On mobile, we use a slightly larger r to fit the wide LCD into the narrow portrait screen.
             targetSph = { theta: Math.PI, phi: Math.PI / 2, r: isMobileWidth ? 0.4 : 0.1 };
             
-            // Sharpen background, keep brightness high for light theme
-            bgEl.style.filter    = 'blur(0px) brightness(98%)';
+            // Sharpen background
+            bgEl.style.filter    = 'blur(0px) brightness(40%)';
             bgEl.style.transform = 'scale(1.0)';
             
             // Delay showing HTML UI to wait for 3D camera zoom
@@ -675,7 +675,7 @@
                 canvas.style.opacity = '0'; // Tweak: Fade out 3D model to show true background fully
                 
                 // Unblur the background to act as the clear camera viewfinder
-                bgEl.style.filter = 'blur(0px) brightness(98%)';
+                bgEl.style.filter = 'blur(0px) brightness(40%)';
                 bgEl.style.transform = 'scale(1.0)';
             }, 800);
             
