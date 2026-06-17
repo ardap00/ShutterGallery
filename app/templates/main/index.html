@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: #020204; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background: #FDFBF7; overflow: hidden; }
 
         /* Mobil alt bar için ekstra padding (scroll olan kısımlarda) */
         .feed-container { padding-bottom: 5rem; }
@@ -25,23 +25,20 @@
 
         #bg {
             position: fixed; inset: 0; z-index: 0;
-            background: url('https://images.unsplash.com/photo-1536924940846-227afb31e2a5?q=80&w=1920') center/cover no-repeat;
-            filter: blur(28px) brightness(30%);
-            transform: scale(1.1);
-            transition: filter 2.5s cubic-bezier(0.4, 0, 0.2, 1), transform 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #FDFBF7;
         }
 
         #hint {
             position: fixed; bottom: 108px; left: 50%; transform: translateX(-50%);
-            z-index: 30; color: rgba(255,255,255,0.4);
+            z-index: 30; color: rgba(45,58,42,0.6);
             font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
             white-space: nowrap; transition: opacity 0.6s ease;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            text-shadow: none;
         }
 
         @keyframes pulse-green {
-            0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
-            50%      { box-shadow: 0 0 0 16px rgba(34,197,94,0); }
+            0%,100% { box-shadow: 0 0 0 0 rgba(123,154,116,0.6); }
+            50%      { box-shadow: 0 0 0 16px rgba(123,154,116,0); }
         }
         #power-btn { animation: pulse-green 2.2s infinite; transition: all 0.6s ease; }
         #power-btn.off { opacity: 0; pointer-events: none; transform: translateY(20px); }
@@ -79,33 +76,33 @@
     <div id="intro-overlay" class="fixed inset-0 pointer-events-none z-20 flex flex-col md:flex-row items-center justify-between py-16 md:py-0 px-6 md:px-16 lg:px-32 transition-opacity duration-1000">
         <!-- Left Side (Top on Mobile): Motto & Vision -->
         <div class="w-full md:max-w-md text-center md:text-left opacity-0 animate-[fadeSlideRight_1.5s_ease_forwards_0.5s]">
-            <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-2 md:mb-6 tracking-tight drop-shadow-2xl" style="text-shadow: 0 4px 20px rgba(0,0,0,0.9);">
-                {{ _('Anı Yakala,') }}<br><span class="text-[#A3B18A]">{{ _('Dünyayla Paylaş.') }}</span>
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#2D3A2A] mb-2 md:mb-6 tracking-tight drop-shadow-sm">
+                {{ _('Anı Yakala,') }}<br><span class="text-[#7B9A74]">{{ _('Dünyayla Paylaş.') }}</span>
             </h2>
-            <p class="text-zinc-200 text-xs sm:text-sm md:text-base leading-relaxed mb-4 md:mb-8 font-medium drop-shadow-md max-w-[280px] sm:max-w-sm md:max-w-none mx-auto md:mx-0" style="text-shadow: 0 2px 10px rgba(0,0,0,0.9);">
+            <p class="text-[#586B5A] text-xs sm:text-sm md:text-base leading-relaxed mb-4 md:mb-8 font-medium drop-shadow-sm max-w-[280px] sm:max-w-sm md:max-w-none mx-auto md:mx-0">
                 {{ _('ShutterGallery, fotoğraf tutkunlarını bir araya getiren premium bir vitrindir. Sadece en iyi karelerin, en yüksek kalitede yer aldığı bağımsız fotoğrafçılık platformu.') }}
             </p>
-            <div class="flex flex-col gap-1.5 md:gap-3 text-[9px] md:text-xs font-mono text-[#A3B18A]/90 tracking-[0.2em] uppercase font-bold items-center md:items-start">
-                <span class="flex items-center gap-2 md:gap-3"><div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#A3B18A] rounded-full shadow-[0_0_8px_rgba(163,177,138,0.8)]"></div> {{ _('Sınırsız İlham') }}</span>
-                <span class="flex items-center gap-2 md:gap-3"><div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#A3B18A] rounded-full shadow-[0_0_8px_rgba(163,177,138,0.8)]"></div> {{ _('Teknik Detaylar (EXIF)') }}</span>
-                <span class="flex items-center gap-2 md:gap-3"><div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#A3B18A] rounded-full shadow-[0_0_8px_rgba(163,177,138,0.8)]"></div> {{ _('Profesyonel Topluluk') }}</span>
+            <div class="flex flex-col gap-1.5 md:gap-3 text-[9px] md:text-xs font-mono text-[#7B9A74] tracking-[0.2em] uppercase font-bold items-center md:items-start">
+                <span class="flex items-center gap-2 md:gap-3"><div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#7B9A74] rounded-full shadow-[0_0_8px_rgba(123,154,116,0.6)]"></div> {{ _('Sınırsız İlham') }}</span>
+                <span class="flex items-center gap-2 md:gap-3"><div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#7B9A74] rounded-full shadow-[0_0_8px_rgba(123,154,116,0.6)]"></div> {{ _('Teknik Detaylar (EXIF)') }}</span>
+                <span class="flex items-center gap-2 md:gap-3"><div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#7B9A74] rounded-full shadow-[0_0_8px_rgba(123,154,116,0.6)]"></div> {{ _('Profesyonel Topluluk') }}</span>
             </div>
         </div>
 
         <!-- Right Side (Bottom on Mobile): Stats / About -->
         <div class="w-full md:max-w-sm text-center md:text-right opacity-0 animate-[fadeSlideLeft_1.5s_ease_forwards_0.8s] mb-20 md:mb-0">
-            <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 md:mb-6 tracking-widest uppercase drop-shadow-2xl" style="text-shadow: 0 4px 20px rgba(0,0,0,0.9);">{{ _('Hakkımızda') }}</h3>
-            <p class="text-zinc-200 text-[10px] sm:text-xs md:text-sm leading-relaxed mb-4 md:mb-10 font-medium drop-shadow-md max-w-[280px] sm:max-w-sm md:max-w-none mx-auto md:mx-0" style="text-shadow: 0 2px 10px rgba(0,0,0,0.9);">
+            <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-[#2D3A2A] mb-2 md:mb-6 tracking-widest uppercase drop-shadow-sm">{{ _('Hakkımızda') }}</h3>
+            <p class="text-[#586B5A] text-[10px] sm:text-xs md:text-sm leading-relaxed mb-4 md:mb-10 font-medium drop-shadow-sm max-w-[280px] sm:max-w-sm md:max-w-none mx-auto md:mx-0">
                 {{ _('2026 yılında kurulan ShutterGallery, fotoğrafçıların yeteneklerini hiçbir algoritma baskısı olmadan sergileyebilmesi için özenle tasarlandı.') }}
             </p>
             <div class="inline-flex flex-row md:flex-col gap-3 md:gap-5 text-left w-[280px] sm:w-auto mx-auto md:mx-0">
-                <div class="flex-1 md:flex-none px-3 py-2 md:px-6 md:py-4 border border-white/10 bg-black/40 backdrop-blur-md rounded-xl md:rounded-2xl border-l-2 md:border-l-4 border-l-[#A3B18A] shadow-2xl">
-                    <p class="text-[8px] md:text-[10px] text-zinc-400 font-mono tracking-widest uppercase mb-0.5 md:mb-1">{{ _('Kuruluş') }}</p>
-                    <p class="text-white text-xs md:text-base font-bold tracking-widest">EST. 2026</p>
+                <div class="flex-1 md:flex-none px-3 py-2 md:px-6 md:py-4 border border-[#7B9A74]/20 bg-white/60 backdrop-blur-md rounded-xl md:rounded-2xl border-l-2 md:border-l-4 border-l-[#7B9A74] shadow-sm">
+                    <p class="text-[8px] md:text-[10px] text-[#6B7A68] font-mono tracking-widest uppercase mb-0.5 md:mb-1">{{ _('Kuruluş') }}</p>
+                    <p class="text-[#2D3A2A] text-xs md:text-base font-bold tracking-widest">EST. 2026</p>
                 </div>
-                <div class="flex-1 md:flex-none px-3 py-2 md:px-6 md:py-4 border border-white/10 bg-black/40 backdrop-blur-md rounded-xl md:rounded-2xl border-l-2 md:border-l-4 border-l-[#A3B18A] shadow-2xl">
-                    <p class="text-[8px] md:text-[10px] text-zinc-400 font-mono tracking-widest uppercase mb-0.5 md:mb-1">Platform</p>
-                    <p class="text-white text-xs md:text-base font-bold tracking-widest">SHUTTER v1.0</p>
+                <div class="flex-1 md:flex-none px-3 py-2 md:px-6 md:py-4 border border-[#7B9A74]/20 bg-white/60 backdrop-blur-md rounded-xl md:rounded-2xl border-l-2 md:border-l-4 border-l-[#7B9A74] shadow-sm">
+                    <p class="text-[8px] md:text-[10px] text-[#6B7A68] font-mono tracking-widest uppercase mb-0.5 md:mb-1">Platform</p>
+                    <p class="text-[#2D3A2A] text-xs md:text-base font-bold tracking-widest">SHUTTER v1.0</p>
                 </div>
             </div>
         </div>
@@ -113,7 +110,7 @@
 
     <div class="fixed bottom-10 inset-x-0 flex justify-center" style="z-index:30;">
         <button id="power-btn"
-                class="flex items-center gap-3 px-8 py-3.5 rounded-full border border-[#A3B18A] bg-black/80 text-[#A3B18A] text-xs font-bold tracking-[0.25em] uppercase hover:bg-[#A3B18A] hover:text-white transition-all duration-300"
+                class="flex items-center gap-3 px-8 py-3.5 rounded-full border border-[#7B9A74]/50 bg-white/80 text-[#506B4D] text-xs font-bold tracking-[0.25em] uppercase hover:bg-[#7B9A74] hover:text-[#2D3A2A] transition-all duration-300 shadow-md"
                 style="backdrop-filter:blur(12px);">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9"/>
@@ -127,7 +124,7 @@
         
         <!-- Uygulama Logosu (LCD Merkez Üst) -->
         <div class="absolute top-4 sm:top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none text-center">
-            <h1 class="text-white/90 font-bold text-base sm:text-xl tracking-widest uppercase drop-shadow-lg" style="text-shadow: 0 2px 10px rgba(0,0,0,0.8);">
+            <h1 class="text-[#2D3A2A]/90 font-bold text-base sm:text-xl tracking-widest uppercase drop-shadow-lg" style="text-shadow: 0 2px 10px rgba(0,0,0,0.8);">
                 Shutter<span class="text-[#A3B18A]">Gallery</span>
             </h1>
         </div>
@@ -136,7 +133,7 @@
         <div class="hidden sm:block absolute top-4 left-4 sm:top-8 sm:left-8 z-50 pointer-events-auto group">
             {% set unread_count = 0 %}
             
-            <button class="text-white hover:text-[#A3B18A] transition-colors flex items-center gap-2 sm:gap-3 bg-black/30 px-3 py-2 sm:px-4 rounded-full backdrop-blur-sm border border-white/5 relative">
+            <button class="text-[#2D3A2A] hover:text-[#A3B18A] transition-colors flex items-center gap-2 sm:gap-3 bg-white/30 px-3 py-2 sm:px-4 rounded-full backdrop-blur-sm border border-[#7B9A74]/10 relative">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 <span class="hidden sm:inline font-mono text-[10px] sm:text-xs tracking-widest uppercase">{{ _('Menü') }}</span>
                 {% if unread_count > 0 %}
@@ -144,73 +141,74 @@
                 {% endif %}
             </button>
             
-            <div class="absolute top-full left-0 mt-3 w-48 sm:w-56 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-left scale-95 group-hover:scale-100 shadow-2xl">
+            <div class="absolute top-full left-0 mt-3 w-48 sm:w-56 bg-white/80 backdrop-blur-md border border-[#7B9A74]/20 rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-left scale-95 group-hover:scale-100 shadow-2xl">
                 <div class="py-2 font-mono text-[10px] tracking-[0.2em] uppercase">
                     {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('users.profile', username=current_user.username) }}" class="block px-4 py-2 sm:py-3 text-white hover:text-[#A3B18A] hover:bg-white/5 transition-colors text-xs tracking-wider uppercase border-b border-white/5"><svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>{{ _('Profilim') }}</a>
-                    <a href="{{ url_for('users.notifications') }}" class="px-4 py-2 sm:py-3 text-white hover:text-[#A3B18A] hover:bg-white/5 transition-colors text-xs tracking-wider uppercase border-b border-white/5 flex items-center justify-between">
+                    <a href="{{ url_for('users.profile', username=current_user.username) }}" class="block px-4 py-2 sm:py-3 text-[#2D3A2A] hover:text-[#A3B18A] hover:bg-white/5 transition-colors text-xs tracking-wider uppercase border-b border-[#7B9A74]/10"><svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>{{ _('Profilim') }}</a>
+                    <a href="{{ url_for('users.notifications') }}" class="px-4 py-2 sm:py-3 text-[#2D3A2A] hover:text-[#A3B18A] hover:bg-white/5 transition-colors text-xs tracking-wider uppercase border-b border-[#7B9A74]/10 flex items-center justify-between">
                         <span>
                             <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>{{ _('Bildirimler') }}
                         </span>
                         {% if unread_count > 0 %}
-                        <span class="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">{{ unread_count }}</span>
+                        <span class="bg-red-500 text-[#2D3A2A] text-[9px] px-1.5 py-0.5 rounded-full font-bold">{{ unread_count }}</span>
                         {% endif %}
                     </a>
-                    <a href="{{ url_for('users.account_settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-[#A3B18A] hover:bg-white/5 transition-colors border-b border-white/5">{{ _('Hesap Ayarları') }}</a>
-                    <a href="{{ url_for('users.avatar_settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-[#A3B18A] hover:bg-white/5 transition-colors border-b border-white/5">{{ _('Avatar Düzenle') }}</a>
-                    <a href="{{ url_for('users.settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-[#A3B18A] hover:bg-white/5 transition-colors border-b border-white/5">{{ _('Ayarlar') }}</a>
-                    <a href="{{ url_for('auth.logout') }}" onclick="sessionStorage.removeItem('camera_powered')" class="flex items-center gap-3 px-5 py-3.5 text-red-400 hover:text-red-300 hover:bg-white/5 transition-colors">{{ _('Çıkış Yap') }}</a>
+                    <a href="{{ url_for('users.account_settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-[#586B5A] hover:text-[#A3B18A] hover:bg-white/5 transition-colors border-b border-[#7B9A74]/10">{{ _('Hesap Ayarları') }}</a>
+                    <a href="{{ url_for('users.account_settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-[#6B7A68] hover:text-[#7B9A74] hover:bg-[#7B9A74]/5 transition-colors border-b border-[#7B9A74]/10">{{ _('Hesap Ayarları') }}</a>
+                    <a href="{{ url_for('users.avatar_settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-[#6B7A68] hover:text-[#7B9A74] hover:bg-[#7B9A74]/5 transition-colors border-b border-[#7B9A74]/10">{{ _('Avatar Düzenle') }}</a>
+                    <a href="{{ url_for('users.settings') }}" class="flex items-center gap-3 px-5 py-3.5 text-[#6B7A68] hover:text-[#7B9A74] hover:bg-[#7B9A74]/5 transition-colors border-b border-[#7B9A74]/10">{{ _('Ayarlar') }}</a>
+                    <a href="{{ url_for('auth.logout') }}" onclick="sessionStorage.removeItem('camera_powered')" class="flex items-center gap-3 px-5 py-3.5 text-[#D4A373] hover:text-red-400 hover:bg-red-50 transition-colors">{{ _('Çıkış Yap') }}</a>
                     {% else %}
-                    <a href="{{ url_for('auth.login') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-[#A3B18A] hover:bg-white/5 transition-colors border-b border-white/5">{{ _('Giriş Yap') }}</a>
-                    <a href="{{ url_for('auth.register') }}" class="flex items-center gap-3 px-5 py-3.5 text-zinc-300 hover:text-[#A3B18A] hover:bg-white/5 transition-colors">{{ _('Kayıt Ol') }}</a>
+                    <a href="{{ url_for('auth.login') }}" class="flex items-center gap-3 px-5 py-3.5 text-[#586B5A] hover:text-[#7B9A74] hover:bg-[#7B9A74]/5 transition-colors border-b border-[#7B9A74]/10">{{ _('Giriş Yap') }}</a>
+                    <a href="{{ url_for('auth.register') }}" class="flex items-center gap-3 px-5 py-3.5 text-[#586B5A] hover:text-[#7B9A74] hover:bg-[#7B9A74]/5 transition-colors">{{ _('Kayıt Ol') }}</a>
                     {% endif %}
                 </div>
             </div>
         </div>
 
         <!-- HUD Elements -->
-        <div class="absolute top-24 left-8 text-white font-mono text-xs tracking-widest drop-shadow-md flex-col gap-2 pointer-events-none">
-            <div class="flex items-center gap-2 text-red-500 font-bold"><div class="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_red]"></div> REC 00:00:00</div>
-            <div class="text-white/80">RAW + JPEG</div>
+        <div class="absolute top-24 left-8 text-[#2D3A2A] font-mono text-xs tracking-widest drop-shadow-sm flex-col gap-2 pointer-events-none">
+            <div class="flex items-center gap-2 text-[#D4A373] font-bold"><div class="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_red]"></div> REC 00:00:00</div>
+            <div class="text-[#586B5A]">RAW + JPEG</div>
         </div>
         
         <!-- Top Right Info & Auth -->
         <div class="hidden sm:flex absolute top-4 right-4 sm:top-8 sm:right-8 flex-col items-end gap-3 z-50">
-            <div class="hidden sm:flex text-white font-mono text-xs tracking-widest drop-shadow-md gap-6 bg-black/30 px-4 py-2 rounded-full backdrop-blur-sm pointer-events-none">
+            <div class="hidden sm:flex text-[#2D3A2A] font-mono text-xs tracking-widest drop-shadow-sm gap-6 bg-white/50 px-4 py-2 rounded-full backdrop-blur-md border border-[#7B9A74]/20 pointer-events-none">
                 <span>ISO 800</span>
                 <span>F/1.4</span>
                 <span>1/4000</span>
-                <span class="text-[#A3B18A]">🔋 100%</span>
+                <span class="text-[#7B9A74] font-bold">🔋 100%</span>
             </div>
-            <div class="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase flex gap-3 sm:gap-4 pointer-events-auto bg-black/40 sm:bg-transparent px-3 py-2 sm:p-0 rounded-full items-center">
+            <div class="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase flex gap-3 sm:gap-4 pointer-events-auto bg-white/60 sm:bg-transparent px-3 py-2 sm:p-0 rounded-full items-center backdrop-blur-md sm:backdrop-blur-none border sm:border-none border-[#7B9A74]/20">
                 {% if current_user.is_authenticated %}
-                <a href="{{ url_for('posts.new_post') }}" class="bg-[#829A73] hover:bg-[#A3B18A] text-white px-3 py-2 sm:px-5 sm:py-2.5 rounded-full transition-all shadow-[0_0_15px_rgba(163,177,138,0.4)] hover:shadow-[0_0_25px_rgba(163,177,138,0.6)] hover:scale-105 flex items-center gap-2 border border-[#A3B18A]/50">
+                <a href="{{ url_for('posts.new_post') }}" class="bg-[#7B9A74] hover:bg-[#506B4D] text-[#2D3A2A] px-3 py-2 sm:px-5 sm:py-2.5 rounded-full transition-all shadow-md hover:shadow-lg hover:scale-105 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     <span class="hidden sm:inline">{{ _('FOTOĞRAF YÜKLE') }}</span>
                 </a>
                 {% else %}
-                <a href="{{ url_for('auth.login') }}" class="text-zinc-300 hover:text-[#A3B18A] transition-colors">{{ _('Giriş') }}</a>
-                <a href="{{ url_for('auth.register') }}" class="text-zinc-300 hover:text-white transition-colors">{{ _('Kayıt') }}</a>
+                <a href="{{ url_for('auth.login') }}" class="text-[#6B7A68] hover:text-[#7B9A74] transition-colors">{{ _('Giriş') }}</a>
+                <a href="{{ url_for('auth.register') }}" class="text-[#6B7A68] hover:text-[#2D3A2A] transition-colors">{{ _('Kayıt') }}</a>
                 {% endif %}
             </div>
         </div>
 
-        <div class="hidden sm:flex absolute bottom-8 left-8 text-white/80 font-mono text-xs tracking-widest drop-shadow-md gap-4">
+        <div class="hidden sm:flex absolute bottom-8 left-8 text-[#586B5A] font-mono text-xs tracking-widest drop-shadow-sm gap-4">
             <span>AF-C</span>
             <span>AWB</span>
         </div>
         
         <!-- Focus Box HUD -->
-        <div class="hidden sm:flex absolute inset-0 m-auto w-[60vw] max-w-2xl h-[50vh] border border-white/20 flex-col justify-center items-center pointer-events-none">
+        <div class="hidden sm:flex absolute inset-0 m-auto w-[60vw] max-w-2xl h-[50vh] border border-[#7B9A74]/30 flex-col justify-center items-center pointer-events-none">
             <!-- Köşe imleçleri -->
-            <div class="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#A3B18A]"></div>
-            <div class="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#A3B18A]"></div>
-            <div class="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#A3B18A]"></div>
-            <div class="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#A3B18A]"></div>
+            <div class="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#7B9A74]"></div>
+            <div class="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#7B9A74]"></div>
+            <div class="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#7B9A74]"></div>
+            <div class="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#7B9A74]"></div>
             
             <!-- Merkez Artı -->
-            <div class="w-px h-6 hud-line absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
-            <div class="w-6 h-px hud-line absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="w-px h-6 hud-line absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#7B9A74]/50"></div>
+            <div class="w-6 h-px hud-line absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#7B9A74]/50"></div>
         </div>
 
         <!-- Instagram Explore Style Gallery -->
@@ -218,10 +216,10 @@
             
             <!-- Feed Tabs -->
             <div class="flex justify-center gap-4 mb-8 pt-4">
-                <a href="{{ url_for('main.index') }}" class="px-6 py-2 rounded-full border transition-colors text-xs tracking-widest font-bold uppercase {% if feed_type == 'feed' %}border-[#A3B18A] bg-[#829A73]/20 text-[#A3B18A] shadow-[0_0_15px_rgba(163,177,138,0.3)]{% else %}border-white/10 text-zinc-500 hover:text-white hover:border-white/30{% endif %}">
+                <a href="{{ url_for('main.index') }}" class="px-6 py-2 rounded-full border transition-colors text-xs tracking-widest font-bold uppercase {% if feed_type == 'feed' %}border-[#7B9A74] bg-[#7B9A74]/10 text-[#7B9A74] shadow-sm{% else %}border-[#7B9A74]/20 text-[#6B7A68] hover:text-[#2D3A2A] hover:border-[#7B9A74]/40{% endif %}">
                     {{ _('Takip Edilenler') }}
                 </a>
-                <a href="{{ url_for('main.discover') }}" class="px-6 py-2 rounded-full border transition-colors text-xs tracking-widest font-bold uppercase {% if feed_type == 'discover' %}border-[#A3B18A] bg-[#829A73]/20 text-[#A3B18A] shadow-[0_0_15px_rgba(163,177,138,0.3)]{% else %}border-white/10 text-zinc-500 hover:text-white hover:border-white/30{% endif %}">
+                <a href="{{ url_for('main.discover') }}" class="px-6 py-2 rounded-full border transition-colors text-xs tracking-widest font-bold uppercase {% if feed_type == 'discover' %}border-[#7B9A74] bg-[#7B9A74]/10 text-[#7B9A74] shadow-sm{% else %}border-[#7B9A74]/20 text-[#6B7A68] hover:text-[#2D3A2A] hover:border-[#7B9A74]/40{% endif %}">
                     {{ _('Keşfet') }}
                 </a>
             </div>
@@ -229,8 +227,8 @@
             <!-- Search Bar -->
             <div class="max-w-xl mx-auto mb-8 relative">
                 <form action="{{ url_for('main.search') }}" method="GET">
-                    <input type="text" name="q" placeholder="Temalarda, kullanıcılarda veya fotoğraf başlıklarında ara..." class="w-full bg-black/40 border border-white/10 rounded-full px-6 py-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-[#A3B18A]/50 transition-colors backdrop-blur-md shadow-xl">
-                    <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-[#A3B18A]">
+                    <input type="text" name="q" placeholder="Temalarda, kullanıcılarda veya fotoğraf başlıklarında ara..." class="w-full bg-white/60 border border-[#7B9A74]/20 rounded-full px-6 py-3 text-[#2D3A2A] text-sm placeholder-[#6B7A68] focus:outline-none focus:border-[#7B9A74]/50 transition-colors backdrop-blur-md shadow-sm">
+                    <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#6B7A68] hover:text-[#7B9A74]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </button>
                 </form>
@@ -239,7 +237,7 @@
             {% if posts.items %}
             <div id="posts-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-7xl mx-auto pb-12">
                 {% for post in posts.items %}
-                <div class="relative group rounded-lg overflow-hidden bg-zinc-900 aspect-square border border-white/5">
+                <div class="relative group rounded-lg overflow-hidden bg-white aspect-square border border-[#7B9A74]/10 shadow-sm">
                     <a href="{{ url_for('posts.post', post_id=post.id) }}" class="block w-full h-full">
                         {% if post.image_file.startswith('http') %}
                         <img src="{{ post.image_file }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
@@ -249,28 +247,28 @@
                     </a>
                     
                     <!-- Overlay -->
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 pointer-events-none">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#FDFBF7]/95 via-[#FDFBF7]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 pointer-events-none">
                         <div class="flex justify-between items-end w-full">
                             <div class="flex-1 truncate pr-2">
-                                <h3 class="text-sm font-bold text-white truncate drop-shadow-md">{{ post.title }}</h3>
-                                <p class="text-[10px] text-[#A3B18A] font-mono uppercase truncate drop-shadow-md">{{ post.author.username }} <span class="text-[8px] text-zinc-400 ml-0.5">#{{ post.author.unique_id }}</span></p>
+                                <h3 class="text-sm font-bold text-[#2D3A2A] truncate drop-shadow-sm">{{ post.title }}</h3>
+                                <p class="text-[10px] text-[#7B9A74] font-mono uppercase truncate drop-shadow-sm">{{ post.author.username }} <span class="text-[8px] text-[#6B7A68] ml-0.5">#{{ post.author.unique_id }}</span></p>
                             </div>
                             <div class="pointer-events-auto flex items-center gap-3">
                                 {% if current_user.is_authenticated %}
                                 <form action="{{ url_for('posts.like_post', post_id=post.id) }}" method="POST" class="inline">
                                     <button type="submit" class="flex flex-col items-center hover:scale-110 transition-transform">
                                         {% if current_user.has_liked_post(post) %}
-                                        <span class="text-red-500 text-xl leading-none drop-shadow-md">♥</span>
+                                        <span class="text-[#D4A373] text-xl leading-none drop-shadow-sm">♥</span>
                                         {% else %}
-                                        <span class="text-white text-xl leading-none drop-shadow-md">♡</span>
+                                        <span class="text-[#2D3A2A] text-xl leading-none drop-shadow-sm">♡</span>
                                         {% endif %}
-                                        <span class="text-white text-[10px] font-bold">{{ post.likers.count() }}</span>
+                                        <span class="text-[#2D3A2A] text-[10px] font-bold">{{ post.likers.count() }}</span>
                                     </button>
                                 </form>
                                 {% else %}
                                 <div class="flex flex-col items-center">
-                                    <span class="text-white text-xl leading-none drop-shadow-md">♡</span>
-                                    <span class="text-white text-[10px] font-bold">{{ post.likers.count() }}</span>
+                                    <span class="text-[#2D3A2A] text-xl leading-none drop-shadow-sm">♡</span>
+                                    <span class="text-[#2D3A2A] text-[10px] font-bold">{{ post.likers.count() }}</span>
                                 </div>
                                 {% endif %}
                             </div>
@@ -283,15 +281,15 @@
             <!-- Pagination Controls -->
             <div id="pagination-controls" class="flex justify-center items-center gap-4 max-w-7xl mx-auto pb-16">
                 {% if posts.has_prev %}
-                <a href="{{ url_for('main.' + feed_type, page=posts.prev_num) }}" class="px-6 py-2 rounded-full border border-white/10 bg-black/40 text-zinc-300 hover:text-[#A3B18A] hover:border-[#A3B18A]/50 transition-colors text-xs font-bold tracking-widest uppercase">
+                <a href="{{ url_for('main.' + feed_type, page=posts.prev_num) }}" class="px-6 py-2 rounded-full border border-[#7B9A74]/20 bg-white/60 text-[#6B7A68] hover:text-[#7B9A74] hover:border-[#7B9A74]/50 transition-colors text-xs font-bold tracking-widest uppercase shadow-sm">
                     &larr; Önceki
                 </a>
                 {% endif %}
                 
-                <span class="text-zinc-500 text-xs font-mono">Sayfa {{ posts.page }} / {{ posts.pages }}</span>
+                <span class="text-[#6B7A68] text-xs font-mono">Sayfa {{ posts.page }} / {{ posts.pages }}</span>
                 
                 {% if posts.has_next %}
-                <a href="{{ url_for('main.' + feed_type, page=posts.next_num) }}" class="px-6 py-2 rounded-full border border-white/10 bg-black/40 text-zinc-300 hover:text-[#A3B18A] hover:border-[#A3B18A]/50 transition-colors text-xs font-bold tracking-widest uppercase">
+                <a href="{{ url_for('main.' + feed_type, page=posts.next_num) }}" class="px-6 py-2 rounded-full border border-[#7B9A74]/20 bg-white/60 text-[#6B7A68] hover:text-[#7B9A74] hover:border-[#7B9A74]/50 transition-colors text-xs font-bold tracking-widest uppercase shadow-sm">
                     Sonraki &rarr;
                 </a>
                 {% endif %}
@@ -301,7 +299,7 @@
             
             {% else %}
             <div class="flex flex-col items-center justify-center h-full text-center">
-                <p class="text-zinc-400 text-xs tracking-widest uppercase mb-4">Henüz fotoğraf yok</p>
+                <p class="text-[#6B7A68] text-xs tracking-widest uppercase mb-4">Henüz fotoğraf yok</p>
                 {% if current_user.is_authenticated %}
                 <a href="{{ url_for('posts.new_post') }}" class="px-6 py-2 rounded-full border border-[#A3B18A]/50 text-[#A3B18A] text-xs font-bold tracking-widest uppercase hover:bg-[#A3B18A]/10 transition-colors">İlk Sen Yükle</a>
                 {% endif %}

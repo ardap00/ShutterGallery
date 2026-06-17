@@ -46,19 +46,19 @@
     </style>
 </head>
 <body>
-    <button id="back-btn" onclick="if(document.referrer) { history.back(); } else { window.location.href='{{ url_for('users.profile', username=user.username) }}'; }" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-all font-bold text-xs tracking-widest uppercase border border-white/10 shadow-lg cursor-pointer">
+    <button id="back-btn" onclick="if(document.referrer) { history.back(); } else { window.location.href='{{ url_for('users.profile', username=user.username) }}'; }" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-[#2D3A2A] rounded-xl backdrop-blur-md transition-all font-bold text-xs tracking-widest uppercase border border-[#7B9A74]/20 shadow-lg cursor-pointer">
         &larr; Profile Dön
     </button>
 
     <div id="blocker">
         <div id="instructions">
-            <span style="font-size:36px; font-weight:800; letter-spacing: -1px; display:block; margin-bottom: 20px;">{{ user.username }} <span class="text-emerald-500">3D Galerisi</span></span>
-            <div class="text-emerald-400 font-bold tracking-widest text-sm mb-8 uppercase animate-pulse">Başlamak için tıklayın</div>
+            <span style="font-size:36px; font-weight:800; letter-spacing: -1px; display:block; margin-bottom: 20px;">{{ user.username }} <span class="text-[#506B4D]">3D Galerisi</span></span>
+            <div class="text-[#7B9A74] font-bold tracking-widest text-sm mb-8 uppercase animate-pulse">Başlamak için tıklayın</div>
             <div class="grid grid-cols-2 gap-x-12 gap-y-4 text-left text-sm text-gray-300 font-medium">
-                <div><strong class="text-white">Hareket:</strong> W, A, S, D</div>
-                <div><strong class="text-white">Etrafı İncele:</strong> Mouse</div>
-                <div><strong class="text-white">Bakış Açısı:</strong> C tuşu</div>
-                <div><strong class="text-white">Çıkış:</strong> ESC tuşu</div>
+                <div><strong class="text-[#2D3A2A]">Hareket:</strong> W, A, S, D</div>
+                <div><strong class="text-[#2D3A2A]">Etrafı İncele:</strong> Mouse</div>
+                <div><strong class="text-[#2D3A2A]">Bakış Açısı:</strong> C tuşu</div>
+                <div><strong class="text-[#2D3A2A]">Çıkış:</strong> ESC tuşu</div>
             </div>
         </div>
     </div>

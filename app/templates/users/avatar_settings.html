@@ -6,26 +6,26 @@
 <div class="max-w-6xl mx-auto px-4 py-8 md:py-12 mt-16 md:mt-0 flex flex-col md:flex-row gap-8">
     
     <!-- Sol Panel: Renk Seçiciler -->
-    <div class="w-full md:w-1/3 bg-zinc-900 border border-white/5 rounded-2xl p-6 shadow-2xl h-fit">
-        <h2 class="text-2xl font-bold text-white mb-6 font-mono uppercase tracking-widest border-b border-white/10 pb-4">
+    <div class="w-full md:w-1/3 bg-[#FDFBF7] border border-[#7B9A74]/10 rounded-2xl p-6 shadow-2xl h-fit">
+        <h2 class="text-2xl font-bold text-[#2D3A2A] mb-6 font-mono uppercase tracking-widest border-b border-[#7B9A74]/20 pb-4">
             Avatar <span class="text-[#A3B18A]">Düzenle</span>
         </h2>
         
-        <p class="text-zinc-400 text-sm mb-8">
+        <p class="text-[#6B7A68] text-sm mb-8">
             3D Galeride kendi bakış açınızdan (aşağı baktığınızda) görünecek olan karakterinizin renklerini seçin.
         </p>
         
         <form id="avatar-form" class="space-y-6">
             <div>
-                <label class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-2">Avatar Rengi</label>
+                <label class="block text-[#586B5A] text-xs font-bold uppercase tracking-wider mb-2">Avatar Rengi</label>
                 <div class="flex items-center gap-4">
                     <input type="color" id="color-body" value="#2196F3" class="w-12 h-12 rounded cursor-pointer bg-transparent border-0 p-0">
-                    <span id="hex-body" class="text-zinc-500 font-mono text-sm uppercase">#2196F3</span>
+                    <span id="hex-body" class="text-[#6B7A68] font-mono text-sm uppercase">#2196F3</span>
                 </div>
             </div>
             
-            <div class="pt-6 border-t border-white/10">
-                <button type="submit" id="save-btn" class="w-full bg-[#829A73] hover:bg-[#A3B18A] text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-[0_0_15px_rgba(163,177,138,0.3)] hover:shadow-[0_0_25px_rgba(163,177,138,0.5)] uppercase tracking-widest text-sm flex justify-center items-center gap-2">
+            <div class="pt-6 border-t border-[#7B9A74]/20">
+                <button type="submit" id="save-btn" class="w-full bg-[#829A73] hover:bg-[#A3B18A] text-[#2D3A2A] font-bold py-3 px-4 rounded-xl transition-colors shadow-[0_0_15px_rgba(163,177,138,0.3)] hover:shadow-[0_0_25px_rgba(163,177,138,0.5)] uppercase tracking-widest text-sm flex justify-center items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                     <span>Kaydet</span>
                 </button>
@@ -34,16 +34,16 @@
     </div>
     
     <!-- Sağ Panel: 3D Önizleme -->
-    <div class="w-full md:w-2/3 bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative" style="height: 60vh; min-height: 400px;">
+    <div class="w-full md:w-2/3 bg-[#FDFBF7] border border-[#7B9A74]/10 rounded-2xl overflow-hidden shadow-2xl relative" style="height: 60vh; min-height: 400px;">
         <!-- Loading Spinner -->
-        <div id="loading" class="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+        <div id="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
             <div class="w-12 h-12 border-4 border-[#A3B18A] border-t-transparent rounded-full animate-spin"></div>
         </div>
         
         <canvas id="avatar-canvas" class="w-full h-full block"></canvas>
         
         <div class="absolute bottom-4 left-0 right-0 text-center pointer-events-none">
-            <span class="bg-black/50 text-white/80 px-4 py-1.5 rounded-full text-xs font-mono tracking-widest backdrop-blur-sm border border-white/10">
+            <span class="bg-white/50 text-[#2D3A2A]/80 px-4 py-1.5 rounded-full text-xs font-mono tracking-widest backdrop-blur-sm border border-[#7B9A74]/20">
                 FAREYİ SÜRÜKLEYEREK DÖNDÜR
             </span>
         </div>
@@ -257,11 +257,11 @@
             
             if (res.ok) {
                 btnText.textContent = 'Kaydedildi ✓';
-                saveBtn.classList.replace('bg-[#829A73]', 'bg-emerald-600');
+                saveBtn.classList.replace('bg-[#829A73]', 'bg-[#7B9A74]');
                 
                 setTimeout(() => {
                     btnText.textContent = originalText;
-                    saveBtn.classList.replace('bg-emerald-600', 'bg-[#829A73]');
+                    saveBtn.classList.replace('bg-[#7B9A74]', 'bg-[#829A73]');
                     saveBtn.disabled = false;
                 }, 2000);
             } else {
