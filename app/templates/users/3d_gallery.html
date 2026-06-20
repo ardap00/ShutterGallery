@@ -770,8 +770,8 @@
                 // Match position (except Y is locked to 0)
                 avatarGroup.position.set(camPos.x, 0, camPos.z);
                 
-                // The angel_character_model.glb needs to face forward (without the Math.PI offset)
-                avatarGroup.rotation.y = euler.y;
+                // Rotate the character 180 degrees so its back faces the camera
+                avatarGroup.rotation.y = euler.y + Math.PI;
 
                 // Update GLTF Animations
                 if (avatarMixer) {
