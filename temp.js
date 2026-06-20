@@ -1,105 +1,28 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ user.username }} - 3D Galeri</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { margin: 0; overflow: hidden; background-color: #000; }
-        #blocker {
-            position: absolute; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            color: white; font-family: sans-serif; text-align: center;
-            z-index: 10;
-        }
-        #instructions {
-            cursor: pointer;
-            padding: 30px 40px; border: 1px solid rgba(255,255,255,0.2); border-radius: 16px;
-            background: rgba(255,255,255,0.05);
-            display: inline-block; margin: 0 auto;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-        #instructions:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.4);
-            transform: scale(1.02);
-        }
-        #crosshair {
-            position: absolute; top: 50%; left: 50%;
-            width: 8px; height: 8px;
-            background-color: rgba(255,255,255,0.8);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 5;
-            display: none;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-        #back-btn {
-            position: absolute; top: 20px; left: 20px;
-            z-index: 20;
-        }
-        #vignette {
-            position: absolute; inset: 0; pointer-events: none; z-index: 4;
-            background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,0.85) 100%);
-        }
-    </style>
-</head>
-<body>
-    <div id="vignette"></div>
-    <button id="back-btn" onclick="if(document.referrer) { history.back(); } else { window.location.href='{{ url_for('users.profile', username=user.username) }}'; }" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-all font-bold text-xs tracking-widest uppercase border border-white/10 shadow-lg cursor-pointer">
-        &larr; Profile Dön
-    </button>
-    <button id="cam-toggle-btn" class="px-3 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-all font-bold text-xs tracking-widest uppercase border border-white/10 shadow-lg cursor-pointer flex items-center justify-center gap-2" style="position: absolute; top: 20px; right: 20px; z-index: 20;" title="Bakış Açısını Değiştir (C)">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-        <span class="hidden md:inline">Bakış Açısı (C)</span>
-    </button>
-    <div id="blocker">
-        <div id="instructions">
-            <span style="font-size:36px; font-weight:800; letter-spacing: -1px; display:block; margin-bottom: 20px;">{{ user.username }} <span class="text-emerald-500">3D Galerisi</span></span>
-            <div class="text-emerald-400 font-bold tracking-widest text-sm mb-8 uppercase animate-pulse">Başlamak için tıklayın</div>
-            <div class="grid grid-cols-2 gap-x-12 gap-y-4 text-left text-sm text-gray-300 font-medium">
-                <div><strong class="text-white">Hareket:</strong> W, A, S, D</div>
-                <div><strong class="text-white">Etrafı İncele:</strong> Mouse</div>
-                <div><strong class="text-white">Bakış Açısı:</strong> C tuşu</div>
-                <div><strong class="text-white">Çıkış:</strong> ESC tuşu</div>
-            </div>
-        </div>
-    </div>
-    
-    <div id="crosshair"></div>
-    <div id="error-box" style="position:fixed; top:80px; left:20px; z-index:9999; background:rgba(220,0,0,0.9); color:white; padding:15px; border-radius:8px; font-family:monospace; display:none; max-width: 80%;"></div>
 
-    <script>
+
     window.addEventListener('error', function(e) {
         const eb = document.getElementById('error-box');
         eb.style.display = 'block';
         eb.innerHTML += "Hata: " + e.message + " (" + e.filename + ":" + e.lineno + ")<br>";
     });
-    </script>
+    
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
-    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
-    <script type="importmap">
+
+
       {
         "imports": {
           "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
           "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
         }
       }
-    </script>
+    
 
-    <script type="module">
         import * as THREE from 'three';
         import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
 
-        const photosData = {{ photos_json | safe }};
+        const photosData = [];
         
         let camera, tpCamera, scene, renderer, controls;
         let isThirdPerson = true;
@@ -232,11 +155,11 @@
             tpCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
 
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x151515); // Slightly brighter realistic dark
-            scene.fog = new THREE.FogExp2(0x151515, 0.008); // Very light fog for depth
+            scene.background = new THREE.Color(0x111113); // Deep realistic dark
+            scene.fog = new THREE.FogExp2(0x111113, 0.008); // Very light fog for depth
 
-            // Natural gallery ambient light - brighter so walls/floor are visible
-            const light = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
+            // Natural gallery ambient light
+            const light = new THREE.HemisphereLight(0xffffff, 0x222222, 0.4);
             scene.add(light);
 
             function createAvatar() {
@@ -433,9 +356,9 @@
             // Floor: Premium Polished Dark Gallery Floor
             const floorGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
             const floorMat = new THREE.MeshStandardMaterial({ 
-                color: 0x111111, // Less black so it bounces some light
-                roughness: 0.15, // Smooth but not a perfect mirror
-                metalness: 0.3 
+                color: 0x0a0a0a, 
+                roughness: 0.08, // Very smooth/reflective
+                metalness: 0.2 
             });
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
@@ -553,12 +476,32 @@
                         
                         frame.position.set(-roomWidth / 2 + 0.35, roomHeight / 2, zPos);
                         frame.rotation.y = Math.PI / 2;
+                        
+                        // Spotlight
+                        const spotLight = new THREE.SpotLight(0xffffee, 10.0);
+                        spotLight.position.set(-roomWidth / 2 + 6, roomHeight - 1.5, zPos);
+                        spotLight.target = imgMesh;
+                        spotLight.angle = Math.PI / 4;
+                        spotLight.penumbra = 0.5;
+                        spotLight.decay = 1.5;
+                        spotLight.distance = 50;
+                        scene.add(spotLight);
                     } else {
                         imgMesh.position.set(roomWidth / 2 - 0.61, roomHeight / 2, zPos); // Fix z-fighting
                         imgMesh.rotation.y = -Math.PI / 2;
                         
                         frame.position.set(roomWidth / 2 - 0.35, roomHeight / 2, zPos);
                         frame.rotation.y = -Math.PI / 2;
+                        
+                        // Spotlight
+                        const spotLight = new THREE.SpotLight(0xffffee, 10.0);
+                        spotLight.position.set(roomWidth / 2 - 6, roomHeight - 1.5, zPos);
+                        spotLight.target = imgMesh;
+                        spotLight.angle = Math.PI / 4;
+                        spotLight.penumbra = 0.5;
+                        spotLight.decay = 1.5;
+                        spotLight.distance = 50;
+                        scene.add(spotLight);
                     }
                     
                     scene.add(frame);
@@ -592,14 +535,14 @@
                     scene.add(plaqueMesh);
                     scene.add(plaqueFrameMesh);
                     
-                    // Spotlight above the painting (Fixed for physically correct lighting in modern Three.js)
-                    const spotLight = new THREE.SpotLight(0xfffaeb, 150.0); // Warm light, high intensity for physically correct lighting
+                    // Spotlight above the painting
+                    const spotLight = new THREE.SpotLight(0xffffff, 2.5);
                     spotLight.position.set(side === 'left' ? -roomWidth/2 + 6 : roomWidth/2 - 6, roomHeight - 1, zPos);
                     spotLight.target = imgMesh;
-                    spotLight.angle = Math.PI / 4;
+                    spotLight.angle = Math.PI / 5;
                     spotLight.penumbra = 0.5;
-                    spotLight.distance = 40;
-                    spotLight.decay = 2.0;
+                    spotLight.distance = 30;
+                    spotLight.decay = 1.5;
                     scene.add(spotLight);
                 });
             });
@@ -793,6 +736,4 @@
         init();
         animate();
 
-    </script>
-</body>
-</html>
+    
