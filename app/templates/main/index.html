@@ -222,20 +222,10 @@
             </div>
         </div>
 
-        <!-- HUD Elements -->
-        <div class="absolute top-24 left-8 text-white font-mono text-xs tracking-widest drop-shadow-md flex-col gap-2 pointer-events-none">
-            <div class="flex items-center gap-2 text-red-500 font-bold"><div class="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_red]"></div> REC 00:00:00</div>
-            <div class="text-white/80">RAW + JPEG</div>
-        </div>
+
         
         <!-- Top Right Info & Auth -->
         <div class="hidden sm:flex absolute top-4 right-4 sm:top-8 sm:right-8 flex-col items-end gap-3 z-50">
-            <div class="hidden sm:flex text-white font-mono text-xs tracking-widest drop-shadow-md gap-6 bg-black/30 px-4 py-2 rounded-full backdrop-blur-sm pointer-events-none">
-                <span>ISO 800</span>
-                <span>F/1.4</span>
-                <span>1/4000</span>
-                <span class="text-[#A3B18A]">🔋 100%</span>
-            </div>
             <div class="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase flex gap-3 sm:gap-4 pointer-events-auto bg-black/40 sm:bg-transparent px-3 py-2 sm:p-0 rounded-full items-center">
                 {% if current_user.is_authenticated %}
                 <a href="{{ url_for('posts.new_post') }}" class="bg-[#829A73] hover:bg-[#A3B18A] text-white px-3 py-2 sm:px-5 sm:py-2.5 rounded-full transition-all shadow-[0_0_15px_rgba(163,177,138,0.4)] hover:shadow-[0_0_25px_rgba(163,177,138,0.6)] hover:scale-105 flex items-center gap-2 border border-[#A3B18A]/50">
@@ -249,23 +239,7 @@
             </div>
         </div>
 
-        <div class="hidden sm:flex absolute bottom-8 left-8 text-white/80 font-mono text-xs tracking-widest drop-shadow-md gap-4">
-            <span>AF-C</span>
-            <span>AWB</span>
-        </div>
-        
-        <!-- Focus Box HUD -->
-        <div class="hidden sm:flex absolute inset-0 m-auto w-[60vw] max-w-2xl h-[50vh] border border-white/20 flex-col justify-center items-center pointer-events-none">
-            <!-- Köşe imleçleri -->
-            <div class="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#A3B18A]"></div>
-            <div class="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#A3B18A]"></div>
-            <div class="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#A3B18A]"></div>
-            <div class="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#A3B18A]"></div>
-            
-            <!-- Merkez Artı -->
-            <div class="w-px h-6 hud-line absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
-            <div class="w-6 h-px hud-line absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
-        </div>
+
 
         <!-- Instagram Explore Style Gallery -->
         <div class="absolute inset-0 top-20 sm:top-24 bottom-4 sm:bottom-24 overflow-y-auto pointer-events-auto custom-scrollbar z-10 px-4 md:px-12 lg:px-24">
