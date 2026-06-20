@@ -91,6 +91,7 @@
     <script type="module">
         import * as THREE from 'three';
         import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
 
@@ -126,14 +127,9 @@
         const obstacles = [];
 
         // Avatar variables
-        let avatarGroup, armL, armR, legL, legR, headMesh;
-        const rawConfig = '{{ current_user.avatar_config|safe if current_user.is_authenticated else "" }}';
-        let avatarConfig = { body: '#2196F3', arms: '#4CAF50', legs: '#FFC107' };
-        try {
-            if (rawConfig && rawConfig !== 'None') {
-                avatarConfig = JSON.parse(rawConfig);
-            }
-        } catch(e) {}
+        let avatarGroup;
+        let avatarMixer;
+        let currentAction;
 
         init();
         animate();
@@ -233,86 +229,41 @@
             const light = new THREE.HemisphereLight(0xffffff, 0xdddddd, 0.6);
             scene.add(light);
 
-            function createAvatar() {
+            function loadAvatar() {
                 avatarGroup = new THREE.Group();
-                
-                // Sevimli, yumuşak "Jellybean" Human Fall Flat tarzı karakter
-                const matBody = new THREE.MeshStandardMaterial({ 
-                    color: avatarConfig.body, 
-                    roughness: 0.6, 
-                    metalness: 0.1 
-                });
-
-                const limbGeo = new THREE.SphereGeometry(1, 32, 32);
-                
-                // Gövde (Torso)
-                const torso = new THREE.Mesh(limbGeo, matBody);
-                torso.scale.set(1.2, 1.4, 0.8);
-                torso.position.y = 3.0; // Yerden yüksekliği
-
-                // Kafa
-                const head = new THREE.Mesh(new THREE.SphereGeometry(0.9, 32, 32), matBody);
-                head.position.y = 1.3; // Gövdenin içine hafifçe gömülü
-                head.position.z = 0.15; 
-                torso.add(head);
-                headMesh = head;
-
-                // Kollar için pivot grupları
-                armL = new THREE.Group();
-                armL.position.set(-1.0, 0.8, 0); // Vücudun içine tam otursun
-                const armLMesh = new THREE.Mesh(limbGeo, matBody);
-                armLMesh.scale.set(0.35, 1.1, 0.35);
-                armLMesh.position.y = -0.9; 
-                armL.add(armLMesh);
-                torso.add(armL);
-
-                armR = new THREE.Group();
-                armR.position.set(1.0, 0.8, 0); 
-                const armRMesh = new THREE.Mesh(limbGeo, matBody);
-                armRMesh.scale.set(0.35, 1.1, 0.35);
-                armRMesh.position.y = -0.9;
-                armR.add(armRMesh);
-                torso.add(armR);
-
-                // Bacaklar için pivot grupları
-                legL = new THREE.Group();
-                legL.position.set(-0.45, -1.1, 0); // Vücudun altına tam otursun
-                const legLMesh = new THREE.Mesh(limbGeo, matBody);
-                legLMesh.scale.set(0.4, 1.1, 0.4);
-                legLMesh.position.y = -0.9;
-                legL.add(legLMesh);
-                torso.add(legL);
-
-                legR = new THREE.Group();
-                legR.position.set(0.45, -1.1, 0); 
-                const legRMesh = new THREE.Mesh(limbGeo, matBody);
-                legRMesh.scale.set(0.4, 1.1, 0.4);
-                legRMesh.position.y = -0.9;
-                legR.add(legRMesh);
-                torso.add(legR);
-
-                // Gölgeler
-                torso.traverse(child => {
-                    if (child.isMesh) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                    }
-                });
-
-                // Kameraya arkası dönük olması için
-                torso.rotation.y = Math.PI;
-
-                avatarGroup.add(torso);
-                
-                // Karakteri uygun boyuta getir
-                avatarGroup.scale.set(1.2, 1.2, 1.2); 
-                
                 scene.add(avatarGroup);
                 
-                // Torso'yu yürüme sırasında aşağı yukarı sallamak için
-                avatarGroup.userData.torso = torso;
+                const loader = new GLTFLoader();
+                loader.load('{{ url_for("static", filename="models/mushroom_dance.glb") }}', function (gltf) {
+                    const model = gltf.scene;
+                    
+                    // Adjust scale and position based on the mushroom_dance model
+                    model.scale.set(4.0, 4.0, 4.0); // Increase size if necessary, you can adjust this later
+                    model.position.set(0, 0, 0);
+                    
+                    // Add shadow casting
+                    model.traverse(function(node) {
+                        if (node.isMesh) {
+                            node.castShadow = true;
+                            node.receiveShadow = true;
+                        }
+                    });
+                    
+                    avatarGroup.add(model);
+                    
+                    // Setup animations
+                    if (gltf.animations && gltf.animations.length > 0) {
+                        avatarMixer = new THREE.AnimationMixer(model);
+                        // Play the first animation (likely the dance)
+                        currentAction = avatarMixer.clipAction(gltf.animations[0]);
+                        currentAction.play();
+                    }
+                }, undefined, function (error) {
+                    console.error('An error happened while loading the avatar:', error);
+                });
             }
-            createAvatar();
+
+            loadAvatar();
 
             if (!isMobile) {
                 controls = new PointerLockControls(camera, document.body);
@@ -769,44 +720,14 @@
                 } else {
                     euler.setFromQuaternion(controls.getObject().quaternion);
                 }
-                avatarGroup.rotation.y = euler.y;
-
-                // Walking Animation
-                const isMoving = (moveForward || moveBackward || moveLeft || moveRight) || (isMobile && (fwdValue !== 0 || bkdValue !== 0 || lftValue !== 0 || rgtValue !== 0));
                 
-                if (isMoving) {
-                    if (armL && armR && legL && legR) {
-                        const walkSpeed = 15;
-                        armL.rotation.x = Math.sin(time * walkSpeed * 0.001) * 0.8;
-                        armR.rotation.x = Math.sin(time * walkSpeed * 0.001 + Math.PI) * 0.8;
-                        legL.rotation.x = Math.sin(time * walkSpeed * 0.001 + Math.PI) * 0.8;
-                        legR.rotation.x = Math.sin(time * walkSpeed * 0.001) * 0.8;
-                        
-                        if (avatarGroup.userData.torso) {
-                            avatarGroup.userData.torso.rotation.z = Math.sin(time * walkSpeed * 0.001) * 0.1;
-                            avatarGroup.userData.torso.position.y = 3.2 + Math.abs(Math.sin(time * walkSpeed * 0.001)) * 0.3;
-                        }
-                    }
-                } else {
-                    if (armL && armR && legL && legR) {
-                        armL.rotation.x += (0 - armL.rotation.x) * 0.1;
-                        armR.rotation.x += (0 - armR.rotation.x) * 0.1;
-                        legL.rotation.x += (0 - legL.rotation.x) * 0.1;
-                        legR.rotation.x += (0 - legR.rotation.x) * 0.1;
-                        
-                        if (avatarGroup.userData.torso) {
-                            avatarGroup.userData.torso.rotation.z += (0 - avatarGroup.userData.torso.rotation.z) * 0.1;
-                            avatarGroup.userData.torso.position.y += (3.2 - avatarGroup.userData.torso.position.y) * 0.1;
-                        }
-                    }
-                }
-            }
+                // Since the camera looks "forward", we rotate the avatar 180 degrees so its back faces the camera (like a standard third-person game)
+                avatarGroup.rotation.y = euler.y + Math.PI;
 
-            // Head rotation
-            if (headMesh) {
-                // Kamera nereye bakıyorsa kafa da o yöne (pitch - yukarı/aşağı) baksın.
-                // Modelin Y rotasyonu Math.PI olduğu için kameranın x rotasyonunun tersini veriyoruz.
-                headMesh.rotation.x = -camera.rotation.x;
+                // Update GLTF Animations
+                if (avatarMixer) {
+                    avatarMixer.update(delta);
+                }
             }
 
             let activeCamera = isThirdPerson ? tpCamera : camera;
