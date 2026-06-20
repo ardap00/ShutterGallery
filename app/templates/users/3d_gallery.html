@@ -770,8 +770,8 @@
                     euler.setFromQuaternion(controls.getObject().quaternion);
                 }
                 
-                // Since the camera looks "forward", we rotate the avatar 180 degrees so its back faces the camera (like a standard third-person game)
-                avatarGroup.rotation.y = euler.y + Math.PI;
+                // The angel_character_model.glb needs to face forward (without the Math.PI offset)
+                avatarGroup.rotation.y = euler.y;
 
                 // Update GLTF Animations
                 if (avatarMixer) {
@@ -782,8 +782,10 @@
             let activeCamera = isThirdPerson ? tpCamera : camera;
             if (isThirdPerson) {
                 const dist = 12;
+                // euler.y determines the direction the camera is facing. 
+                // Vector(0,0,1) is the local "backward" vector.
                 const dir = new THREE.Vector3(0, 0, 1);
-                dir.applyAxisAngle(new THREE.Vector3(0,1,0), avatarGroup.rotation.y);
+                dir.applyAxisAngle(new THREE.Vector3(0,1,0), euler.y);
                 tpCamera.position.copy(camera.position).add(dir.multiplyScalar(dist));
                 tpCamera.position.y = camera.position.y + 4;
                 
@@ -793,7 +795,11 @@
                 tpCamera.position.x = Math.max(-roomWidth / 2 + marginX, Math.min(roomWidth / 2 - marginX, tpCamera.position.x));
                 tpCamera.position.z = Math.max(-totalZ + 40 + marginZ, Math.min(40 - marginZ, tpCamera.position.z));
                 
-                tpCamera.lookAt(camera.position);
+                // Kameranın her zaman ileriye (karakterin önündeki bir noktaya) bakmasını sağla
+                const targetPoint = new THREE.Vector3(0, 0, -20);
+                targetPoint.applyAxisAngle(new THREE.Vector3(0,1,0), euler.y);
+                targetPoint.add(camera.position);
+                tpCamera.lookAt(targetPoint);
             }
 
             renderer.render(scene, activeCamera);
