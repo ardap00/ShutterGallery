@@ -755,20 +755,20 @@
 
             prevTime = time;
 
+            // Calculate Camera Yaw (euler) globally so both avatar and tpCamera can use it
+            const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+            if (isMobile) {
+                euler.setFromQuaternion(camera.quaternion);
+            } else {
+                euler.setFromQuaternion(controls.getObject().quaternion);
+            }
+
             // --- Avatar Update Logic ---
             if (avatarGroup) {
                 const camPos = isMobile ? camera.position : controls.getObject().position;
                 
                 // Match position (except Y is locked to 0)
                 avatarGroup.position.set(camPos.x, 0, camPos.z);
-                
-                // Match rotation Y (Yaw)
-                const euler = new THREE.Euler(0, 0, 0, 'YXZ');
-                if (isMobile) {
-                    euler.setFromQuaternion(camera.quaternion);
-                } else {
-                    euler.setFromQuaternion(controls.getObject().quaternion);
-                }
                 
                 // The angel_character_model.glb needs to face forward (without the Math.PI offset)
                 avatarGroup.rotation.y = euler.y;
