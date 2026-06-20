@@ -1,0 +1,47 @@
+<!-- PWA Install Button -->
+<div id="pwa-install-container" class="fixed top-4 right-4 md:top-8 md:right-8 z-[60]" style="display: none;">
+    <button id="pwa-install-btn" class="glass-button flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-full text-white bg-emerald-500/20 hover:bg-emerald-500/40 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all animate-pulse">
+        <svg class="w-4 h-4 md:w-5 md:h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+        <span class="font-bold text-[10px] md:text-xs tracking-widest uppercase text-emerald-100">Uygulamayı İndir</span>
+    </button>
+</div>
+
+<script>
+    let deferredPrompt;
+    const installContainer = document.getElementById('pwa-install-container');
+    const installBtn = document.getElementById('pwa-install-btn');
+
+    // Mobil cihaz kontrolü
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Tarayıcının kendi otomatik kurulum penceresini engelle
+        e.preventDefault();
+        // Olayı sakla
+        deferredPrompt = e;
+        
+        // Sadece mobil cihazlardaysa ve standalone değilse göster
+        if (isMobile && !window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
+            installContainer.style.display = 'block';
+        }
+    });
+
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            // Kullanıcıya yükleme istemini göster
+            deferredPrompt.prompt();
+            // Kullanıcının yanıtını bekle
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                installContainer.style.display = 'none';
+            }
+            // İstemi temizle
+            deferredPrompt = null;
+        }
+    });
+
+    // Zaten yüklü bir PWA içinden çalışıyorsa butonu gizle (güvenlik için)
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        installContainer.style.display = 'none';
+    }
+</script>
