@@ -627,18 +627,20 @@
                         scene.add(lampLeft);
                         scene.add(lampRight);
                         
-                        // Add warm light for each lamp inside the cage
-                        const lightLeft = new THREE.PointLight(0xffddaa, 0.5, 15);
-                        lightLeft.position.copy(lampLeft.position);
-                        lightLeft.position.y += 1.8; // Move light up into the cage
-                        lightLeft.position.x += (side === 'left' ? 0.8 : -0.8); // Move light out from the wall
-                        scene.add(lightLeft);
-                        
-                        const lightRight = new THREE.PointLight(0xffddaa, 0.5, 15);
-                        lightRight.position.copy(lampRight.position);
-                        lightRight.position.y += 1.8; // Move light up into the cage
-                        lightRight.position.x += (side === 'left' ? 0.8 : -0.8); // Move light out from the wall
-                        scene.add(lightRight);
+                        // Add warm light for each lamp inside the cage (Mobil optimizasyon: Mobilde bu ışıkları ekleme)
+                        if (!isMobile) {
+                            const lightLeft = new THREE.PointLight(0xffddaa, 0.5, 15);
+                            lightLeft.position.copy(lampLeft.position);
+                            lightLeft.position.y += 1.8; // Move light up into the cage
+                            lightLeft.position.x += (side === 'left' ? 0.8 : -0.8); // Move light out from the wall
+                            scene.add(lightLeft);
+                            
+                            const lightRight = new THREE.PointLight(0xffddaa, 0.5, 15);
+                            lightRight.position.copy(lampRight.position);
+                            lightRight.position.y += 1.8; // Move light up into the cage
+                            lightRight.position.x += (side === 'left' ? 0.8 : -0.8); // Move light out from the wall
+                            scene.add(lightRight);
+                        }
                     }
                 });
             });
@@ -652,7 +654,10 @@
             });
 
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            // Mobil cihazlarda çözünürlüğü kısıtla (Optimizasyon)
+            const maxPixelRatio = isMobile ? 1.0 : window.devicePixelRatio;
+            renderer.setPixelRatio(maxPixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.outputColorSpace = THREE.SRGBColorSpace;
             document.body.appendChild(renderer.domElement);
