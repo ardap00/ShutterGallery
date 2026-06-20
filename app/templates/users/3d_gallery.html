@@ -375,9 +375,9 @@
                 }, {passive: false});
             }
 
-            // Floor (Zemin koyu beton/granit rengi yapıldı)
+            // Floor (Shiny Marble)
             const floorGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
-            const floorMat = new THREE.MeshStandardMaterial({ color: 0x2c2c2c, roughness: 0.5, metalness: 0.2 });
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.05, metalness: 0.1 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
             floor.position.z = -totalZ / 2 + 40;
