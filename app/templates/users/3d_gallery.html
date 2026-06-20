@@ -611,29 +611,33 @@
                         const lampHeight = roomHeight / 2 + 2.5; // Slightly above the middle
                         
                         if (side === 'left') {
-                            lampLeft.position.set(-roomWidth / 2 + 0.5, lampHeight, zPos + lampOffset);
+                            lampLeft.position.set(-roomWidth / 2 + 0.05, lampHeight, zPos + lampOffset);
                             lampLeft.rotation.y = -Math.PI / 2; // Rotated 180 deg
                             
-                            lampRight.position.set(-roomWidth / 2 + 0.5, lampHeight, zPos - lampOffset);
+                            lampRight.position.set(-roomWidth / 2 + 0.05, lampHeight, zPos - lampOffset);
                             lampRight.rotation.y = -Math.PI / 2; // Rotated 180 deg
                         } else {
-                            lampLeft.position.set(roomWidth / 2 - 0.5, lampHeight, zPos + lampOffset);
+                            lampLeft.position.set(roomWidth / 2 - 0.05, lampHeight, zPos + lampOffset);
                             lampLeft.rotation.y = Math.PI / 2; // Rotated 180 deg
                             
-                            lampRight.position.set(roomWidth / 2 - 0.5, lampHeight, zPos - lampOffset);
+                            lampRight.position.set(roomWidth / 2 - 0.05, lampHeight, zPos - lampOffset);
                             lampRight.rotation.y = Math.PI / 2; // Rotated 180 deg
                         }
                         
                         scene.add(lampLeft);
                         scene.add(lampRight);
                         
-                        // Add warm light for each lamp
+                        // Add warm light for each lamp inside the cage
                         const lightLeft = new THREE.PointLight(0xffddaa, 0.5, 15);
                         lightLeft.position.copy(lampLeft.position);
+                        lightLeft.position.y += 1.8; // Move light up into the cage
+                        lightLeft.position.x += (side === 'left' ? 0.8 : -0.8); // Move light out from the wall
                         scene.add(lightLeft);
                         
                         const lightRight = new THREE.PointLight(0xffddaa, 0.5, 15);
                         lightRight.position.copy(lampRight.position);
+                        lightRight.position.y += 1.8; // Move light up into the cage
+                        lightRight.position.x += (side === 'left' ? 0.8 : -0.8); // Move light out from the wall
                         scene.add(lightRight);
                     }
                 });
