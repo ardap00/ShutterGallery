@@ -119,6 +119,7 @@
 </head>
 <body>
     <div id="bg"></div>
+    <canvas id="particles-canvas" class="fixed inset-0 z-0 pointer-events-none opacity-50"></canvas>
     <canvas id="c" class="fixed inset-0 w-full h-full" style="z-index:10; transition: opacity 1s ease;"></canvas>
 
     <div id="hint">{{ _('↔ Sürükle & Döndür &nbsp;·&nbsp; Scroll: Yakınlaş') }}</div>
@@ -851,5 +852,68 @@
     
     <!-- Mobile Bottom Navigation Bar -->
     {% include "main/_mobile_nav.html" %}
+    
+    <script>
+        // Particles Script
+        const pCanvas = document.getElementById('particles-canvas');
+        if (pCanvas) {
+            const pCtx = pCanvas.getContext('2d');
+            let dustParticles = [];
+            
+            function resizeParticles() {
+                pCanvas.width = window.innerWidth;
+                pCanvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeParticles);
+            resizeParticles();
+
+            class DustParticle {
+                constructor() {
+                    this.x = Math.random() * pCanvas.width;
+                    this.y = Math.random() * pCanvas.height;
+                    this.size = Math.random() * 2 + 0.5;
+                    this.speedX = Math.random() * 0.4 - 0.2;
+                    this.speedY = Math.random() * -0.5 - 0.1;
+                    this.opacity = Math.random() * 0.5 + 0.1;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.y < 0) {
+                        this.y = pCanvas.height;
+                        this.x = Math.random() * pCanvas.width;
+                    }
+                    if (this.x < 0 || this.x > pCanvas.width) {
+                        this.speedX = -this.speedX;
+                    }
+                }
+                draw() {
+                    pCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                    pCtx.beginPath();
+                    pCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    pCtx.fill();
+                }
+            }
+
+            function initDustParticles() {
+                dustParticles = [];
+                const numParticles = Math.min(window.innerWidth / 15, 100);
+                for (let i = 0; i < numParticles; i++) {
+                    dustParticles.push(new DustParticle());
+                }
+            }
+            initDustParticles();
+
+            function animateDustParticles() {
+                pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+                for (let p of dustParticles) {
+                    p.update();
+                    p.draw();
+                }
+                requestAnimationFrame(animateDustParticles);
+            }
+            animateDustParticles();
+        }
+    </script>
 </body>
 </html>

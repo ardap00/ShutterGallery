@@ -45,12 +45,16 @@
         }
         #vignette {
             position: absolute; inset: 0; pointer-events: none; z-index: 4;
-            background: radial-gradient(circle, rgba(0,0,0,0) 30%, rgba(0,0,0,0.95) 100%);
+            background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,0.85) 100%);
+        }
+        #particles-canvas {
+            position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.4;
         }
     </style>
 </head>
 <body>
     <div id="vignette"></div>
+    <canvas id="particles-canvas"></canvas>
     <button id="back-btn" onclick="if(document.referrer) { history.back(); } else { window.location.href='{{ url_for('users.profile', username=user.username) }}'; }" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-all font-bold text-xs tracking-widest uppercase border border-white/10 shadow-lg cursor-pointer">
         &larr; Profile Dön
     </button>
@@ -232,11 +236,11 @@
             tpCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
 
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0a0c); // Dark cinematic background
-            scene.fog = new THREE.FogExp2(0x0a0a0c, 0.02); // Exponential fog for depth
+            scene.background = new THREE.Color(0x0f0f11); // Slightly brighter cinematic background
+            scene.fog = new THREE.FogExp2(0x0f0f11, 0.012); // Less dense fog
 
-            // Very subtle ambient light for darkness
-            const light = new THREE.HemisphereLight(0x222222, 0x0a0a0c, 0.4);
+            // Stronger ambient light so the room and floor are visible
+            const light = new THREE.HemisphereLight(0x666666, 0x111111, 0.8);
             scene.add(light);
 
             function createAvatar() {
@@ -474,11 +478,11 @@
             carpetTex.wrapT = THREE.RepeatWrapping;
             carpetTex.repeat.set(1, totalZ / 10); // scale pattern
             
-            // Highly reflective dark marble floor
+            // Highly reflective dark marble floor (brighter so it's visible)
             const carpetMat = new THREE.MeshStandardMaterial({ 
-                color: 0x111111,
-                roughness: 0.15, 
-                metalness: 0.8
+                color: 0x222222,
+                roughness: 0.2, 
+                metalness: 0.6
             });
             const carpet = new THREE.Mesh(carpetGeo, carpetMat);
             carpet.rotation.x = -Math.PI / 2;
@@ -489,7 +493,7 @@
             
             // Ceiling
             const ceilGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
-            const ceilMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9, metalness: 0.1 });
+            const ceilMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9, metalness: 0.1 });
             const ceiling = new THREE.Mesh(ceilGeo, ceilMat);
             ceiling.rotation.x = Math.PI / 2;
             ceiling.position.y = roomHeight;
@@ -592,36 +596,36 @@
                     const frame = new THREE.Mesh(frameGeo, frameMat);
                     
                     if (side === 'left') {
-                        imgMesh.position.set(-roomWidth / 2 + 0.6, roomHeight / 2, zPos);
+                        imgMesh.position.set(-roomWidth / 2 + 0.61, roomHeight / 2, zPos); // Fix z-fighting
                         imgMesh.rotation.y = Math.PI / 2;
                         
                         frame.position.set(-roomWidth / 2 + 0.35, roomHeight / 2, zPos);
                         frame.rotation.y = Math.PI / 2;
                         
                         // Spotlight
-                        const spotLight = new THREE.SpotLight(0xffffff, 4.0);
-                        spotLight.position.set(-roomWidth / 2 + 5, roomHeight - 2, zPos);
+                        const spotLight = new THREE.SpotLight(0xffffee, 10.0);
+                        spotLight.position.set(-roomWidth / 2 + 6, roomHeight - 1.5, zPos);
                         spotLight.target = imgMesh;
-                        spotLight.angle = Math.PI / 5;
-                        spotLight.penumbra = 0.8;
+                        spotLight.angle = Math.PI / 4;
+                        spotLight.penumbra = 0.5;
                         spotLight.decay = 1.5;
-                        spotLight.distance = 40;
+                        spotLight.distance = 50;
                         scene.add(spotLight);
                     } else {
-                        imgMesh.position.set(roomWidth / 2 - 0.6, roomHeight / 2, zPos);
+                        imgMesh.position.set(roomWidth / 2 - 0.61, roomHeight / 2, zPos); // Fix z-fighting
                         imgMesh.rotation.y = -Math.PI / 2;
                         
                         frame.position.set(roomWidth / 2 - 0.35, roomHeight / 2, zPos);
                         frame.rotation.y = -Math.PI / 2;
                         
                         // Spotlight
-                        const spotLight = new THREE.SpotLight(0xffffff, 4.0);
-                        spotLight.position.set(roomWidth / 2 - 5, roomHeight - 2, zPos);
+                        const spotLight = new THREE.SpotLight(0xffffee, 10.0);
+                        spotLight.position.set(roomWidth / 2 - 6, roomHeight - 1.5, zPos);
                         spotLight.target = imgMesh;
-                        spotLight.angle = Math.PI / 5;
-                        spotLight.penumbra = 0.8;
+                        spotLight.angle = Math.PI / 4;
+                        spotLight.penumbra = 0.5;
                         spotLight.decay = 1.5;
-                        spotLight.distance = 40;
+                        spotLight.distance = 50;
                         scene.add(spotLight);
                     }
                     
@@ -853,6 +857,70 @@
         document.getElementById('cam-toggle-btn').addEventListener('click', () => {
             isThirdPerson = !isThirdPerson;
         });
+
+        init();
+        animate();
+
+        // Particles Script
+        const pCanvas = document.getElementById('particles-canvas');
+        if (pCanvas) {
+            const pCtx = pCanvas.getContext('2d');
+            let dustParticles = [];
+            
+            function resizeParticles() {
+                pCanvas.width = window.innerWidth;
+                pCanvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeParticles);
+            resizeParticles();
+
+            class DustParticle {
+                constructor() {
+                    this.x = Math.random() * pCanvas.width;
+                    this.y = Math.random() * pCanvas.height;
+                    this.size = Math.random() * 2 + 0.5;
+                    this.speedX = Math.random() * 0.4 - 0.2;
+                    this.speedY = Math.random() * -0.5 - 0.1;
+                    this.opacity = Math.random() * 0.5 + 0.1;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.y < 0) {
+                        this.y = pCanvas.height;
+                        this.x = Math.random() * pCanvas.width;
+                    }
+                    if (this.x < 0 || this.x > pCanvas.width) {
+                        this.speedX = -this.speedX;
+                    }
+                }
+                draw() {
+                    pCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                    pCtx.beginPath();
+                    pCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    pCtx.fill();
+                }
+            }
+
+            function initDustParticles() {
+                dustParticles = [];
+                const numParticles = Math.min(window.innerWidth / 15, 100);
+                for (let i = 0; i < numParticles; i++) {
+                    dustParticles.push(new DustParticle());
+                }
+            }
+            initDustParticles();
+
+            function animateDustParticles() {
+                pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+                for (let p of dustParticles) {
+                    p.update();
+                    p.draw();
+                }
+                requestAnimationFrame(animateDustParticles);
+            }
+            animateDustParticles();
+        }
     </script>
 </body>
 </html>
