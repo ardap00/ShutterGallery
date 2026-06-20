@@ -504,11 +504,13 @@
                 scene.add(pointLight);
             }
 
-            // Add Photos
+            // Add Photos and Wall Lamps
             const textureLoader = new THREE.TextureLoader();
+            const gltfLoader = new GLTFLoader();
 
-            photosData.forEach((photo, index) => {
-                const side = index % 2 === 0 ? 'left' : 'right';
+            function renderPhotos(lampModel) {
+                photosData.forEach((photo, index) => {
+                    const side = index % 2 === 0 ? 'left' : 'right';
                 const zPos = -Math.floor(index / 2) * zSpacing;
                 
                 textureLoader.load(photo.image_url, function(texture) {
@@ -595,7 +597,52 @@
                     spotLight.distance = 30;
                     spotLight.decay = 1.5;
                     scene.add(spotLight);
+                    
+                    // Wall Lamps (Left and Right of the painting)
+                    if (lampModel) {
+                        const lampLeft = lampModel.clone();
+                        const lampRight = lampModel.clone();
+                        
+                        const lampScale = 2.0;
+                        lampLeft.scale.set(lampScale, lampScale, lampScale);
+                        lampRight.scale.set(lampScale, lampScale, lampScale);
+                        
+                        const lampOffset = pWidth / 2 + 3.0; // 3 units away from the edge of the painting
+                        
+                        if (side === 'left') {
+                            lampLeft.position.set(-roomWidth / 2 + 0.5, roomHeight / 2, zPos + lampOffset);
+                            lampLeft.rotation.y = Math.PI / 2;
+                            
+                            lampRight.position.set(-roomWidth / 2 + 0.5, roomHeight / 2, zPos - lampOffset);
+                            lampRight.rotation.y = Math.PI / 2;
+                        } else {
+                            lampLeft.position.set(roomWidth / 2 - 0.5, roomHeight / 2, zPos + lampOffset);
+                            lampLeft.rotation.y = -Math.PI / 2;
+                            
+                            lampRight.position.set(roomWidth / 2 - 0.5, roomHeight / 2, zPos - lampOffset);
+                            lampRight.rotation.y = -Math.PI / 2;
+                        }
+                        
+                        scene.add(lampLeft);
+                        scene.add(lampRight);
+                        
+                        // Add warm light for each lamp
+                        const lightLeft = new THREE.PointLight(0xffddaa, 0.5, 15);
+                        lightLeft.position.copy(lampLeft.position);
+                        scene.add(lightLeft);
+                        
+                        const lightRight = new THREE.PointLight(0xffddaa, 0.5, 15);
+                        lightRight.position.copy(lampRight.position);
+                        scene.add(lightRight);
+                    }
                 });
+            }
+
+            gltfLoader.load('{{ url_for("static", filename="models/wall_lamp.glb") }}', function(gltf) {
+                renderPhotos(gltf.scene);
+            }, undefined, function(error) {
+                console.error("Failed to load wall lamp:", error);
+                renderPhotos(null);
             });
 
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
