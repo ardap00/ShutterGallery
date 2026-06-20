@@ -603,23 +603,24 @@
                         const lampLeft = lampModel.clone();
                         const lampRight = lampModel.clone();
                         
-                        const lampScale = 2.0;
+                        const lampScale = 0.03; // Significantly reduced scale
                         lampLeft.scale.set(lampScale, lampScale, lampScale);
                         lampRight.scale.set(lampScale, lampScale, lampScale);
                         
-                        const lampOffset = pWidth / 2 + 3.0; // 3 units away from the edge of the painting
+                        const lampOffset = pWidth / 2 + 2.0; // Closer to the painting
+                        const lampHeight = roomHeight / 2 + 2.5; // Slightly above the middle
                         
                         if (side === 'left') {
-                            lampLeft.position.set(-roomWidth / 2 + 0.5, roomHeight / 2, zPos + lampOffset);
+                            lampLeft.position.set(-roomWidth / 2 + 0.5, lampHeight, zPos + lampOffset);
                             lampLeft.rotation.y = Math.PI / 2;
                             
-                            lampRight.position.set(-roomWidth / 2 + 0.5, roomHeight / 2, zPos - lampOffset);
+                            lampRight.position.set(-roomWidth / 2 + 0.5, lampHeight, zPos - lampOffset);
                             lampRight.rotation.y = Math.PI / 2;
                         } else {
-                            lampLeft.position.set(roomWidth / 2 - 0.5, roomHeight / 2, zPos + lampOffset);
+                            lampLeft.position.set(roomWidth / 2 - 0.5, lampHeight, zPos + lampOffset);
                             lampLeft.rotation.y = -Math.PI / 2;
                             
-                            lampRight.position.set(roomWidth / 2 - 0.5, roomHeight / 2, zPos - lampOffset);
+                            lampRight.position.set(roomWidth / 2 - 0.5, lampHeight, zPos - lampOffset);
                             lampRight.rotation.y = -Math.PI / 2;
                         }
                         
