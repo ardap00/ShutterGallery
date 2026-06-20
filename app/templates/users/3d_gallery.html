@@ -603,7 +603,7 @@
                         const lampLeft = lampModel.clone();
                         const lampRight = lampModel.clone();
                         
-                        const lampScale = 0.03; // Significantly reduced scale
+                        const lampScale = 0.045; // Increased by 1.5x from 0.03
                         lampLeft.scale.set(lampScale, lampScale, lampScale);
                         lampRight.scale.set(lampScale, lampScale, lampScale);
                         
@@ -612,16 +612,16 @@
                         
                         if (side === 'left') {
                             lampLeft.position.set(-roomWidth / 2 + 0.5, lampHeight, zPos + lampOffset);
-                            lampLeft.rotation.y = Math.PI / 2;
+                            lampLeft.rotation.y = -Math.PI / 2; // Rotated 180 deg
                             
                             lampRight.position.set(-roomWidth / 2 + 0.5, lampHeight, zPos - lampOffset);
-                            lampRight.rotation.y = Math.PI / 2;
+                            lampRight.rotation.y = -Math.PI / 2; // Rotated 180 deg
                         } else {
                             lampLeft.position.set(roomWidth / 2 - 0.5, lampHeight, zPos + lampOffset);
-                            lampLeft.rotation.y = -Math.PI / 2;
+                            lampLeft.rotation.y = Math.PI / 2; // Rotated 180 deg
                             
                             lampRight.position.set(roomWidth / 2 - 0.5, lampHeight, zPos - lampOffset);
-                            lampRight.rotation.y = -Math.PI / 2;
+                            lampRight.rotation.y = Math.PI / 2; // Rotated 180 deg
                         }
                         
                         scene.add(lampLeft);
