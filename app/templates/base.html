@@ -14,54 +14,204 @@
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='shuttergallerylogo.jpeg') }}">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    animation: {
+                        'breathe': 'breathe 25s ease-in-out infinite alternate',
+                        'fade-in': 'fadeIn 0.8s ease-out forwards',
+                    },
+                    keyframes: {
+                        breathe: {
+                            '0%': { transform: 'scale(1.02)' },
+                            '100%': { transform: 'scale(1.10)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(15px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            scroll-behavior: smooth; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Cinematic Animated Background */
         #bg {
+            position: fixed; inset: 0; z-index: -2;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url('{{ url_for("static", filename="global-bg.jpg") }}') center/cover no-repeat;
+            filter: blur(6px) brightness(0.85);
+            transform-origin: center center;
+            will-change: transform;
+        }
+        
+        /* Subtle Film Grain */
+        #grain {
             position: fixed; inset: 0; z-index: -1;
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ url_for("static", filename="global-bg.jpg") }}') center/cover no-repeat;
-            filter: blur(2px);
-            transform: scale(1.02);
+            background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            opacity: 0.04;
+            pointer-events: none;
+        }
+
+        /* Glassmorphism System */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+        
+        .glass-card {
+            background: rgba(20, 20, 20, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            background: rgba(30, 30, 30, 0.5);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .glass-button:active {
+            transform: translateY(1px) scale(0.96);
         }
     </style>
 </head>
-<body class="min-h-screen bg-black overflow-x-hidden pb-16 md:pb-0">
-    <div id="bg"></div>
+<body class="min-h-screen bg-black overflow-x-hidden pb-16 md:pb-0 text-white selection:bg-emerald-500/30">
+    <div id="bg" class="animate-breathe"></div>
+    <div id="grain"></div>
+    <canvas id="particles-canvas" class="fixed inset-0 z-[-1] pointer-events-none opacity-50"></canvas>
 
     <!-- Menü (Geri dönüş düğmesi) -->
     <div class="fixed top-4 left-4 md:top-8 md:left-8 z-50">
-        <button onclick="history.back()" class="text-white/60 hover:text-emerald-400 transition-colors flex items-center gap-2 md:gap-3 bg-black/30 px-3 py-2 md:px-4 md:py-2 rounded-full backdrop-blur-sm border border-white/5 cursor-pointer">
+        <button onclick="history.back()" class="text-white/60 hover:text-emerald-400 transition-colors flex items-center gap-2 md:gap-3 glass-button px-3 py-2 md:px-4 md:py-2 rounded-full cursor-pointer">
             <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             <span class="hidden md:inline font-mono text-[10px] md:text-xs tracking-widest uppercase">Geri</span>
         </button>
-
     </div>
 
     <!-- Uygulama Logosu -->
     <div class="fixed top-4 md:top-8 left-1/2 -translate-x-1/2 z-40 pointer-events-none text-center">
-        <a href="{{ url_for('main.index') }}" class="pointer-events-auto flex items-center gap-2 hover:opacity-80 transition-opacity drop-shadow-lg">
-            <img src="{{ url_for('static', filename='shuttergallerylogo.jpeg') }}" alt="ShutterGallery Logo" class="h-8 md:h-12 w-auto object-contain rounded-md shadow-lg">
-            <span class="text-base md:text-xl font-bold tracking-widest text-white">Shutter<span class="text-emerald-500">Gallery</span></span>
+        <a href="{{ url_for('main.index') }}" class="pointer-events-auto flex items-center gap-2 hover:opacity-80 transition-opacity drop-shadow-lg glass-panel px-4 py-2 rounded-full">
+            <img src="{{ url_for('static', filename='shuttergallerylogo.jpeg') }}" alt="ShutterGallery Logo" class="h-6 md:h-8 w-auto object-contain rounded-full shadow-lg">
+            <span class="text-sm md:text-base font-bold tracking-widest text-white">Shutter<span class="text-emerald-500">Gallery</span></span>
         </a>
     </div>
 
     <!-- Flash Mesajları -->
-    <div class="fixed top-8 right-8 z-50 flex flex-col gap-2">
+    <div class="fixed top-24 md:top-8 right-4 md:right-8 z-50 flex flex-col gap-3">
         {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="px-4 py-3 rounded-xl text-sm font-mono tracking-wide
-                {% if category == 'danger' %}bg-red-500/20 border border-red-500/30 text-red-400
-                {% elif category == 'success' %}bg-emerald-500/20 border border-emerald-500/30 text-emerald-400
-                {% else %}bg-blue-500/20 border border-blue-500/30 text-blue-400{% endif %}" style="backdrop-filter: blur(10px);">
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% set color = 'emerald' if category == 'success' else ('rose' if category == 'error' else 'blue') %}
+                    <div class="glass-panel border-l-4 border-{{ color }}-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 animate-fade-in text-sm font-medium">
+                        {% if category == 'success' %}
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        {% else %}
+                        <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        {% endif %}
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
         {% endwith %}
     </div>
 
     {% block content %}{% endblock %}
+
+    <script>
+        // Professional Cinematic Dust Particles
+        const canvas = document.getElementById('particles-canvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 1.5 + 0.5;
+                    this.speedX = Math.random() * 0.4 - 0.2;
+                    this.speedY = Math.random() * -0.5 - 0.1;
+                    this.opacity = Math.random() * 0.5 + 0.1;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.y < 0) {
+                        this.y = canvas.height;
+                        this.x = Math.random() * canvas.width;
+                    }
+                    if (this.x < 0 || this.x > canvas.width) {
+                        this.speedX = -this.speedX;
+                    }
+                }
+                draw() {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function initParticles() {
+                particles = [];
+                const numParticles = Math.min(window.innerWidth / 15, 100);
+                for (let i = 0; i < numParticles; i++) {
+                    particles.push(new Particle());
+                }
+            }
+            initParticles();
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let p of particles) {
+                    p.update();
+                    p.draw();
+                }
+                requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
+        }
+    </script>
 
     <!-- Mobile Bottom Navigation Bar -->
     {% include "main/_mobile_nav.html" %}

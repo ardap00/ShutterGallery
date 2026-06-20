@@ -43,9 +43,14 @@
             position: absolute; top: 20px; left: 20px;
             z-index: 20;
         }
+        #vignette {
+            position: absolute; inset: 0; pointer-events: none; z-index: 4;
+            background: radial-gradient(circle, rgba(0,0,0,0) 30%, rgba(0,0,0,0.95) 100%);
+        }
     </style>
 </head>
 <body>
+    <div id="vignette"></div>
     <button id="back-btn" onclick="if(document.referrer) { history.back(); } else { window.location.href='{{ url_for('users.profile', username=user.username) }}'; }" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-all font-bold text-xs tracking-widest uppercase border border-white/10 shadow-lg cursor-pointer">
         &larr; Profile Dön
     </button>
@@ -227,10 +232,11 @@
             tpCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
 
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xf5f5f5);
-            scene.fog = new THREE.Fog(0xf5f5f5, 10, Math.min(150, totalZ));
+            scene.background = new THREE.Color(0x0a0a0c); // Dark cinematic background
+            scene.fog = new THREE.FogExp2(0x0a0a0c, 0.02); // Exponential fog for depth
 
-            const light = new THREE.HemisphereLight(0xffffff, 0xdddddd, 0.6);
+            // Very subtle ambient light for darkness
+            const light = new THREE.HemisphereLight(0x222222, 0x0a0a0c, 0.4);
             scene.add(light);
 
             function createAvatar() {
@@ -468,11 +474,11 @@
             carpetTex.wrapT = THREE.RepeatWrapping;
             carpetTex.repeat.set(1, totalZ / 10); // scale pattern
             
+            // Highly reflective dark marble floor
             const carpetMat = new THREE.MeshStandardMaterial({ 
-                color: 0xffffff,
-                map: carpetTex, 
-                roughness: 0.95, 
-                metalness: 0.0
+                color: 0x111111,
+                roughness: 0.15, 
+                metalness: 0.8
             });
             const carpet = new THREE.Mesh(carpetGeo, carpetMat);
             carpet.rotation.x = -Math.PI / 2;
@@ -483,7 +489,7 @@
             
             // Ceiling
             const ceilGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
-            const ceilMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1 });
+            const ceilMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9, metalness: 0.1 });
             const ceiling = new THREE.Mesh(ceilGeo, ceilMat);
             ceiling.rotation.x = Math.PI / 2;
             ceiling.position.y = roomHeight;
@@ -495,11 +501,12 @@
             wallTexture.repeat.set(totalZ / 20, roomHeight / 20); // Scale the texture
             
             const wallMat = new THREE.MeshStandardMaterial({ 
-                color: 0xffffff, 
-                roughness: 1.0,
+                color: 0x151515, 
+                roughness: 0.8,
+                metalness: 0.2,
                 map: wallTexture,
                 bumpMap: wallTexture,
-                bumpScale: 0.4
+                bumpScale: 0.2
             });
             const wallGeo = new THREE.PlaneGeometry(totalZ, roomHeight);
             
@@ -540,17 +547,13 @@
             startWall.position.y = roomHeight / 2;
             scene.add(startWall);
 
-            // Ceiling Lamps
+            // Ceiling Lamps (Subtle, mostly dark)
             for (let z = 20; z > -totalZ + 40; z -= zSpacing) {
-                const lampGeo = new THREE.CylinderGeometry(0.8, 1, 0.4, 16);
-                const lampMat = new THREE.MeshStandardMaterial({ color: 0x333333, emissive: 0xffffff, emissiveIntensity: 1 });
+                const lampGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.2, 16);
+                const lampMat = new THREE.MeshStandardMaterial({ color: 0x111111, emissive: 0x222222 });
                 const lamp = new THREE.Mesh(lampGeo, lampMat);
-                lamp.position.set(0, roomHeight - 0.2, z);
+                lamp.position.set(0, roomHeight - 0.1, z);
                 scene.add(lamp);
-                
-                const pointLight = new THREE.PointLight(0xffffee, 0.5, 60);
-                pointLight.position.set(0, roomHeight - 1, z);
-                scene.add(pointLight);
             }
 
             // Add Photos
@@ -582,30 +585,48 @@
                     const imgMesh = new THREE.Mesh(imgGeo, imgMat);
                     
                     // Frame
-                    const frameGeo = new THREE.BoxGeometry(pWidth + 0.8, pHeight + 0.8, 0.4);
-                    const frameMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2 }); // Siyah çerçeve güzel durur
-                    const frameMesh = new THREE.Mesh(frameGeo, frameMat);
+                    const frameThickness = 0.5;
+                    const frameDepth = 0.5;
+                    const frameGeo = new THREE.BoxGeometry(pWidth + frameThickness, pHeight + frameThickness, frameDepth);
+                    const frameMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.6, metalness: 0.8 });
+                    const frame = new THREE.Mesh(frameGeo, frameMat);
                     
                     if (side === 'left') {
-                        // Frame center at -19.9, front face is at -19.7
-                        // Place image at -19.65 to be slightly in front of the frame face
-                        imgMesh.position.set(-roomWidth / 2 + 0.35, roomHeight / 2, zPos);
+                        imgMesh.position.set(-roomWidth / 2 + 0.6, roomHeight / 2, zPos);
                         imgMesh.rotation.y = Math.PI / 2;
                         
-                        frameMesh.position.set(-roomWidth / 2 + 0.1, roomHeight / 2, zPos);
-                        frameMesh.rotation.y = Math.PI / 2;
+                        frame.position.set(-roomWidth / 2 + 0.35, roomHeight / 2, zPos);
+                        frame.rotation.y = Math.PI / 2;
+                        
+                        // Spotlight
+                        const spotLight = new THREE.SpotLight(0xffffff, 4.0);
+                        spotLight.position.set(-roomWidth / 2 + 5, roomHeight - 2, zPos);
+                        spotLight.target = imgMesh;
+                        spotLight.angle = Math.PI / 5;
+                        spotLight.penumbra = 0.8;
+                        spotLight.decay = 1.5;
+                        spotLight.distance = 40;
+                        scene.add(spotLight);
                     } else {
-                        // Frame center at 19.9, front face is at 19.7
-                        // Place image at 19.65 to be slightly in front of the frame face
-                        imgMesh.position.set(roomWidth / 2 - 0.35, roomHeight / 2, zPos);
+                        imgMesh.position.set(roomWidth / 2 - 0.6, roomHeight / 2, zPos);
                         imgMesh.rotation.y = -Math.PI / 2;
                         
-                        frameMesh.position.set(roomWidth / 2 - 0.1, roomHeight / 2, zPos);
-                        frameMesh.rotation.y = -Math.PI / 2;
+                        frame.position.set(roomWidth / 2 - 0.35, roomHeight / 2, zPos);
+                        frame.rotation.y = -Math.PI / 2;
+                        
+                        // Spotlight
+                        const spotLight = new THREE.SpotLight(0xffffff, 4.0);
+                        spotLight.position.set(roomWidth / 2 - 5, roomHeight - 2, zPos);
+                        spotLight.target = imgMesh;
+                        spotLight.angle = Math.PI / 5;
+                        spotLight.penumbra = 0.8;
+                        spotLight.decay = 1.5;
+                        spotLight.distance = 40;
+                        scene.add(spotLight);
                     }
                     
+                    scene.add(frame);
                     scene.add(imgMesh);
-                    scene.add(frameMesh);
                     
                     // Create Plaque
                     const plaqueTex = createTextTexture(photo);

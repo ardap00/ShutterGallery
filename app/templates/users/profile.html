@@ -4,17 +4,17 @@
 <div class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto text-white font-sans">
     
     <!-- Search Bar -->
-    <div class="max-w-xl mx-auto mb-8 relative">
+    <div class="max-w-xl mx-auto mb-8 relative animate-fade-in" style="animation-delay: 0.1s;">
         <form action="{{ url_for('main.search') }}" method="GET">
-            <input type="text" name="q" placeholder="Temalarda, kullanıcılarda veya fotoğraf başlıklarında ara..." class="w-full bg-zinc-900/80 border border-white/10 rounded-full px-6 py-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-emerald-500/50 transition-colors backdrop-blur-md shadow-xl">
-            <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-emerald-400">
+            <input type="text" name="q" placeholder="Temalarda, kullanıcılarda veya fotoğraf başlıklarında ara..." class="w-full glass-panel rounded-full px-6 py-4 text-white text-sm placeholder-white/50 focus:outline-none focus:bg-white/10 transition-all shadow-xl">
+            <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-emerald-400 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </button>
         </form>
     </div>
 
     <!-- User Profile Header -->
-    <div class="flex flex-col md:flex-row items-center gap-8 mb-12 bg-zinc-900/50 p-8 rounded-3xl border border-white/5 backdrop-blur-sm">
+    <div class="flex flex-col md:flex-row items-center gap-8 mb-12 glass-panel p-8 md:p-12 rounded-[2rem] animate-fade-in" style="animation-delay: 0.2s;">
         <div class="relative group w-32 h-32 md:w-48 md:h-48 shrink-0">
             {% set avatar_filename = user.avatar_file if user.avatar_file else 'default.jpg' %}
             {% if avatar_filename.startswith('http') %}
@@ -36,48 +36,48 @@
                 {{ user.bio if user.bio else 'Henüz bir biyografi eklenmedi.' }}
             </p>
             
-            <div class="mt-6 flex flex-wrap gap-4 justify-center md:justify-start items-center">
-                <a href="{{ url_for('users.profile', username=user.username, tab='photos') }}" class="px-6 py-2 rounded-full {% if tab == 'photos' %}bg-zinc-800 border-emerald-500/50{% else %}bg-black border-white/10 hover:bg-zinc-800{% endif %} border text-center transition-colors">
-                    <div class="text-lg font-bold">{{ post_count }}</div>
-                    <div class="text-[10px] uppercase font-mono tracking-widest text-zinc-500">Gönderi</div>
+            <div class="mt-8 flex flex-wrap gap-4 justify-center md:justify-start items-center">
+                <a href="{{ url_for('users.profile', username=user.username, tab='photos') }}" class="glass-button px-6 py-2.5 rounded-full {% if tab == 'photos' %}bg-white/20 border-white/40{% endif %} text-center">
+                    <div class="text-xl font-bold">{{ post_count }}</div>
+                    <div class="text-[10px] uppercase tracking-widest text-white/60 font-semibold mt-0.5">Gönderi</div>
                 </a>
-                <a href="{{ url_for('users.profile', username=user.username, tab='followers') }}" class="px-6 py-2 rounded-full {% if tab == 'followers' %}bg-zinc-800 border-emerald-500/50{% else %}bg-black border-white/10 hover:bg-zinc-800{% endif %} border text-center transition-colors">
-                    <div class="text-lg font-bold">{{ user.followers.count() }}</div>
-                    <div class="text-[10px] uppercase font-mono tracking-widest text-zinc-500">Takipçi</div>
+                <a href="{{ url_for('users.profile', username=user.username, tab='followers') }}" class="glass-button px-6 py-2.5 rounded-full {% if tab == 'followers' %}bg-white/20 border-white/40{% endif %} text-center">
+                    <div class="text-xl font-bold">{{ user.followers.count() }}</div>
+                    <div class="text-[10px] uppercase tracking-widest text-white/60 font-semibold mt-0.5">Takipçi</div>
                 </a>
-                <a href="{{ url_for('users.profile', username=user.username, tab='following') }}" class="px-6 py-2 rounded-full {% if tab == 'following' %}bg-zinc-800 border-emerald-500/50{% else %}bg-black border-white/10 hover:bg-zinc-800{% endif %} border text-center transition-colors">
-                    <div class="text-lg font-bold">{{ user.followed.count() }}</div>
-                    <div class="text-[10px] uppercase font-mono tracking-widest text-zinc-500">Takip</div>
+                <a href="{{ url_for('users.profile', username=user.username, tab='following') }}" class="glass-button px-6 py-2.5 rounded-full {% if tab == 'following' %}bg-white/20 border-white/40{% endif %} text-center">
+                    <div class="text-xl font-bold">{{ user.followed.count() }}</div>
+                    <div class="text-[10px] uppercase tracking-widest text-white/60 font-semibold mt-0.5">Takip</div>
                 </a>
                 {% if current_user == user %}
-                <a href="{{ url_for('posts.new_post') }}" class="px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                <a href="{{ url_for('posts.new_post') }}" class="glass-button px-6 py-3.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/40 border-emerald-500/30 text-emerald-300 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest ml-0 md:ml-4">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Hızlı Yükle
                 </a>
-                <a href="{{ url_for('users.account_settings') }}" class="px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                <a href="{{ url_for('users.account_settings') }}" class="glass-button px-6 py-3.5 rounded-full flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
                     Profili Düzenle
                 </a>
-                <a href="{{ url_for('users.avatar_settings') }}" class="px-6 py-3 rounded-full bg-[#829A73]/20 hover:bg-[#829A73]/40 border border-[#829A73]/50 text-[#A3B18A] transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                <a href="{{ url_for('users.avatar_settings') }}" class="glass-button px-6 py-3.5 rounded-full flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
                     Avatarı Düzenle
                 </a>
                 {% elif current_user.is_authenticated %}
                     {% if current_user.is_following(user) %}
-                        <a href="{{ url_for('users.unfollow', username=user.username) }}" class="px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                        <a href="{{ url_for('users.unfollow', username=user.username) }}" class="glass-button px-6 py-3.5 rounded-full flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
                             Takipten Çık
                         </a>
                     {% else %}
-                        <a href="{{ url_for('users.follow', username=user.username) }}" class="px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                        <a href="{{ url_for('users.follow', username=user.username) }}" class="glass-button px-6 py-3.5 rounded-full bg-white/20 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
                             Takip Et
                         </a>
                     {% endif %}
-                    <a href="{{ url_for('messages.chat', username=user.username) }}" class="px-6 py-3 rounded-full bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/50 text-blue-400 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                    <a href="{{ url_for('messages.chat', username=user.username) }}" class="glass-button px-6 py-3.5 rounded-full flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
                         Mesaj
                     </a>
                 {% endif %}
                 
                 {% if post_count > 0 %}
-                <a href="{{ url_for('users.gallery3d', username=user.username) }}" class="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(147,51,234,0.4)]">
+                <a href="{{ url_for('users.gallery3d', username=user.username) }}" class="glass-button px-6 py-3.5 rounded-full bg-white/10 hover:bg-white/20 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>
                     3D Galeriyi Gez
                 </a>
@@ -87,24 +87,25 @@
     </div>
 
     <!-- Tab Content -->
+    <div class="animate-fade-in" style="animation-delay: 0.3s;">
     {% if tab == 'photos' %}
         <h2 class="text-xl font-bold mb-6 tracking-tight border-b border-white/10 pb-4">Fotoğraflar</h2>
         {% if posts %}
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {% for post in posts %}
-            <div class="relative group rounded-xl overflow-hidden bg-zinc-900 aspect-square border border-white/5">
+            <div class="glass-card relative group rounded-2xl overflow-hidden aspect-square">
                 <a href="{{ url_for('posts.post', post_id=post.id) }}" class="block w-full h-full">
                     {% if post.image_file.startswith('http') %}
-                    <img src="{{ post.image_file }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <img src="{{ post.image_file }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                     {% else %}
-                    <img src="{{ url_for('static', filename='uploads/' + post.image_file) }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <img src="{{ url_for('static', filename='uploads/' + post.image_file) }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                     {% endif %}
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                        <h3 class="text-sm font-bold text-white truncate drop-shadow-md">{{ post.title }}</h3>
-                        <div class="flex gap-3 text-[10px] text-zinc-400 font-mono mt-1">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
+                        <h3 class="text-base font-bold text-white truncate drop-shadow-md">{{ post.title }}</h3>
+                        <div class="flex gap-4 text-xs text-white/70 font-medium mt-1.5">
                             <span>👁 {{ post.views }}</span>
                             <span>💬 {{ post.comments|length }}</span>
-                            <span class="{% if current_user.is_authenticated and current_user.has_liked_post(post) %}text-red-500{% endif %}">
+                            <span class="{% if current_user.is_authenticated and current_user.has_liked_post(post) %}text-rose-400{% endif %}">
                                 ♥ {{ post.likers.count() }}
                             </span>
                         </div>
@@ -114,57 +115,61 @@
             {% endfor %}
         </div>
         {% else %}
-        <div class="text-center py-20 bg-zinc-900/30 rounded-3xl border border-white/5 border-dashed">
-            <p class="text-zinc-500 tracking-widest uppercase text-sm mb-4">Henüz fotoğraf yok</p>
+        <div class="text-center py-24 glass-panel rounded-[2rem]">
+            <p class="text-white/50 tracking-widest uppercase text-sm mb-6">Henüz fotoğraf yok</p>
             {% if current_user == user %}
-            <a href="{{ url_for('posts.new_post') }}" class="text-emerald-400 hover:text-emerald-300 text-xs font-mono uppercase tracking-widest">İlk fotoğrafını yükle →</a>
+            <a href="{{ url_for('posts.new_post') }}" class="glass-button px-6 py-3 rounded-full text-white text-xs font-bold uppercase tracking-widest inline-flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                İlk fotoğrafını yükle
+            </a>
             {% endif %}
         </div>
         {% endif %}
     {% elif tab == 'followers' %}
         <h2 class="text-xl font-bold mb-6 tracking-tight border-b border-white/10 pb-4">Takipçiler</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for follower in user.followers %}
-            <a href="{{ url_for('users.profile', username=follower.username) }}" class="flex items-center gap-4 bg-zinc-900/50 p-4 rounded-xl border border-white/5 hover:border-emerald-500/30 hover:bg-zinc-900 transition-all">
+            <a href="{{ url_for('users.profile', username=follower.username) }}" class="glass-card flex items-center gap-5 p-5 rounded-2xl">
                 {% set f_avatar = follower.avatar_file if follower.avatar_file else 'default.jpg' %}
                 {% if f_avatar.startswith('http') %}
-                <img src="{{ f_avatar }}" class="w-12 h-12 rounded-full object-cover">
+                <img src="{{ f_avatar }}" class="w-14 h-14 rounded-full object-cover border-2 border-white/10 shadow-lg">
                 {% else %}
-                <img src="{{ url_for('static', filename='avatars/' + f_avatar) }}" class="w-12 h-12 rounded-full object-cover">
+                <img src="{{ url_for('static', filename='avatars/' + f_avatar) }}" class="w-14 h-14 rounded-full object-cover border-2 border-white/10 shadow-lg">
                 {% endif %}
                 <div>
-                    <h3 class="font-bold text-white">{{ follower.username }} <span class="text-xs text-zinc-500 font-mono ml-1">#{{ follower.unique_id }}</span></h3>
-                    <p class="text-xs text-zinc-500">{{ follower.followers.count() }} Takipçi</p>
+                    <h3 class="font-bold text-white text-lg">{{ follower.username }} <span class="text-[10px] text-white/40 tracking-widest uppercase ml-1">#{{ follower.unique_id }}</span></h3>
+                    <p class="text-xs text-white/50 font-medium">{{ follower.followers.count() }} Takipçi</p>
                 </div>
             </a>
             {% else %}
-            <div class="col-span-full text-center py-12 text-zinc-500 uppercase tracking-widest text-xs">
+            <div class="col-span-full text-center py-24 glass-panel rounded-[2rem] text-white/50 uppercase tracking-widest text-sm">
                 Henüz takipçi yok
             </div>
             {% endfor %}
         </div>
     {% elif tab == 'following' %}
         <h2 class="text-xl font-bold mb-6 tracking-tight border-b border-white/10 pb-4">Takip Edilenler</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for followed in user.followed %}
-            <a href="{{ url_for('users.profile', username=followed.username) }}" class="flex items-center gap-4 bg-zinc-900/50 p-4 rounded-xl border border-white/5 hover:border-emerald-500/30 hover:bg-zinc-900 transition-all">
+            <a href="{{ url_for('users.profile', username=followed.username) }}" class="glass-card flex items-center gap-5 p-5 rounded-2xl">
                 {% set f_avatar = followed.avatar_file if followed.avatar_file else 'default.jpg' %}
                 {% if f_avatar.startswith('http') %}
-                <img src="{{ f_avatar }}" class="w-12 h-12 rounded-full object-cover">
+                <img src="{{ f_avatar }}" class="w-14 h-14 rounded-full object-cover border-2 border-white/10 shadow-lg">
                 {% else %}
-                <img src="{{ url_for('static', filename='avatars/' + f_avatar) }}" class="w-12 h-12 rounded-full object-cover">
+                <img src="{{ url_for('static', filename='avatars/' + f_avatar) }}" class="w-14 h-14 rounded-full object-cover border-2 border-white/10 shadow-lg">
                 {% endif %}
                 <div>
-                    <h3 class="font-bold text-white">{{ followed.username }} <span class="text-xs text-zinc-500 font-mono ml-1">#{{ followed.unique_id }}</span></h3>
-                    <p class="text-xs text-zinc-500">{{ followed.followers.count() }} Takipçi</p>
+                    <h3 class="font-bold text-white text-lg">{{ followed.username }} <span class="text-[10px] text-white/40 tracking-widest uppercase ml-1">#{{ followed.unique_id }}</span></h3>
+                    <p class="text-xs text-white/50 font-medium">{{ followed.followers.count() }} Takipçi</p>
                 </div>
             </a>
             {% else %}
-            <div class="col-span-full text-center py-12 text-zinc-500 uppercase tracking-widest text-xs">
+            <div class="col-span-full text-center py-24 glass-panel rounded-[2rem] text-white/50 uppercase tracking-widest text-sm">
                 Henüz kimseyi takip etmiyor
             </div>
             {% endfor %}
         </div>
     {% endif %}
+    </div>
 </div>
 {% endblock content %}
