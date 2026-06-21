@@ -786,8 +786,8 @@
                         const size = new THREE.Vector3();
                         box.getSize(size);
                         
-                        // Tablonun genişliğinden (pWidth) biraz daha geniş olsun (veya minimum 6 birim)
-                        const targetWidth = Math.max(pWidth + 1, 6);
+                        // Bariyerlerin yüksekliği eşit olması için sabit bir genişlik baz alınır (örn. 8 birim)
+                        const targetWidth = 8;
                         const scale = targetWidth / (size.x || 1);
                         barrier.scale.set(scale, scale, scale);
                         
