@@ -375,62 +375,47 @@
                 }, {passive: false});
             }
 
-            // Floor (Zemin koyu beton/granit rengi yapıldı)
-            const floorGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
-            const floorMat = new THREE.MeshStandardMaterial({ color: 0x2c2c2c, roughness: 0.5, metalness: 0.2 });
-            const floor = new THREE.Mesh(floorGeo, floorMat);
-            floor.rotation.x = -Math.PI / 2;
-            floor.position.z = -totalZ / 2 + 40;
-            floor.receiveShadow = true;
-            scene.add(floor);
-            
-            // Red Carpet
-            const carpetWidth = 6;
-            const carpetGeo = new THREE.PlaneGeometry(carpetWidth, totalZ);
-            
-            const carpetCanvas = document.createElement('canvas');
-            carpetCanvas.width = 512;
-            carpetCanvas.height = 512;
-            const cCtx = carpetCanvas.getContext('2d');
-            
-            cCtx.fillStyle = '#7a0000'; // Dark red
-            cCtx.fillRect(0, 0, 512, 512);
-            
-            // Gold borders
-            cCtx.fillStyle = '#d4af37';
-            cCtx.fillRect(20, 0, 15, 512);
-            cCtx.fillRect(477, 0, 15, 512);
-            
-            // Central subtle diamond pattern
-            cCtx.strokeStyle = '#520000';
-            cCtx.lineWidth = 6;
-            for(let i = 0; i <= 512; i += 64) {
-                cCtx.beginPath();
-                cCtx.moveTo(256, i);
-                cCtx.lineTo(320, i + 32);
-                cCtx.lineTo(256, i + 64);
-                cCtx.lineTo(192, i + 32);
-                cCtx.closePath();
-                cCtx.stroke();
-            }
-            
-            const carpetTex = new THREE.CanvasTexture(carpetCanvas);
-            carpetTex.wrapS = THREE.RepeatWrapping;
-            carpetTex.wrapT = THREE.RepeatWrapping;
-            carpetTex.repeat.set(1, totalZ / 10); // scale pattern
-            
-            const carpetMat = new THREE.MeshStandardMaterial({ 
-                color: 0xffffff,
-                map: carpetTex, 
-                roughness: 0.95, 
-                metalness: 0.0
+            // Floor (Marble Floor)
+            gltfLoader.load('{{ url_for("static", filename="models/marble_floor.glb") }}', function(gltf) {
+                const floorModel = gltf.scene;
+                
+                // Modelin boyutunu hesapla
+                const box = new THREE.Box3().setFromObject(floorModel);
+                const size = new THREE.Vector3();
+                box.getSize(size);
+                
+                // Modeli odanın genişliğine (veya belirli bir karö boyutuna) göre ölçekle
+                // Odanın genişliği 40 birim, 10 birimlik karolar döşeyelim
+                const targetTileSize = 10;
+                const scale = targetTileSize / (size.x || 1); 
+                floorModel.scale.set(scale, scale, scale);
+                
+                const scaledSize = size.clone().multiplyScalar(scale);
+                
+                // Koridor boyunca fayansları döşe
+                const startZ = 40;
+                const endZ = -totalZ + 20; // 20 birim tolerans bırakalım
+                const startX = -roomWidth / 2;
+                const endX = roomWidth / 2;
+                
+                for (let x = startX; x < endX; x += targetTileSize) {
+                    for (let z = startZ; z > endZ; z -= targetTileSize) {
+                        const tile = floorModel.clone();
+                        // Karo merkezini hizalayarak yerleştir
+                        tile.position.set(x + targetTileSize / 2, 0, z - targetTileSize / 2);
+                        scene.add(tile);
+                    }
+                }
+            }, undefined, function(error) {
+                console.error("Failed to load marble floor:", error);
+                // Hata durumunda varsayılan zemin
+                const floorGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
+                const floorMat = new THREE.MeshStandardMaterial({ color: 0x2c2c2c, roughness: 0.5 });
+                const floor = new THREE.Mesh(floorGeo, floorMat);
+                floor.rotation.x = -Math.PI / 2;
+                floor.position.z = -totalZ / 2 + 40;
+                scene.add(floor);
             });
-            const carpet = new THREE.Mesh(carpetGeo, carpetMat);
-            carpet.rotation.x = -Math.PI / 2;
-            carpet.position.z = -totalZ / 2 + 40;
-            carpet.position.y = 0.02; // Z-fighting prevention
-            carpet.receiveShadow = true;
-            scene.add(carpet);
             
             // Ceiling
             const ceilGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
