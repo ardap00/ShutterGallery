@@ -559,12 +559,12 @@
             gltfLoader.load('{{ url_for("static", filename="models/chandelier_black.glb") }}', function(gltf) {
                 const chandelierModel = gltf.scene;
                 // Chandelier scale (can be adjusted)
-                chandelierModel.scale.set(0.04, 0.04, 0.04);
+                chandelierModel.scale.set(0.08, 0.08, 0.08);
                 
                 for (let z = 20; z > -totalZ + 40; z -= zSpacing) {
                     const chandelier = chandelierModel.clone();
-                    // Tavan yüksekliğinden biraz aşağıya as
-                    chandelier.position.set(0, roomHeight, z);
+                    // Tavan yüksekliğinden biraz aşağıya as (Tavanın içinde kalmaması için -3 birim)
+                    chandelier.position.set(0, roomHeight - 3, z);
                     scene.add(chandelier);
                     
                     const pointLight = new THREE.PointLight(0xffffee, 0.8, 60);
