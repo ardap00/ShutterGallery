@@ -685,21 +685,26 @@
                     const frameMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2 }); // Siyah çerçeve güzel durur
                     const frameMesh = new THREE.Mesh(frameGeo, frameMat);
                     
+                    // Tüm tabloların ALT çizgisinin (çerçeve dahil) sabit bir yükseklikte (3.5 birim) olmasını sağla
+                    const targetHeight = 3.5;
+                    const frameHeight = pHeight + 0.8;
+                    const paintingCenterY = targetHeight + frameHeight / 2;
+                    
                     if (side === 'left') {
                         // Frame center at -19.9, front face is at -19.7
                         // Place image at -19.65 to be slightly in front of the frame face
-                        imgMesh.position.set(-roomWidth / 2 + 0.35, roomHeight / 2, zPos);
+                        imgMesh.position.set(-roomWidth / 2 + 0.35, paintingCenterY, zPos);
                         imgMesh.rotation.y = Math.PI / 2;
                         
-                        frameMesh.position.set(-roomWidth / 2 + 0.1, roomHeight / 2, zPos);
+                        frameMesh.position.set(-roomWidth / 2 + 0.1, paintingCenterY, zPos);
                         frameMesh.rotation.y = Math.PI / 2;
                     } else {
                         // Frame center at 19.9, front face is at 19.7
                         // Place image at 19.65 to be slightly in front of the frame face
-                        imgMesh.position.set(roomWidth / 2 - 0.35, roomHeight / 2, zPos);
+                        imgMesh.position.set(roomWidth / 2 - 0.35, paintingCenterY, zPos);
                         imgMesh.rotation.y = -Math.PI / 2;
                         
-                        frameMesh.position.set(roomWidth / 2 - 0.1, roomHeight / 2, zPos);
+                        frameMesh.position.set(roomWidth / 2 - 0.1, paintingCenterY, zPos);
                         frameMesh.rotation.y = -Math.PI / 2;
                     }
                     
@@ -718,17 +723,19 @@
                     const plaqueFrameMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3 });
                     const plaqueFrameMesh = new THREE.Mesh(plaqueFrameGeo, plaqueFrameMat);
                     
+                    const plaqueY = 6.5; // Sabit yükseklik, tablolar oynasa da isimlikler düz bir hizada kalır
+                    
                     if (side === 'left') {
-                        plaqueMesh.position.set(-roomWidth / 2 + 0.35, roomHeight / 2 - 2, zPos - pWidth / 2 - 2.5);
+                        plaqueMesh.position.set(-roomWidth / 2 + 0.35, plaqueY, zPos - pWidth / 2 - 2.5);
                         plaqueMesh.rotation.y = Math.PI / 2;
                         
-                        plaqueFrameMesh.position.set(-roomWidth / 2 + 0.15, roomHeight / 2 - 2, zPos - pWidth / 2 - 2.5);
+                        plaqueFrameMesh.position.set(-roomWidth / 2 + 0.15, plaqueY, zPos - pWidth / 2 - 2.5);
                         plaqueFrameMesh.rotation.y = Math.PI / 2;
                     } else {
-                        plaqueMesh.position.set(roomWidth / 2 - 0.35, roomHeight / 2 - 2, zPos - pWidth / 2 - 2.5);
+                        plaqueMesh.position.set(roomWidth / 2 - 0.35, plaqueY, zPos - pWidth / 2 - 2.5);
                         plaqueMesh.rotation.y = -Math.PI / 2;
                         
-                        plaqueFrameMesh.position.set(roomWidth / 2 - 0.15, roomHeight / 2 - 2, zPos - pWidth / 2 - 2.5);
+                        plaqueFrameMesh.position.set(roomWidth / 2 - 0.15, plaqueY, zPos - pWidth / 2 - 2.5);
                         plaqueFrameMesh.rotation.y = -Math.PI / 2;
                     }
                     scene.add(plaqueMesh);
@@ -753,7 +760,7 @@
                         topLamp.scale.set(lampScale, lampScale, lampScale);
                         
                         // Lamba yüksekliği: Tablonun üst sınırından 1.5 birim yukarıda
-                        const lampHeight = (roomHeight / 2) + (pHeight / 2) + 1.5;
+                        const lampHeight = paintingCenterY + (pHeight / 2) + 1.5;
                         
                         // Duvar içine girmesini önlemek için X ekseninde biraz öne (odanın içine) çekiyoruz
                         const wallOffset = 0.4;
@@ -786,9 +793,8 @@
                         const size = new THREE.Vector3();
                         box.getSize(size);
                         
-                        // Bariyerlerin yüksekliği eşit olması için sabit bir genişlik baz alınır (örn. 8 birim)
-                        const targetWidth = 8;
-                        const scale = targetWidth / (size.x || 1);
+                        // Bariyer yüksekliği: Tabloların alt noktasıyla aynı (hepsi tam 3.5 birim)
+                        const scale = targetHeight / (size.y || 1);
                         barrier.scale.set(scale, scale, scale);
                         
                         // Bariyeri yere tam sıfır oturtmak için y kaydırmasını hesapla
