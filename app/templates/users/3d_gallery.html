@@ -130,6 +130,8 @@
         let avatarGroup;
         let avatarMixer;
         let currentAction;
+        let walkAction;
+        let idleAction;
 
         init();
         animate();
@@ -234,11 +236,11 @@
                 scene.add(avatarGroup);
                 
                 const loader = new GLTFLoader();
-                loader.load('{{ url_for("static", filename="models/abel__lowpoly_character.glb") }}', function (gltf) {
+                loader.load('{{ url_for("static", filename="models/lowpoly_anime_character_cyberstyle.glb") }}', function (gltf) {
                     const model = gltf.scene;
                     
-                    // Modelin boyutunu ayarla (Çok büyük olduğu için 1.2 seviyesine çekildi)
-                    model.scale.set(1.2, 1.2, 1.2);
+                    // Modelin boyutunu ayarla (Modelin kendi ölçeği farklı olabilir, şimdilik 1.0)
+                    model.scale.set(1.0, 1.0, 1.0);
                     // Modelin merkez noktasını ayaklarına çekmek için bounding box hesapla
                     const box = new THREE.Box3().setFromObject(model);
                     model.position.y = -box.min.y;
@@ -255,21 +257,27 @@
                     
                     // Setup animations (Yürüme / Idle)
                     if (gltf.animations && gltf.animations.length > 0) {
-                        const anim = gltf.animations[0];
+                        avatarMixer = new THREE.AnimationMixer(model);
                         
-                        // Yok olma hatasını çözmek için animasyonun sonundaki boş/hatalı kareleri kırp (Süreyi %5 kısalt)
-                        anim.duration = anim.duration * 0.95;
-                        
-                        // Stop-motion (parça parça) etkisini yok etmek için tüm hareketlere pürüzsüz geçiş (Linear Interpolation) zorla
-                        anim.tracks.forEach(track => {
-                            track.setInterpolation(THREE.InterpolateLinear);
+                        gltf.animations.forEach(anim => {
+                            if (anim.name.toLowerCase().includes('walk')) {
+                                walkAction = avatarMixer.clipAction(anim);
+                            } else if (anim.name.toLowerCase().includes('idle')) {
+                                idleAction = avatarMixer.clipAction(anim);
+                            }
                         });
                         
-                        avatarMixer = new THREE.AnimationMixer(model);
-                        currentAction = avatarMixer.clipAction(anim);
-                        // Animasyon hızını bir tık artırarak daha akıcı olmasını sağla
-                        currentAction.setEffectiveTimeScale(1.2);
-                        // Animasyonu şimdilik durdur, sadece hareket edince çalışacak
+                        // İsimler uyuşmazsa ilk iki animasyonu kullan
+                        if (!walkAction && gltf.animations.length > 0) walkAction = avatarMixer.clipAction(gltf.animations[0]);
+                        if (!idleAction && gltf.animations.length > 1) idleAction = avatarMixer.clipAction(gltf.animations[1]);
+                        
+                        // Başlangıçta idle (bekleme) animasyonunu oynat
+                        if (idleAction) {
+                            idleAction.play();
+                            currentAction = idleAction;
+                        } else if (walkAction) {
+                            currentAction = walkAction;
+                        }
                     }
                 }, undefined, function (error) {
                     console.error('An error happened while loading the avatar:', error);
@@ -1017,13 +1025,21 @@
                     diff = Math.atan2(Math.sin(diff), Math.cos(diff)); // Normalize to [-PI, PI]
                     avatarGroup.rotation.y += diff * 15 * delta;
                     
-                    // Harekete başlayınca animasyonu oynat
-                    if (currentAction && !currentAction.isRunning()) {
+                    // Harekete başlayınca yürüme animasyonuna geç
+                    if (walkAction && currentAction !== walkAction) {
+                        if (currentAction) currentAction.fadeOut(0.2);
+                        walkAction.reset().fadeIn(0.2).play();
+                        currentAction = walkAction;
+                    } else if (!walkAction && currentAction && !currentAction.isRunning()) {
                         currentAction.play();
                     }
                 } else {
-                    // Durunca animasyonu durdur
-                    if (currentAction && currentAction.isRunning()) {
+                    // Durunca bekleme (idle) animasyonuna geç
+                    if (idleAction && currentAction !== idleAction) {
+                        if (currentAction) currentAction.fadeOut(0.2);
+                        idleAction.reset().fadeIn(0.2).play();
+                        currentAction = idleAction;
+                    } else if (!idleAction && currentAction && currentAction.isRunning()) {
                         currentAction.stop();
                     }
                 }
