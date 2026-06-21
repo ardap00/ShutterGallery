@@ -939,7 +939,7 @@
                 camera.lookAt(targetPosition);
 
                 // Mobile Move
-                const speed = 30.0;
+                const speed = 10.0;
                 
                 const forwardVec = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
                 forwardVec.y = 0; forwardVec.normalize();
