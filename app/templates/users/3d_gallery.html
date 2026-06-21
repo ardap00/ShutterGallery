@@ -654,7 +654,7 @@
             // Add Photos and Wall Lamps
             const textureLoader = new THREE.TextureLoader();
 
-            function renderPhotos(lampModel) {
+            function renderPhotos(lampModel, barrierModel) {
                 photosData.forEach((photo, index) => {
                     const side = index % 2 === 0 ? 'left' : 'right';
                 const zPos = -Math.floor(index / 2) * zSpacing;
@@ -775,17 +775,63 @@
                             light.position.x += (side === 'left' ? 0.8 : -0.8);
                             scene.add(light);
                         }
+                        }
+                    }
+                    
+                    // Kırmızı kadife bariyer ekleme
+                    if (barrierModel) {
+                        const barrier = barrierModel.clone();
+                        
+                        // Bariyerin boyutunu hesapla
+                        const box = new THREE.Box3().setFromObject(barrier);
+                        const size = new THREE.Vector3();
+                        box.getSize(size);
+                        
+                        // Tablonun genişliğinden (pWidth) biraz daha geniş olsun (veya minimum 6 birim)
+                        const targetWidth = Math.max(pWidth + 1, 6);
+                        const scale = targetWidth / (size.x || 1);
+                        barrier.scale.set(scale, scale, scale);
+                        
+                        // Bariyeri yere tam sıfır oturtmak için y kaydırmasını hesapla
+                        barrier.position.set(0, 0, 0);
+                        barrier.updateMatrixWorld(true);
+                        let bbox = new THREE.Box3().setFromObject(barrier);
+                        barrier.position.y -= bbox.min.y;
+                        
+                        // Tablo duvarından ne kadar uzakta olacağı
+                        const barrierOffset = 3;
+                        if (side === 'left') {
+                            barrier.position.set(-roomWidth / 2 + barrierOffset, barrier.position.y, zPos);
+                            barrier.rotation.y = Math.PI / 2;
+                        } else {
+                            barrier.position.set(roomWidth / 2 - barrierOffset, barrier.position.y, zPos);
+                            barrier.rotation.y = -Math.PI / 2;
+                        }
+                        
+                        scene.add(barrier);
                     }
                 });
             });
         }
 
-        gltfLoader.load('{{ url_for("static", filename="models/top_lamp.glb") }}', function(gltf) {
-                renderPhotos(gltf.scene);
+        gltfLoader.load('{{ url_for("static", filename="models/red_velvet_rope_barriers.glb") }}', function(gltfBarrier) {
+            const barrierModel = gltfBarrier.scene;
+            gltfLoader.load('{{ url_for("static", filename="models/top_lamp.glb") }}', function(gltfLamp) {
+                renderPhotos(gltfLamp.scene, barrierModel);
             }, undefined, function(error) {
                 console.error("Failed to load wall lamp:", error);
-                renderPhotos(null);
+                renderPhotos(null, barrierModel);
             });
+        }, undefined, function(error) {
+            console.error("Failed to load barrier:", error);
+            // Fallback
+            gltfLoader.load('{{ url_for("static", filename="models/top_lamp.glb") }}', function(gltfLamp) {
+                renderPhotos(gltfLamp.scene, null);
+            }, undefined, function(error) {
+                console.error("Failed to load wall lamp:", error);
+                renderPhotos(null, null);
+            });
+        });
 
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
             
