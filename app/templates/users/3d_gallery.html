@@ -555,6 +555,7 @@
             scene.add(endDoor);
 
             // Ceiling Lamps (Chandelier)
+            const gltfLoader = new GLTFLoader();
             gltfLoader.load('{{ url_for("static", filename="models/chandelier_black.glb") }}', function(gltf) {
                 const chandelierModel = gltf.scene;
                 // Chandelier scale (can be adjusted)
@@ -588,7 +589,6 @@
 
             // Add Photos and Wall Lamps
             const textureLoader = new THREE.TextureLoader();
-            const gltfLoader = new GLTFLoader();
 
             function renderPhotos(lampModel) {
                 photosData.forEach((photo, index) => {
