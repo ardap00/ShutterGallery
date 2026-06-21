@@ -239,11 +239,11 @@
                 loader.load('{{ url_for("static", filename="models/lowpoly_anime_character_cyberstyle.glb") }}', function (gltf) {
                     const model = gltf.scene;
                     
-                    // Modelin boyutunu ayarla (20 kat çok büyük olup kamerayı içine aldığı için 4.5 seviyesine çekildi)
+                    // Modelin boyutunu ayarla
                     model.scale.set(4.5, 4.5, 4.5);
-                    // Modelin merkez noktasını ayaklarına çekmek için bounding box hesapla
-                    const box = new THREE.Box3().setFromObject(model);
-                    model.position.y = -box.min.y;
+                    // Bounding Box hesaplaması bu modelde hatalı sonuç verip karakteri havaya uçurduğu için iptal ettik
+                    // Karakterin Y eksenini direkt sıfıra (zemine) sabitliyoruz.
+                    model.position.y = 0;
                     
                     // Add shadow casting
                     model.traverse(function(node) {
