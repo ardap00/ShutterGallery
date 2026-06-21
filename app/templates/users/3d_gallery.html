@@ -572,6 +572,31 @@
                 }
             });
 
+            // Coffee Tables
+            gltfLoader.load('{{ url_for("static", filename="models/coffee_table.glb") }}', function(gltf) {
+                const tableModel = gltf.scene;
+                
+                // Masanın mevcut boyutunu ölç ve odanın büyüklüğüne orantıla
+                const box = new THREE.Box3().setFromObject(tableModel);
+                const size = new THREE.Vector3();
+                box.getSize(size);
+                
+                // Hedef genişlik (yaklaşık 4 birim) - Çok küçük veya çok büyük kalmaması için
+                const targetWidth = 4;
+                const scale = targetWidth / (size.x || 1);
+                tableModel.scale.set(scale, scale, scale);
+                
+                // Tablolar arası mesafenin (zSpacing) tam ortalarına (zSpacing / 2) masaları yerleştir
+                for (let z = -zSpacing / 2; z > -totalZ + 40; z -= zSpacing) {
+                    const table = tableModel.clone();
+                    // Zemin (Y=0) hizasında, koridorun tam ortasına (X=0) koy
+                    table.position.set(0, 0, z);
+                    scene.add(table);
+                }
+            }, undefined, function(error) {
+                console.error("Failed to load coffee table:", error);
+            });
+
             // Add Photos and Wall Lamps
             const textureLoader = new THREE.TextureLoader();
 
