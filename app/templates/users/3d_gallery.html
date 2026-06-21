@@ -237,8 +237,8 @@
                 loader.load('{{ url_for("static", filename="models/abel__lowpoly_character.glb") }}', function (gltf) {
                     const model = gltf.scene;
                     
-                    // Modelin boyutunu ayarla (çok küçükse büyüt, büyükse küçült. Şimdilik 4.0)
-                    model.scale.set(4.0, 4.0, 4.0);
+                    // Modelin boyutunu ayarla (Çok büyük olduğu için 1.2 seviyesine çekildi)
+                    model.scale.set(1.2, 1.2, 1.2);
                     model.position.set(0, 0, 0);
                     
                     // Add shadow casting
