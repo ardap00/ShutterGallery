@@ -665,8 +665,8 @@
                     if (lampModel) {
                         const topLamp = lampModel.clone();
                         
-                        // Tablo boyutuna (pWidth) oranla lamba boyutunu (scale) ayarla
-                        const lampScale = Math.max(0.05, pWidth * 0.015);
+                        // Tablo boyutuna (pWidth) oranla lamba boyutunu (scale) ayarla (Öncekinin 5'te 1'i)
+                        const lampScale = Math.max(0.01, pWidth * 0.003);
                         topLamp.scale.set(lampScale, lampScale, lampScale);
                         
                         // Lamba yüksekliği: Tablonun üst sınırından 1.5 birim yukarıda
@@ -674,10 +674,10 @@
                         
                         if (side === 'left') {
                             topLamp.position.set(-roomWidth / 2 + 0.05, lampHeight, zPos);
-                            topLamp.rotation.y = -Math.PI / 2; // Duvara yaslanmış
+                            topLamp.rotation.y = Math.PI / 2; // 180 derece döndürüldü
                         } else {
                             topLamp.position.set(roomWidth / 2 - 0.05, lampHeight, zPos);
-                            topLamp.rotation.y = Math.PI / 2; // Duvara yaslanmış
+                            topLamp.rotation.y = -Math.PI / 2; // 180 derece döndürüldü
                         }
                         
                         scene.add(topLamp);
