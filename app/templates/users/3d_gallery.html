@@ -554,18 +554,37 @@
             endDoor.rotation.y = Math.PI; // Face inward
             scene.add(endDoor);
 
-            // Ceiling Lamps
-            for (let z = 20; z > -totalZ + 40; z -= zSpacing) {
-                const lampGeo = new THREE.CylinderGeometry(0.8, 1, 0.4, 16);
-                const lampMat = new THREE.MeshStandardMaterial({ color: 0x333333, emissive: 0xffffff, emissiveIntensity: 1 });
-                const lamp = new THREE.Mesh(lampGeo, lampMat);
-                lamp.position.set(0, roomHeight - 0.2, z);
-                scene.add(lamp);
+            // Ceiling Lamps (Chandelier)
+            gltfLoader.load('{{ url_for("static", filename="models/chandelier_black.glb") }}', function(gltf) {
+                const chandelierModel = gltf.scene;
+                // Chandelier scale (can be adjusted)
+                chandelierModel.scale.set(0.04, 0.04, 0.04);
                 
-                const pointLight = new THREE.PointLight(0xffffee, 0.5, 60);
-                pointLight.position.set(0, roomHeight - 1, z);
-                scene.add(pointLight);
-            }
+                for (let z = 20; z > -totalZ + 40; z -= zSpacing) {
+                    const chandelier = chandelierModel.clone();
+                    // Tavan yüksekliğinden biraz aşağıya as
+                    chandelier.position.set(0, roomHeight, z);
+                    scene.add(chandelier);
+                    
+                    const pointLight = new THREE.PointLight(0xffffee, 0.8, 60);
+                    pointLight.position.set(0, roomHeight - 3, z);
+                    scene.add(pointLight);
+                }
+            }, undefined, function(error) {
+                console.error("Failed to load chandelier:", error);
+                // Fallback to basic cylinders
+                for (let z = 20; z > -totalZ + 40; z -= zSpacing) {
+                    const lampGeo = new THREE.CylinderGeometry(0.8, 1, 0.4, 16);
+                    const lampMat = new THREE.MeshStandardMaterial({ color: 0x333333, emissive: 0xffffff, emissiveIntensity: 1 });
+                    const lamp = new THREE.Mesh(lampGeo, lampMat);
+                    lamp.position.set(0, roomHeight - 0.2, z);
+                    scene.add(lamp);
+                    
+                    const pointLight = new THREE.PointLight(0xffffee, 0.5, 60);
+                    pointLight.position.set(0, roomHeight - 1, z);
+                    scene.add(pointLight);
+                }
+            });
 
             // Add Photos and Wall Lamps
             const textureLoader = new THREE.TextureLoader();
