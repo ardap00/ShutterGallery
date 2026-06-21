@@ -618,15 +618,33 @@
                 // Tablolar arası mesafenin (zSpacing) tam ortalarına (zSpacing / 2) masaları yerleştir
                 for (let z = -zSpacing / 2; z > -totalZ + 40; z -= zSpacing) {
                     const tableLeft = tableModel.clone();
-                    // Sol duvara yakın, yerin altında kalmaması için Y ekseninde (Y=3) yukarıda
-                    tableLeft.position.set(-(roomWidth / 2) + 4, 3, z);
                     tableLeft.rotation.y = Math.PI / 2;
+                    tableLeft.position.set(0, 0, z);
+                    tableLeft.updateMatrixWorld(true);
+                    let boxL = new THREE.Box3().setFromObject(tableLeft);
+                    
+                    // Mermere (Y=0) tam sıfıra sıfır oturt
+                    tableLeft.position.y -= boxL.min.y;
+                    tableLeft.updateMatrixWorld(true);
+                    boxL = new THREE.Box3().setFromObject(tableLeft);
+                    
+                    // Sol duvara sıfıra sıfır yanaştır
+                    tableLeft.position.x -= (boxL.min.x - (-roomWidth / 2));
                     scene.add(tableLeft);
 
                     const tableRight = tableModel.clone();
-                    // Sağ duvara yakın, yerin altında kalmaması için Y ekseninde (Y=3) yukarıda
-                    tableRight.position.set((roomWidth / 2) - 4, 3, z);
                     tableRight.rotation.y = -Math.PI / 2;
+                    tableRight.position.set(0, 0, z);
+                    tableRight.updateMatrixWorld(true);
+                    let boxR = new THREE.Box3().setFromObject(tableRight);
+                    
+                    // Mermere (Y=0) tam sıfıra sıfır oturt
+                    tableRight.position.y -= boxR.min.y;
+                    tableRight.updateMatrixWorld(true);
+                    boxR = new THREE.Box3().setFromObject(tableRight);
+                    
+                    // Sağ duvara sıfıra sıfır yanaştır
+                    tableRight.position.x -= (boxR.max.x - (roomWidth / 2));
                     scene.add(tableRight);
                 }
             }, undefined, function(error) {
