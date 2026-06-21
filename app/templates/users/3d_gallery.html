@@ -672,11 +672,13 @@
                         // Lamba yüksekliği: Tablonun üst sınırından 1.5 birim yukarıda
                         const lampHeight = (roomHeight / 2) + (pHeight / 2) + 1.5;
                         
+                        // Duvar içine girmesini önlemek için X ekseninde biraz öne (odanın içine) çekiyoruz
+                        const wallOffset = 0.4;
                         if (side === 'left') {
-                            topLamp.position.set(-roomWidth / 2 + 0.05, lampHeight, zPos);
+                            topLamp.position.set(-roomWidth / 2 + wallOffset, lampHeight, zPos);
                             topLamp.rotation.y = Math.PI / 2; // 180 derece döndürüldü
                         } else {
-                            topLamp.position.set(roomWidth / 2 - 0.05, lampHeight, zPos);
+                            topLamp.position.set(roomWidth / 2 - wallOffset, lampHeight, zPos);
                             topLamp.rotation.y = -Math.PI / 2; // 180 derece döndürüldü
                         }
                         
