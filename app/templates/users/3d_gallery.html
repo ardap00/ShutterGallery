@@ -491,6 +491,69 @@
             startWall.position.y = roomHeight / 2;
             scene.add(startWall);
 
+            // Create Exhibition Doors
+            function createExhibitionDoor() {
+                const doorGroup = new THREE.Group();
+                
+                // Door Frame
+                const frameGeo = new THREE.BoxGeometry(10, 12, 0.4);
+                const frameMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.3, metalness: 0.8 });
+                const frame = new THREE.Mesh(frameGeo, frameMat);
+                frame.position.y = 6;
+                doorGroup.add(frame);
+                
+                // Glass Panels (Left and Right)
+                const glassGeo = new THREE.BoxGeometry(4.2, 11, 0.2);
+                const glassMat = new THREE.MeshStandardMaterial({ 
+                    color: 0x88ccff, 
+                    roughness: 0.1, 
+                    metalness: 0.1, 
+                    transparent: true, 
+                    opacity: 0.4 
+                });
+                
+                const leftGlass = new THREE.Mesh(glassGeo, glassMat);
+                leftGlass.position.set(-2.4, 6, 0);
+                doorGroup.add(leftGlass);
+                
+                const rightGlass = new THREE.Mesh(glassGeo, glassMat);
+                rightGlass.position.set(2.4, 6, 0);
+                doorGroup.add(rightGlass);
+                
+                // Handles
+                const handleGeo = new THREE.CylinderGeometry(0.1, 0.1, 3);
+                const handleMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.2, metalness: 0.9 });
+                
+                const leftHandle = new THREE.Mesh(handleGeo, handleMat);
+                leftHandle.position.set(-0.6, 6, 0.25);
+                doorGroup.add(leftHandle);
+                
+                const rightHandle = new THREE.Mesh(handleGeo, handleMat);
+                rightHandle.position.set(0.6, 6, 0.25);
+                doorGroup.add(rightHandle);
+                
+                const leftHandleBack = new THREE.Mesh(handleGeo, handleMat);
+                leftHandleBack.position.set(-0.6, 6, -0.25);
+                doorGroup.add(leftHandleBack);
+                
+                const rightHandleBack = new THREE.Mesh(handleGeo, handleMat);
+                rightHandleBack.position.set(0.6, 6, -0.25);
+                doorGroup.add(rightHandleBack);
+                
+                return doorGroup;
+            }
+
+            // Start Door
+            const startDoor = createExhibitionDoor();
+            startDoor.position.set(0, 0, 39.9);
+            scene.add(startDoor);
+            
+            // End Door
+            const endDoor = createExhibitionDoor();
+            endDoor.position.set(0, 0, -totalZ + 40.1);
+            endDoor.rotation.y = Math.PI; // Face inward
+            scene.add(endDoor);
+
             // Ceiling Lamps
             for (let z = 20; z > -totalZ + 40; z -= zSpacing) {
                 const lampGeo = new THREE.CylinderGeometry(0.8, 1, 0.4, 16);
