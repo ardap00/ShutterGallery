@@ -239,7 +239,9 @@
                     
                     // Modelin boyutunu ayarla (Çok büyük olduğu için 1.2 seviyesine çekildi)
                     model.scale.set(1.2, 1.2, 1.2);
-                    model.position.set(0, 0, 0);
+                    // Modelin merkez noktasını ayaklarına çekmek için bounding box hesapla
+                    const box = new THREE.Box3().setFromObject(model);
+                    model.position.y = -box.min.y;
                     
                     // Add shadow casting
                     model.traverse(function(node) {
@@ -253,8 +255,20 @@
                     
                     // Setup animations (Yürüme / Idle)
                     if (gltf.animations && gltf.animations.length > 0) {
+                        const anim = gltf.animations[0];
+                        
+                        // Yok olma hatasını çözmek için animasyonun sonundaki boş/hatalı kareleri kırp (Süreyi %5 kısalt)
+                        anim.duration = anim.duration * 0.95;
+                        
+                        // Stop-motion (parça parça) etkisini yok etmek için tüm hareketlere pürüzsüz geçiş (Linear Interpolation) zorla
+                        anim.tracks.forEach(track => {
+                            track.setInterpolation(THREE.InterpolateLinear);
+                        });
+                        
                         avatarMixer = new THREE.AnimationMixer(model);
-                        currentAction = avatarMixer.clipAction(gltf.animations[0]);
+                        currentAction = avatarMixer.clipAction(anim);
+                        // Animasyon hızını bir tık artırarak daha akıcı olmasını sağla
+                        currentAction.setEffectiveTimeScale(1.2);
                         // Animasyonu şimdilik durdur, sadece hareket edince çalışacak
                     }
                 }, undefined, function (error) {
