@@ -661,55 +661,41 @@
                     spotLight.decay = 1.5;
                     scene.add(spotLight);
                     
-                    // Wall Lamps (Left and Right of the painting)
+                    // Wall Lamp (Centered above the painting)
                     if (lampModel) {
-                        const lampLeft = lampModel.clone();
-                        const lampRight = lampModel.clone();
+                        const topLamp = lampModel.clone();
                         
-                        const lampScale = 0.09; // Increased by 2x from 0.045
-                        lampLeft.scale.set(lampScale, lampScale, lampScale);
-                        lampRight.scale.set(lampScale, lampScale, lampScale);
+                        // Tablo boyutuna (pWidth) oranla lamba boyutunu (scale) ayarla
+                        const lampScale = Math.max(0.05, pWidth * 0.015);
+                        topLamp.scale.set(lampScale, lampScale, lampScale);
                         
-                        const lampOffset = pWidth / 2 + 2.0; // Closer to the painting
-                        const lampHeight = roomHeight / 2 + 2.5; // Slightly above the middle
+                        // Lamba yüksekliği: Tablonun üst sınırından 1.5 birim yukarıda
+                        const lampHeight = (roomHeight / 2) + (pHeight / 2) + 1.5;
                         
                         if (side === 'left') {
-                            lampLeft.position.set(-roomWidth / 2 + 0.05, lampHeight, zPos + lampOffset);
-                            lampLeft.rotation.y = -Math.PI / 2; // Rotated 180 deg
-                            
-                            lampRight.position.set(-roomWidth / 2 + 0.05, lampHeight, zPos - lampOffset);
-                            lampRight.rotation.y = -Math.PI / 2; // Rotated 180 deg
+                            topLamp.position.set(-roomWidth / 2 + 0.05, lampHeight, zPos);
+                            topLamp.rotation.y = -Math.PI / 2; // Duvara yaslanmış
                         } else {
-                            lampLeft.position.set(roomWidth / 2 - 0.05, lampHeight, zPos + lampOffset);
-                            lampLeft.rotation.y = Math.PI / 2; // Rotated 180 deg
-                            
-                            lampRight.position.set(roomWidth / 2 - 0.05, lampHeight, zPos - lampOffset);
-                            lampRight.rotation.y = Math.PI / 2; // Rotated 180 deg
+                            topLamp.position.set(roomWidth / 2 - 0.05, lampHeight, zPos);
+                            topLamp.rotation.y = Math.PI / 2; // Duvara yaslanmış
                         }
                         
-                        scene.add(lampLeft);
-                        scene.add(lampRight);
+                        scene.add(topLamp);
                         
-                        // Add warm light for each lamp inside the cage (Mobil optimizasyon: Mobilde bu ışıkları ekleme)
+                        // Mobil Optimizasyon: Sadece masaüstünde ekstra lamba ışığı hesapla
                         if (!isMobile) {
-                            const lightLeft = new THREE.PointLight(0xffddaa, 0.5, 15);
-                            lightLeft.position.copy(lampLeft.position);
-                            lightLeft.position.y += 1.8; // Move light up into the cage
-                            lightLeft.position.x += (side === 'left' ? 0.8 : -0.8); // Move light out from the wall
-                            scene.add(lightLeft);
-                            
-                            const lightRight = new THREE.PointLight(0xffddaa, 0.5, 15);
-                            lightRight.position.copy(lampRight.position);
-                            lightRight.position.y += 1.8; // Move light up into the cage
-                            lightRight.position.x += (side === 'left' ? 0.8 : -0.8); // Move light out from the wall
-                            scene.add(lightRight);
+                            const light = new THREE.PointLight(0xffddaa, 0.5, 15);
+                            light.position.copy(topLamp.position);
+                            // Işığı lambanın kafesinin içine (duvardan biraz uzağa ve aşağı/yukarı) konumlandır
+                            light.position.x += (side === 'left' ? 0.8 : -0.8);
+                            scene.add(light);
                         }
                     }
                 });
             });
         }
 
-        gltfLoader.load('{{ url_for("static", filename="models/wall_lamp.glb") }}', function(gltf) {
+        gltfLoader.load('{{ url_for("static", filename="models/top_lamp.glb") }}', function(gltf) {
                 renderPhotos(gltf.scene);
             }, undefined, function(error) {
                 console.error("Failed to load wall lamp:", error);
