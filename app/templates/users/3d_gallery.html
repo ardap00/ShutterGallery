@@ -610,8 +610,8 @@
                 const size = new THREE.Vector3();
                 box.getSize(size);
                 
-                // Hedef genişlik (yaklaşık 4 birim) - Çok küçük veya çok büyük kalmaması için
-                const targetWidth = 4;
+                // Hedef genişlik (yaklaşık 3 birim) - Biraz küçültüldü
+                const targetWidth = 3;
                 const scale = targetWidth / (size.x || 1);
                 tableModel.scale.set(scale, scale, scale);
                 
@@ -685,8 +685,8 @@
                     const frameMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2 }); // Siyah çerçeve güzel durur
                     const frameMesh = new THREE.Mesh(frameGeo, frameMat);
                     
-                    // Tüm tabloların ALT çizgisinin (çerçeve dahil) sabit bir yükseklikte (3.5 birim) olmasını sağla
-                    const targetHeight = 3.5;
+                    // Tüm tabloların ALT çizgisinin (çerçeve dahil) sabit bir yükseklikte (4.0 birim) olmasını sağla
+                    const targetHeight = 4.0;
                     const frameHeight = pHeight + 0.8;
                     const paintingCenterY = targetHeight + frameHeight / 2;
                     
@@ -793,9 +793,12 @@
                         const size = new THREE.Vector3();
                         box.getSize(size);
                         
-                        // Bariyer yüksekliği: Tabloların alt noktasıyla aynı (hepsi tam 3.5 birim)
-                        const scale = targetHeight / (size.y || 1);
-                        barrier.scale.set(scale, scale, scale);
+                        // Bariyer yüksekliği: Tabloların alt noktasıyla aynı (hepsi tam 4.0 birim)
+                        const scaleY = targetHeight / (size.y || 1);
+                        // Genişliğini tablonun genişliğiyle (pWidth) eşitle
+                        const scaleX = pWidth / (size.x || 1);
+                        // Derinliği (kalınlığı) yükseklikle orantılı bırak
+                        barrier.scale.set(scaleX, scaleY, scaleY);
                         
                         // Bariyeri yere tam sıfır oturtmak için y kaydırmasını hesapla
                         barrier.position.set(0, 0, 0);
