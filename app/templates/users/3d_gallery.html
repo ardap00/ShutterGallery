@@ -418,6 +418,35 @@
                 scene.add(floor);
             });
             
+            // Red Carpet (Model)
+            gltfLoader.load('{{ url_for("static", filename="models/floor_red_carpet.glb") }}', function(gltf) {
+                const carpetModel = gltf.scene;
+                
+                // Halının mevcut boyutunu ölç
+                const box = new THREE.Box3().setFromObject(carpetModel);
+                const size = new THREE.Vector3();
+                box.getSize(size);
+                
+                // Hedef genişlik (yaklaşık 6 birim)
+                const targetWidth = 6;
+                const scale = targetWidth / (size.x || 1);
+                carpetModel.scale.set(scale, scale, scale);
+                
+                const scaledZ = size.z * scale;
+                
+                // Koridor boyunca halıyı döşe
+                const startZ = 40;
+                const endZ = -totalZ + 40;
+                
+                for (let z = startZ; z > endZ; z -= scaledZ) {
+                    const carpetTile = carpetModel.clone();
+                    // Z-fighting önlemek için Y ekseninde 0.05 birim yukarıda
+                    carpetTile.position.set(0, 0.05, z - scaledZ / 2);
+                    scene.add(carpetTile);
+                }
+            }, undefined, function(error) {
+                console.error("Failed to load red carpet:", error);
+            });
             // Ceiling
             const ceilGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
             const ceilMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1 });
