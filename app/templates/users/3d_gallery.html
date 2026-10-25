@@ -464,6 +464,7 @@
 
             // Mount Photos onto the Slots
             const textureLoader = new THREE.TextureLoader();
+            textureLoader.setCrossOrigin('anonymous');
 
             photos.forEach((photo, idx) => {
                 if (idx >= slots.length) return;
@@ -484,25 +485,41 @@
                         photoH = photoW / aspect;
                     }
 
-                    // Paspartu Mat Board & Outer Frame
-                    const matPadding = 0.2;
+                    // Dimensions
+                    const matPadding = 0.18;
                     const matW = photoW + matPadding * 2;
                     const matH = photoH + matPadding * 2;
-                    const frameD = 0.08;
 
-                    const matMesh = new THREE.Mesh(new THREE.BoxGeometry(matW, matH, frameD), paspartuMat);
-                    const outerFrameMesh = new THREE.Mesh(new THREE.BoxGeometry(matW + 0.15, matH + 0.15, frameD + 0.02), frameMat);
-                    const photoMesh = new THREE.Mesh(new THREE.PlaneGeometry(photoW, photoH), new THREE.MeshBasicMaterial({ map: texture }));
-
-                    outerFrameMesh.position.set(slot.x, slot.y, slot.z);
+                    // 1. Dark Outer Frame Box
+                    const frameThickness = 0.06;
+                    const outerFrameMesh = new THREE.Mesh(
+                        new THREE.BoxGeometry(matW + 0.12, matH + 0.12, frameThickness),
+                        frameMat
+                    );
+                    outerFrameMesh.position.set(slot.x, slot.y, slot.z + slot.normalZ * (frameThickness / 2));
                     outerFrameMesh.rotation.y = slot.rotY;
                     scene.add(outerFrameMesh);
 
-                    matMesh.position.set(slot.x, slot.y, slot.z + slot.normalZ * 0.02);
+                    // 2. White Paspartu Plane (sitting on face of frame)
+                    const matMesh = new THREE.Mesh(
+                        new THREE.PlaneGeometry(matW, matH),
+                        paspartuMat
+                    );
+                    matMesh.position.set(slot.x, slot.y, slot.z + slot.normalZ * (frameThickness + 0.005));
                     matMesh.rotation.y = slot.rotY;
                     scene.add(matMesh);
 
-                    photoMesh.position.set(slot.x, slot.y, slot.z + slot.normalZ * 0.05);
+                    // 3. The Photograph Plane (clearly positioned in front of paspartu)
+                    const photoMat = new THREE.MeshBasicMaterial({ 
+                        map: texture, 
+                        side: THREE.FrontSide,
+                        toneMapped: false 
+                    });
+                    const photoMesh = new THREE.Mesh(
+                        new THREE.PlaneGeometry(photoW, photoH), 
+                        photoMat
+                    );
+                    photoMesh.position.set(slot.x, slot.y, slot.z + slot.normalZ * (frameThickness + 0.012));
                     photoMesh.rotation.y = slot.rotY;
                     scene.add(photoMesh);
 
@@ -510,17 +527,17 @@
                     const plaqueTex = createPlaqueTexture(photo);
                     const plaqueW = 1.0;
                     const plaqueH = 0.65;
-                    const plaqueMesh = new THREE.Mesh(new THREE.PlaneGeometry(plaqueW, plaqueH), new THREE.MeshBasicMaterial({ map: plaqueTex }));
+                    const plaqueMesh = new THREE.Mesh(new THREE.PlaneGeometry(plaqueW, plaqueH), new THREE.MeshBasicMaterial({ map: plaqueTex, toneMapped: false }));
                     const plaqueBack = new THREE.Mesh(new THREE.BoxGeometry(plaqueW + 0.06, plaqueH + 0.06, 0.04), frameMat);
 
                     const plaqueSide = (slot.normalZ > 0) ? 1.0 : -1.0;
                     const plaqueX = slot.x + plaqueSide * (photoW / 2 + 0.85);
 
-                    plaqueBack.position.set(plaqueX, slot.y - 0.2, slot.z);
+                    plaqueBack.position.set(plaqueX, slot.y - 0.2, slot.z + slot.normalZ * 0.02);
                     plaqueBack.rotation.y = slot.rotY;
                     scene.add(plaqueBack);
 
-                    plaqueMesh.position.set(plaqueX, slot.y - 0.2, slot.z + slot.normalZ * 0.03);
+                    plaqueMesh.position.set(plaqueX, slot.y - 0.2, slot.z + slot.normalZ * 0.045);
                     plaqueMesh.rotation.y = slot.rotY;
                     scene.add(plaqueMesh);
 
@@ -531,6 +548,8 @@
                     spot.target = photoMesh;
                     scene.add(spot);
                     scene.add(spot.target);
+                }, undefined, function(err) {
+                    console.error("Fotoğraf yüklenemedi:", photo.image_url, err);
                 });
             });
 
