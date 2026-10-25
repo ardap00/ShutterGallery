@@ -374,17 +374,22 @@
             const galleryInstance = baseModel.clone(true);
             galleryInstance.position.set(0, 0, moduleOffsetZ);
 
-            // If there's a subsequent gallery module, remove the solid back wall triangles so player can walk through
-            if (hasNext) {
+            // Remove triangles as needed for this module:
+            //   - moduleIndex > 1 (secondary module): remove front entrance door tris 0-1 (indices 0..5, Z = +33.96)
+            //   - hasNext: remove back wall tris 2-4 (indices 6..14, Z = -18.93) to open passageway
+            const needsEntranceOpen = (moduleIndex > 1);
+            if (hasNext || needsEntranceOpen) {
                 galleryInstance.traverse(function(child) {
                     if (child.isMesh && child.name.includes('Cube_pbr.001')) {
                         const geo = child.geometry.clone();
                         if (geo.index) {
                             const arr = geo.index.array;
                             const newIndices = [];
-                            // Skip indices 6..14 (the 3 back wall triangles at Z = -18.93)
                             for (let j = 0; j < arr.length; j += 3) {
-                                if (j >= 6 && j <= 14) continue;
+                                // Skip front entrance door (indices 0..5) for secondary modules
+                                if (needsEntranceOpen && j >= 0 && j <= 5) continue;
+                                // Skip back wall (indices 6..14) when connecting to next gallery
+                                if (hasNext && j >= 6 && j <= 14) continue;
                                 newIndices.push(arr[j], arr[j+1], arr[j+2]);
                             }
                             geo.setIndex(newIndices);
@@ -392,22 +397,27 @@
                         }
                     }
                 });
+            }
+
+            if (hasNext) {
+                // Double-sided wall patch material so it looks correct from both galleries
+                const patchMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85, side: THREE.DoubleSide });
 
                 // Add left and right wall filler panels around the center doorway at Z = -18.93
                 // Left filler: X in [-21.9, -3.67], Y in [0, 7.0]
                 const leftPatchW = 21.9 - 3.67;
-                const leftPatch = new THREE.Mesh(new THREE.PlaneGeometry(leftPatchW, 7.0), wallPatchMat);
+                const leftPatch = new THREE.Mesh(new THREE.PlaneGeometry(leftPatchW, 7.0), patchMat);
                 leftPatch.position.set(-21.9 + leftPatchW / 2, 3.5, -18.93 + moduleOffsetZ);
                 scene.add(leftPatch);
 
                 // Right filler: X in [3.67, 21.9], Y in [0, 7.0]
-                const rightPatch = new THREE.Mesh(new THREE.PlaneGeometry(leftPatchW, 7.0), wallPatchMat);
+                const rightPatch = new THREE.Mesh(new THREE.PlaneGeometry(leftPatchW, 7.0), patchMat);
                 rightPatch.position.set(21.9 - leftPatchW / 2, 3.5, -18.93 + moduleOffsetZ);
                 scene.add(rightPatch);
 
                 // Header filler above doorway: X in [-3.67, 3.67], Y in [4.8, 7.0]
                 const headerH = 2.2;
-                const headerPatch = new THREE.Mesh(new THREE.PlaneGeometry(7.34, headerH), wallPatchMat);
+                const headerPatch = new THREE.Mesh(new THREE.PlaneGeometry(7.34, headerH), patchMat);
                 headerPatch.position.set(0, 4.8 + headerH / 2, -18.93 + moduleOffsetZ);
                 scene.add(headerPatch);
 
