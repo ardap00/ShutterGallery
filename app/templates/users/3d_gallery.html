@@ -411,17 +411,28 @@
                 headerPatch.position.set(0, 4.8 + headerH / 2, -18.93 + moduleOffsetZ);
                 scene.add(headerPatch);
 
-                // Doorway Frame & Sign connecting to next gallery
-                const doorFrameGeo = new THREE.BoxGeometry(7.8, 5.0, 0.4);
-                const doorFrame = new THREE.Mesh(doorFrameGeo, frameMat);
-                doorFrame.position.set(0, 2.5, -18.93 + moduleOffsetZ);
-                scene.add(doorFrame);
+                // Doorway Frame: hollow posts (left + right) + top lintel, center is OPEN
+                const postH = 4.8;
+                const postW = 0.35;
+                const postD = 0.4;
+                // Left post
+                const leftPost = new THREE.Mesh(new THREE.BoxGeometry(postW, postH, postD), frameMat);
+                leftPost.position.set(-3.84, postH / 2, -18.93 + moduleOffsetZ);
+                scene.add(leftPost);
+                // Right post
+                const rightPost = new THREE.Mesh(new THREE.BoxGeometry(postW, postH, postD), frameMat);
+                rightPost.position.set(3.84, postH / 2, -18.93 + moduleOffsetZ);
+                scene.add(rightPost);
+                // Top lintel
+                const lintel = new THREE.Mesh(new THREE.BoxGeometry(7.8 + postW * 2, 0.35, postD), frameMat);
+                lintel.position.set(0, postH + 0.175, -18.93 + moduleOffsetZ);
+                scene.add(lintel);
 
                 // Sign above door
                 const signTex = createDoorSignTexture(moduleIndex + 1);
-                const signGeo = new THREE.PlaneGeometry(4.0, 1.0);
+                const signGeo = new THREE.PlaneGeometry(4.0, 0.9);
                 const signMesh = new THREE.Mesh(signGeo, new THREE.MeshBasicMaterial({ map: signTex }));
-                signMesh.position.set(0, 4.2, -18.7 + moduleOffsetZ);
+                signMesh.position.set(0, 5.6, -18.7 + moduleOffsetZ);
                 scene.add(signMesh);
             }
 
@@ -554,39 +565,40 @@
             });
 
             // --- Collision Boundaries for this Gallery Module ---
-            // Main Room Walkable Zone
+            // Main Room Walkable Zone (covers full room floor including up to walls)
             walkableZones.push({
-                minX: -20.5,
-                maxX: 20.5,
-                minZ: -17.5 + moduleOffsetZ,
-                maxZ: 27.5 + moduleOffsetZ
+                minX: -21.5,
+                maxX: 21.5,
+                minZ: -18.8 + moduleOffsetZ,
+                maxZ: 28.3 + moduleOffsetZ
             });
 
             // Entrance Vestibule Walkable Zone
             walkableZones.push({
-                minX: -3.2,
-                maxX: 3.2,
-                minZ: 27.0 + moduleOffsetZ,
-                maxZ: 33.0 + moduleOffsetZ
+                minX: -3.4,
+                maxX: 3.4,
+                minZ: 27.5 + moduleOffsetZ,
+                maxZ: 33.7 + moduleOffsetZ
             });
 
-            // Doorway to next gallery (if applicable)
+            // Doorway to next gallery (if applicable) - overlap zones to eliminate gap
             if (hasNext) {
                 walkableZones.push({
-                    minX: -3.2,
-                    maxX: 3.2,
-                    minZ: -20.5 + moduleOffsetZ,
-                    maxZ: -17.0 + moduleOffsetZ
+                    minX: -3.4,
+                    maxX: 3.4,
+                    minZ: -20.0 + moduleOffsetZ,
+                    maxZ: -17.5 + moduleOffsetZ
                 });
             }
 
-            // Register the 6 interior walls as collision obstacles (X in [-14, -6] and [6, 14])
+            // Register the 6 interior walls as collision obstacles
+            // Physical wall thickness is 0.24m (±0.12), use ±0.15 buffer so player stops just at the face
             wallDefs.forEach((w) => {
                 obstacles.push({
-                    minX: w.wx - 4.2,
-                    maxX: w.wx + 4.2,
-                    minZ: w.wz - 0.5 + moduleOffsetZ,
-                    maxZ: w.wz + 0.5 + moduleOffsetZ
+                    minX: w.wx - 4.0,
+                    maxX: w.wx + 4.0,
+                    minZ: w.wz - 0.15 + moduleOffsetZ,
+                    maxZ: w.wz + 0.15 + moduleOffsetZ
                 });
             });
 
@@ -854,12 +866,12 @@
                 const totalStep = stepZ.add(stepX);
 
                 const nextX = playerPos.x + totalStep.x;
-                if (isPositionWalkable(nextX, playerPos.z, 0.6)) {
+                if (isPositionWalkable(nextX, playerPos.z, 0.3)) {
                     playerPos.x = nextX;
                 }
 
                 const nextZ = playerPos.z + totalStep.z;
-                if (isPositionWalkable(playerPos.x, nextZ, 0.6)) {
+                if (isPositionWalkable(playerPos.x, nextZ, 0.3)) {
                     playerPos.z = nextZ;
                 }
 
@@ -887,12 +899,12 @@
                 if (lftValue > 0) moveStep.addScaledVector(rightVec, -speed * delta * lftValue);
 
                 const nextX = playerPos.x + moveStep.x;
-                if (isPositionWalkable(nextX, playerPos.z, 0.6)) {
+                if (isPositionWalkable(nextX, playerPos.z, 0.3)) {
                     playerPos.x = nextX;
                 }
 
                 const nextZ = playerPos.z + moveStep.z;
-                if (isPositionWalkable(playerPos.x, nextZ, 0.6)) {
+                if (isPositionWalkable(playerPos.x, nextZ, 0.3)) {
                     playerPos.z = nextZ;
                 }
 
