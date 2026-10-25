@@ -2,78 +2,150 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ user.username }} - 3D Galeri</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{{ user.username }} - Çağdaş 3D Sanat Galerisi</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; }
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #0b0e14; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
         #blocker {
             position: absolute; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.8);
+            background: radial-gradient(circle at center, rgba(15, 23, 42, 0.85) 0%, rgba(3, 7, 18, 0.95) 100%);
             display: flex; flex-direction: column;
             justify-content: center; align-items: center;
-            color: white; font-family: sans-serif; text-align: center;
-            z-index: 10;
+            color: white; text-align: center;
+            z-index: 50;
+            backdrop-filter: blur(12px);
+            transition: opacity 0.4s ease;
         }
         #instructions {
             cursor: pointer;
-            padding: 30px 40px; border: 1px solid rgba(255,255,255,0.2); border-radius: 16px;
-            background: rgba(255,255,255,0.05);
-            display: inline-block; margin: 0 auto;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+            padding: 36px 48px; 
+            border: 1px solid rgba(255,255,255,0.12); 
+            border-radius: 24px;
+            background: rgba(255,255,255,0.04);
+            display: inline-block; 
+            margin: 0 auto;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 90vw;
         }
         #instructions:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.4);
-            transform: scale(1.02);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.25);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
         }
         #crosshair {
             position: absolute; top: 50%; left: 50%;
-            width: 8px; height: 8px;
-            background-color: rgba(255,255,255,0.8);
+            width: 6px; height: 6px;
+            background-color: rgba(255,255,255,0.9);
             border-radius: 50%;
             transform: translate(-50%, -50%);
             pointer-events: none;
             z-index: 5;
             display: none;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: 0 0 8px rgba(0,0,0,0.8);
         }
-        #back-btn {
-            position: absolute; top: 20px; left: 20px;
-            z-index: 20;
+        .hud-btn {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+            transition: all 0.2s ease;
+        }
+        .hud-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+        #room-badge {
+            transition: all 0.4s ease;
         }
     </style>
 </head>
 <body>
-    <button id="back-btn" onclick="if(document.referrer) { history.back(); } else { window.location.href='{{ url_for('users.profile', username=user.username) }}'; }" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-all font-bold text-xs tracking-widest uppercase border border-white/10 shadow-lg cursor-pointer">
-        &larr; Profile Dön
-    </button>
-    <button id="cam-toggle-btn" class="px-3 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-md transition-all font-bold text-xs tracking-widest uppercase border border-white/10 shadow-lg cursor-pointer flex items-center justify-center gap-2" style="position: absolute; top: 20px; right: 20px; z-index: 20;" title="Bakış Açısını Değiştir (C)">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-        <span class="hidden md:inline">Bakış Açısı (C)</span>
-    </button>
+    <!-- Top HUD Navigation -->
+    <div class="fixed top-5 left-5 z-40 flex items-center gap-3">
+        <button id="back-btn" onclick="if(document.referrer) { history.back(); } else { window.location.href='{{ url_for('users.profile', username=user.username) }}'; }" class="hud-btn px-4 py-2.5 text-white rounded-xl font-semibold text-xs tracking-wider uppercase flex items-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <span>Profile Dön</span>
+        </button>
+    </div>
+
+    <!-- Active Wing / Room Indicator -->
+    <div id="room-badge" class="fixed top-5 left-1/2 -translate-x-1/2 z-40 hud-btn px-5 py-2 rounded-full text-white/90 text-xs font-semibold tracking-widest uppercase flex items-center gap-2 pointer-events-none">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="room-name">Giriş Atriumu</span>
+    </div>
+
+    <!-- Camera Mode Toggle -->
+    <div class="fixed top-5 right-5 z-40 flex items-center gap-3">
+        <button id="cam-toggle-btn" class="hud-btn px-4 py-2.5 text-white rounded-xl font-semibold text-xs tracking-wider uppercase flex items-center gap-2 cursor-pointer" title="Bakış Açısını Değiştir (C)">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+            <span id="cam-mode-text" class="hidden sm:inline">Kamera: 3. Şahıs (C)</span>
+        </button>
+    </div>
+
+    <!-- Entrance Blocker / Instructions -->
     <div id="blocker">
         <div id="instructions">
-            <span style="font-size:36px; font-weight:800; letter-spacing: -1px; display:block; margin-bottom: 20px;">{{ user.username }} <span class="text-emerald-500">3D Galerisi</span></span>
-            <div class="text-emerald-400 font-bold tracking-widest text-sm mb-8 uppercase animate-pulse">Başlamak için tıklayın</div>
-            <div class="grid grid-cols-2 gap-x-12 gap-y-4 text-left text-sm text-gray-300 font-medium">
-                <div><strong class="text-white">Hareket:</strong> W, A, S, D</div>
-                <div><strong class="text-white">Etrafı İncele:</strong> Mouse</div>
-                <div><strong class="text-white">Bakış Açısı:</strong> C tuşu</div>
-                <div><strong class="text-white">Çıkış:</strong> ESC tuşu</div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold tracking-widest uppercase mb-4">
+                Contemporary Pavilion
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">
+                {{ user.username }} <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">3D Sanat Galerisi</span>
+            </h1>
+            <p class="text-gray-400 text-sm max-w-md mx-auto mb-6">
+                Modüler çağdaş sanat kanatları, doğal cam tavan ışıklıkları ve yüksek çözünürlüklü sergi alanları.
+            </p>
+            
+            <div class="inline-block px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-sm tracking-wider uppercase shadow-lg shadow-emerald-500/20 mb-8 cursor-pointer transform hover:scale-105 transition-all">
+                Galeriye Adım At
+            </div>
+
+            <div class="grid grid-cols-2 gap-x-10 gap-y-3 text-left text-xs text-gray-300 font-medium border-t border-white/10 pt-6 max-w-sm mx-auto">
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-1 rounded bg-white/10 text-white font-mono font-bold">W A S D</span>
+                    <span>Yürüme</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-1 rounded bg-white/10 text-white font-mono font-bold">Mouse</span>
+                    <span>Etrafı İncele</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-1 rounded bg-white/10 text-white font-mono font-bold">C</span>
+                    <span>Bakış Açısı</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-1 rounded bg-white/10 text-white font-mono font-bold">ESC</span>
+                    <span>İmleci Bırak</span>
+                </div>
             </div>
         </div>
     </div>
     
     <div id="crosshair"></div>
-    <div id="error-box" style="position:fixed; top:80px; left:20px; z-index:9999; background:rgba(220,0,0,0.9); color:white; padding:15px; border-radius:8px; font-family:monospace; display:none; max-width: 80%;"></div>
+    <div id="error-box" style="position:fixed; top:80px; left:20px; z-index:9999; background:rgba(220,38,38,0.9); color:white; padding:12px 18px; border-radius:12px; font-family:monospace; display:none; max-width: 80%; font-size:12px;"></div>
 
     <script>
     window.addEventListener('error', function(e) {
         const eb = document.getElementById('error-box');
-        eb.style.display = 'block';
-        eb.innerHTML += "Hata: " + e.message + " (" + e.filename + ":" + e.lineno + ")<br>";
+        if (eb) {
+            eb.style.display = 'block';
+            eb.innerHTML += "Hata: " + e.message + " (" + e.filename + ":" + e.lineno + ")<br>";
+        }
     });
     </script>
 
@@ -94,37 +166,21 @@
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
-
         const photosData = {{ photos_json | safe }};
-        
+
+        // Core Three.js variables
         let camera, tpCamera, scene, renderer, controls;
         let isThirdPerson = true;
-        let moveForward = false;
-        let moveBackward = false;
-        let moveLeft = false;
-        let moveRight = false;
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
         let prevTime = performance.now();
         const velocity = new THREE.Vector3();
         const direction = new THREE.Vector3();
 
         // Mobile control variables
-        let fwdValue = 0;
-        let bkdValue = 0;
-        let rgtValue = 0;
-        let lftValue = 0;
-        let touchLook = { x: 0, y: 0 };
+        let fwdValue = 0, bkdValue = 0, rgtValue = 0, lftValue = 0;
         let previousTouchLook = { x: 0, y: 0 };
         let lon = -90, lat = 0;
         let phi = 0, theta = 0;
-        
-        // Gallery dimensions
-        const roomWidth = 40;
-        const roomHeight = 20;
-        const zSpacing = 30; // Distance between photos
-        const totalZ = Math.max(100, Math.ceil(photosData.length / 2) * zSpacing + 80);
-
-        // Obstacles array for collision
-        const obstacles = [];
 
         // Avatar variables
         let avatarGroup;
@@ -133,177 +189,1052 @@
         let walkAction;
         let idleAction;
 
+        // Walkable Zones and Obstacles for collision detection
+        const walkableZones = [];
+        const obstacles = [];
+        const zoneLabels = []; // { name: '...', minZ: ..., maxZ: ... }
+
+        // Architecture dimensions
+        const ATRIUM_LENGTH = 36;
+        const ATRIUM_WIDTH = 34;
+        const ATRIUM_HEIGHT = 16;
+
+        const PAVILION_WIDTH = 34;
+        const PAVILION_HEIGHT = 15;
+        const PHOTOS_PER_PAVILION = 6; // 3 left, 3 right
+        const PHOTO_Z_SPACING = 20;
+
+        const BRIDGE_WIDTH = 18;
+        const BRIDGE_LENGTH = 20;
+        const BRIDGE_HEIGHT = 12;
+
         init();
         animate();
 
-        function createTextTexture(photo) {
+        // --- Procedural Canvas Textures for Realistic PBR Architectural Materials ---
+        function createTerrazzoTexture() {
             const canvas = document.createElement('canvas');
             canvas.width = 1024;
             canvas.height = 1024;
             const ctx = canvas.getContext('2d');
-            
-            // Background
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Border
-            ctx.strokeStyle = '#222222';
-            ctx.lineWidth = 10;
-            ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
-            
-            ctx.fillStyle = '#111111';
-            ctx.textAlign = 'left';
-            
-            // Title
-            ctx.font = 'bold 70px sans-serif';
-            ctx.fillText(photo.title || 'İsimsiz', 60, 120);
-            
-            // Description (word wrap)
-            ctx.font = '40px sans-serif';
-            const desc = photo.description || '';
-            const words = desc.split(' ');
-            let line = '';
-            let y = 200;
-            for(let n = 0; n < words.length; n++) {
-                let testLine = line + words[n] + ' ';
-                let metrics = ctx.measureText(testLine);
-                if (metrics.width > canvas.width - 120 && n > 0) {
-                    ctx.fillText(line, 60, y);
-                    line = words[n] + ' ';
-                    y += 55;
-                } else {
-                    line = testLine;
-                }
-            }
-            ctx.fillText(line, 60, y);
-            
-            // EXIF Info
-            y += 100;
-            ctx.font = 'bold 40px monospace';
-            ctx.fillStyle = '#444444';
-            if (photo.camera_model) { ctx.fillText(`Kamera: ${photo.camera_model}`, 60, y); y += 60; }
-            if (photo.lens_model) { ctx.fillText(`Lens: ${photo.lens_model}`, 60, y); y += 60; }
-            if (photo.iso) { ctx.fillText(`ISO: ${photo.iso}`, 60, y); y += 60; }
-            if (photo.aperture) { ctx.fillText(`Diyafram: ${photo.aperture}`, 60, y); y += 60; }
-            if (photo.shutter_speed) { ctx.fillText(`Enstantane: ${photo.shutter_speed}`, 60, y); y += 60; }
-            
-            const texture = new THREE.CanvasTexture(canvas);
-            return texture;
-        }
 
-        function createWallTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            
-            ctx.fillStyle = '#ffffff';
+            // Warm light grey concrete base
+            ctx.fillStyle = '#e8ecf1';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+
+            // Marble aggregates and terrazzo flecks
+            const colors = ['#ffffff', '#cbd5e1', '#94a3b8', '#64748b', '#d97706', '#f1f5f9'];
+            for (let i = 0; i < 4500; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const r = Math.random() * 3 + 1;
+                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Subtle surface grain
             const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imgData.data;
-            for(let i = 0; i < data.length; i += 4) {
-                // Daha belirgin sıva/duvar efekti için gürültüyü artırdık
-                const noise = Math.random() * 35; 
-                data[i] = Math.max(0, data[i] - noise);
-                data[i+1] = Math.max(0, data[i+1] - noise);
-                data[i+2] = Math.max(0, data[i+2] - noise);
+            for (let i = 0; i < data.length; i += 4) {
+                const noise = (Math.random() - 0.5) * 10;
+                data[i] = Math.min(255, Math.max(0, data[i] + noise));
+                data[i+1] = Math.min(255, Math.max(0, data[i+1] + noise));
+                data[i+2] = Math.min(255, Math.max(0, data[i+2] + noise));
             }
             ctx.putImageData(imgData, 0, 0);
-            
+
             const texture = new THREE.CanvasTexture(canvas);
             texture.wrapS = THREE.RepeatWrapping;
             texture.wrapT = THREE.RepeatWrapping;
             return texture;
         }
 
-        function init() {
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-            camera.position.y = 8;
-            camera.position.z = 20;
+        function createWoodBridgeTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
 
-            tpCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+            // Smoked dark walnut base
+            ctx.fillStyle = '#1c1917';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xf5f5f5);
-            scene.fog = new THREE.Fog(0xf5f5f5, 10, Math.min(150, totalZ));
+            // Wood plank lines
+            const plankWidth = 64;
+            ctx.strokeStyle = '#0c0a09';
+            ctx.lineWidth = 3;
+            for (let x = 0; x < canvas.width; x += plankWidth) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
 
-            const light = new THREE.HemisphereLight(0xffffff, 0xdddddd, 0.6);
-            scene.add(light);
-
-            function loadAvatar() {
-                avatarGroup = new THREE.Group();
-                scene.add(avatarGroup);
-                
-                const loader = new GLTFLoader();
-                loader.load('{{ url_for("static", filename="models/lowpoly_anime_character_cyberstyle.glb") }}', function (gltf) {
-                    const model = gltf.scene;
-                    
-                    // Modelin boyutunu ayarla
-                    model.scale.set(4.5, 4.5, 4.5);
-                    // Bounding Box hesaplaması bu modelde hatalı sonuç verip karakteri havaya uçurduğu için iptal ettik
-                    // Karakterin Y eksenini direkt sıfıra (zemine) sabitliyoruz.
-                    model.position.y = 0;
-                    
-                    // Add shadow casting
-                    model.traverse(function(node) {
-                        if (node.isMesh) {
-                            node.castShadow = true;
-                            node.receiveShadow = true;
-                        }
-                    });
-                    
-                    avatarGroup.add(model);
-                    
-                    // Setup animations (Yürüme / Idle)
-                    if (gltf.animations && gltf.animations.length > 0) {
-                        avatarMixer = new THREE.AnimationMixer(model);
-                        
-                        gltf.animations.forEach(anim => {
-                            if (anim.name.toLowerCase().includes('walk')) {
-                                walkAction = avatarMixer.clipAction(anim);
-                            } else if (anim.name.toLowerCase().includes('idle')) {
-                                idleAction = avatarMixer.clipAction(anim);
-                            }
-                        });
-                        
-                        // İsimler uyuşmazsa ilk iki animasyonu kullan
-                        if (!walkAction && gltf.animations.length > 0) walkAction = avatarMixer.clipAction(gltf.animations[0]);
-                        if (!idleAction && gltf.animations.length > 1) idleAction = avatarMixer.clipAction(gltf.animations[1]);
-                        
-                        // Başlangıçta idle (bekleme) animasyonunu oynat
-                        if (idleAction) {
-                            idleAction.play();
-                            currentAction = idleAction;
-                        } else if (walkAction) {
-                            currentAction = walkAction;
-                        }
-                    }
-                }, undefined, function (error) {
-                    console.error('An error happened while loading the avatar:', error);
-                });
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.04})`;
+                ctx.fillRect(x, 0, plankWidth, canvas.height);
             }
 
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            return texture;
+        }
+
+        function createMuseumWallTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imgData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const noise = (Math.random() - 0.5) * 14;
+                data[i] = Math.min(255, Math.max(0, data[i] + noise));
+                data[i+1] = Math.min(255, Math.max(0, data[i+1] + noise));
+                data[i+2] = Math.min(255, Math.max(0, data[i+2] + noise));
+            }
+            ctx.putImageData(imgData, 0, 0);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            return texture;
+        }
+
+        function createPlaqueTexture(photo) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 680;
+            const ctx = canvas.getContext('2d');
+
+            // High-end minimalist dark acrylic background
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 8;
+            ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
+
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(40, 40, 12, 100);
+
+            // Title
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 56px sans-serif';
+            ctx.textAlign = 'left';
+            const title = (photo.title || 'İsimsiz Eser').substring(0, 30);
+            ctx.fillText(title, 70, 105);
+
+            // Description (word wrap)
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '36px sans-serif';
+            const desc = photo.description || 'ShutterGallery sergi koleksiyonundan bir kare.';
+            const words = desc.split(' ');
+            let line = '';
+            let y = 200;
+            for (let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                let metrics = ctx.measureText(testLine);
+                if (metrics.width > canvas.width - 120 && n > 0) {
+                    ctx.fillText(line, 50, y);
+                    line = words[n] + ' ';
+                    y += 48;
+                    if (y > 350) break;
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, 50, y);
+
+            // Divider Line
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(50, 420);
+            ctx.lineTo(canvas.width - 50, 420);
+            ctx.stroke();
+
+            // EXIF Camera Information
+            ctx.font = 'bold 30px monospace';
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillText('EXIF METRİKLERİ', 50, 470);
+
+            ctx.font = '28px monospace';
+            ctx.fillStyle = '#cbd5e1';
+            let exif1 = [];
+            if (photo.camera_model) exif1.push(`Kamera: ${photo.camera_model}`);
+            if (photo.lens_model) exif1.push(`Lens: ${photo.lens_model}`);
+            ctx.fillText(exif1.join('  |  ') || 'Kamera bilgisi girilmedi', 50, 525);
+
+            let exif2 = [];
+            if (photo.iso) exif2.push(`ISO ${photo.iso}`);
+            if (photo.aperture) exif2.push(`f/${photo.aperture}`);
+            if (photo.shutter_speed) exif2.push(`${photo.shutter_speed}s`);
+            ctx.fillText(exif2.join('   •   ') || 'Pozlama ayarları saklı', 50, 575);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            return texture;
+        }
+
+        function createWelcomeBannerTexture(username) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 768;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 14;
+            ctx.strokeRect(12, 12, canvas.width - 24, canvas.height - 24);
+
+            ctx.fillStyle = '#10b981';
+            ctx.font = 'bold 38px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('SHUTTERGALLERY • CONTEMPORARY WING', canvas.width / 2, 120);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 64px sans-serif';
+            ctx.fillText(`${username.toUpperCase()} RETROSPECTIVE`, canvas.width / 2, 260);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '36px sans-serif';
+            ctx.fillText('Küratörlü 3D Fotoğraf Sergisi', canvas.width / 2, 360);
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(120, 430);
+            ctx.lineTo(canvas.width - 120, 430);
+            ctx.stroke();
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '32px sans-serif';
+            ctx.fillText('WASD ile yürüyün, C tuşuyla bakış açısını değiştirin.', canvas.width / 2, 510);
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 34px monospace';
+            ctx.fillText('↓ SERGİ SALONLARINA DOĞRU İLERLEYİN ↓', canvas.width / 2, 630);
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // --- Main Init Function ---
+        function init() {
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.5, 1500);
+            camera.position.set(0, 8, 20);
+
+            tpCamera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 1500);
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xdce5ee);
+            scene.fog = new THREE.FogExp2(0xdce5ee, 0.0018);
+
+            // Ambient / Sky Lighting
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0xcfd8dc, 0.85);
+            scene.add(hemiLight);
+
+            // Global Directional Sun pouring through skylights
+            const sunLight = new THREE.DirectionalLight(0xfffaf0, 1.2);
+            sunLight.position.set(30, 80, 20);
+            scene.add(sunLight);
+
+            // Outdoor Landscape Ground (Visible through glass bridges and windows)
+            const outdoorGeo = new THREE.PlaneGeometry(600, 600);
+            const outdoorMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.95 });
+            const outdoorGround = new THREE.Mesh(outdoorGeo, outdoorMat);
+            outdoorGround.rotation.x = -Math.PI / 2;
+            outdoorGround.position.set(0, -0.2, -100);
+            scene.add(outdoorGround);
+
+            // Load Materials
+            const terrazzoTex = createTerrazzoTexture();
+            terrazzoTex.repeat.set(12, 12);
+            const floorMat = new THREE.MeshStandardMaterial({
+                map: terrazzoTex,
+                roughness: 0.35,
+                metalness: 0.05,
+                color: 0xffffff
+            });
+
+            const woodBridgeTex = createWoodBridgeTexture();
+            woodBridgeTex.repeat.set(4, 4);
+            const bridgeFloorMat = new THREE.MeshStandardMaterial({
+                map: woodBridgeTex,
+                roughness: 0.5,
+                metalness: 0.1
+            });
+
+            const wallTex = createMuseumWallTexture();
+            wallTex.repeat.set(8, 4);
+            const wallMat = new THREE.MeshStandardMaterial({
+                map: wallTex,
+                roughness: 0.85,
+                color: 0xffffff
+            });
+
+            const darkAccentMat = new THREE.MeshStandardMaterial({
+                color: 0x1e293b,
+                roughness: 0.3,
+                metalness: 0.8
+            });
+
+            const glassMat = new THREE.MeshPhysicalMaterial({
+                color: 0x93c5fd,
+                transmission: 0.9,
+                opacity: 0.35,
+                transparent: true,
+                roughness: 0.05,
+                ior: 1.5,
+                reflectivity: 0.9
+            });
+
+            const frameMat = new THREE.MeshStandardMaterial({
+                color: 0x0f172a,
+                roughness: 0.25,
+                metalness: 0.85
+            });
+
+            const paspartuMat = new THREE.MeshStandardMaterial({
+                color: 0xfbfbfb,
+                roughness: 0.95
+            });
+
+            const benchWoodMat = new THREE.MeshStandardMaterial({
+                color: 0x27272a,
+                roughness: 0.4
+            });
+
+            const gltfLoader = new GLTFLoader();
+
+            // --- BUILD ARCHITECTURE ---
+
+            // 1. Grand Atrium (Entrance Foyer)
+            // Z ranges from +32 down to -4
+            buildAtrium({
+                scene, floorMat, wallMat, darkAccentMat, glassMat,
+                gltfLoader, benchWoodMat,
+                width: ATRIUM_WIDTH,
+                length: ATRIUM_LENGTH,
+                height: ATRIUM_HEIGHT,
+                startZ: 32
+            });
+
+            // Calculate number of pavilions needed for photos
+            const numPavilions = Math.max(1, Math.ceil(photosData.length / PHOTOS_PER_PAVILION));
+            let currentZ = 32 - ATRIUM_LENGTH; // Starts at -4
+
+            for (let i = 0; i < numPavilions; i++) {
+                const pStartIndex = i * PHOTOS_PER_PAVILION;
+                const pPhotos = photosData.slice(pStartIndex, pStartIndex + PHOTOS_PER_PAVILION);
+                const pLength = Math.max(56, Math.ceil(Math.max(1, pPhotos.length) / 2) * PHOTO_Z_SPACING + 16);
+
+                // Build Pavilion
+                buildPavilion({
+                    scene, floorMat, wallMat, darkAccentMat, glassMat,
+                    frameMat, paspartuMat, benchWoodMat, gltfLoader,
+                    pavilionIndex: i + 1,
+                    photos: pPhotos,
+                    width: PAVILION_WIDTH,
+                    length: pLength,
+                    height: PAVILION_HEIGHT,
+                    startZ: currentZ
+                });
+
+                currentZ -= pLength;
+
+                // Build Connecting Glass Skybridge if there's another pavilion
+                if (i < numPavilions - 1) {
+                    buildGlassSkybridge({
+                        scene, bridgeFloorMat, darkAccentMat, glassMat,
+                        width: BRIDGE_WIDTH,
+                        length: BRIDGE_LENGTH,
+                        height: BRIDGE_HEIGHT,
+                        startZ: currentZ
+                    });
+                    currentZ -= BRIDGE_LENGTH;
+                }
+            }
+
+            // Build Concluding Observational Lounge at the end of the museum
+            buildEndLounge({
+                scene, floorMat, wallMat, darkAccentMat, glassMat,
+                gltfLoader, benchWoodMat,
+                width: ATRIUM_WIDTH,
+                length: 24,
+                height: ATRIUM_HEIGHT,
+                startZ: currentZ
+            });
+
+            // Load Cyberpunk Anime Avatar
             loadAvatar();
 
+            // Setup Controls
+            setupControls();
+
+            // Renderer Setup
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            const maxPixelRatio = isMobile ? 1.0 : Math.min(window.devicePixelRatio, 2.0);
+            renderer.setPixelRatio(maxPixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.05;
+            document.body.appendChild(renderer.domElement);
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // --- Architecture Builders ---
+
+        function buildAtrium({ scene, floorMat, wallMat, darkAccentMat, glassMat, gltfLoader, benchWoodMat, width, length, height, startZ }) {
+            const endZ = startZ - length;
+
+            // Floor
+            const floorGeo = new THREE.PlaneGeometry(width, length);
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.set(0, 0, startZ - length / 2);
+            scene.add(floor);
+
+            // Ceiling with central skylight opening
+            const skylightW = 14;
+            const skylightL = 20;
+
+            const ceilGeo = new THREE.PlaneGeometry(width, length);
+            const ceil = new THREE.Mesh(ceilGeo, wallMat);
+            ceil.rotation.x = Math.PI / 2;
+            ceil.position.set(0, height, startZ - length / 2);
+            scene.add(ceil);
+
+            // Recessed Glass Skylight Frame
+            const skyGlassGeo = new THREE.PlaneGeometry(skylightW, skylightL);
+            const skyGlass = new THREE.Mesh(skyGlassGeo, glassMat);
+            skyGlass.rotation.x = Math.PI / 2;
+            skyGlass.position.set(0, height - 0.2, startZ - length / 2);
+            scene.add(skyGlass);
+
+            // Skylight Grid Mullions
+            const mullionGeo = new THREE.BoxGeometry(0.3, 0.4, skylightL);
+            for (let mx = -skylightW / 2 + 3.5; mx < skylightW / 2; mx += 3.5) {
+                const mullion = new THREE.Mesh(mullionGeo, darkAccentMat);
+                mullion.position.set(mx, height - 0.1, startZ - length / 2);
+                scene.add(mullion);
+            }
+
+            // Dedicated Skylight Daylight Beam
+            const skyBeam = new THREE.SpotLight(0xffffff, 2.5, 60, Math.PI / 3, 0.6);
+            skyBeam.position.set(0, height + 5, startZ - length / 2);
+            skyBeam.target.position.set(0, 0, startZ - length / 2);
+            scene.add(skyBeam);
+            scene.add(skyBeam.target);
+
+            // Side Walls (Left and Right)
+            const sideWallGeo = new THREE.PlaneGeometry(length, height);
+            const leftWall = new THREE.Mesh(sideWallGeo, wallMat);
+            leftWall.rotation.y = Math.PI / 2;
+            leftWall.position.set(-width / 2, height / 2, startZ - length / 2);
+            scene.add(leftWall);
+
+            const rightWall = new THREE.Mesh(sideWallGeo, wallMat);
+            rightWall.rotation.y = -Math.PI / 2;
+            rightWall.position.set(width / 2, height / 2, startZ - length / 2);
+            scene.add(rightWall);
+
+            // Back Entrance Wall (Behind player at start)
+            const backWallGeo = new THREE.PlaneGeometry(width, height);
+            const backWall = new THREE.Mesh(backWallGeo, wallMat);
+            backWall.position.set(0, height / 2, startZ);
+            scene.add(backWall);
+
+            // Entrance Glass Doors
+            const doorGeo = new THREE.BoxGeometry(10, 10, 0.4);
+            const doorFrame = new THREE.Mesh(doorGeo, darkAccentMat);
+            doorFrame.position.set(0, 5, startZ - 0.2);
+            scene.add(doorFrame);
+
+            const doorGlassGeo = new THREE.BoxGeometry(9.2, 9.2, 0.2);
+            const doorGlass = new THREE.Mesh(doorGlassGeo, glassMat);
+            doorGlass.position.set(0, 5, startZ - 0.2);
+            scene.add(doorGlass);
+
+            // Front Wall with Wide Portal leading to Pavilion 1
+            const portalW = 16;
+            const portalH = 12;
+            const wallLeftW = (width - portalW) / 2;
+
+            const frontWallPieceL = new THREE.Mesh(new THREE.PlaneGeometry(wallLeftW, height), wallMat);
+            frontWallPieceL.position.set(-width / 2 + wallLeftW / 2, height / 2, endZ);
+            scene.add(frontWallPieceL);
+
+            const frontWallPieceR = new THREE.Mesh(new THREE.PlaneGeometry(wallLeftW, height), wallMat);
+            frontWallPieceR.position.set(width / 2 - wallLeftW / 2, height / 2, endZ);
+            scene.add(frontWallPieceR);
+
+            const frontWallPieceTop = new THREE.Mesh(new THREE.PlaneGeometry(portalW, height - portalH), wallMat);
+            frontWallPieceTop.position.set(0, portalH + (height - portalH) / 2, endZ);
+            scene.add(frontWallPieceTop);
+
+            // Portal Architectural Frame
+            const portalArch = new THREE.Mesh(new THREE.BoxGeometry(portalW + 0.8, portalH + 0.4, 1.2), darkAccentMat);
+            portalArch.position.set(0, (portalH + 0.4) / 2, endZ);
+            scene.add(portalArch);
+
+            // Welcome Information Totem / Modern Kiosk (on the left side of atrium)
+            const totemGeo = new THREE.PlaneGeometry(5.5, 4.2);
+            const totemTex = createWelcomeBannerTexture('{{ user.username }}');
+            const totemMat = new THREE.MeshBasicMaterial({ map: totemTex });
+            const totem = new THREE.Mesh(totemGeo, totemMat);
+            totem.position.set(-8.5, 4.0, 18);
+            totem.rotation.y = Math.PI / 6;
+            scene.add(totem);
+
+            const totemBacking = new THREE.Mesh(new THREE.BoxGeometry(5.8, 4.4, 0.3), darkAccentMat);
+            totemBacking.position.copy(totem.position);
+            totemBacking.rotation.copy(totem.rotation);
+            scene.add(totemBacking);
+
+            obstacles.push({ x: -8.5, z: 18, radius: 2.5 });
+
+            // Central Pedestal Sculpture (Atrium Centerpiece)
+            const pedGeo = new THREE.BoxGeometry(3.5, 3.2, 3.5);
+            const pedMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.2, metalness: 0.8 });
+            const pedestal = new THREE.Mesh(pedGeo, pedMat);
+            pedestal.position.set(0, 1.6, 10);
+            scene.add(pedestal);
+
+            // Centerpiece spotlight
+            const pedSpot = new THREE.SpotLight(0xfff5ea, 4.0, 25, Math.PI / 6, 0.4);
+            pedSpot.position.set(0, height - 1, 10);
+            pedSpot.target = pedestal;
+            scene.add(pedSpot);
+            scene.add(pedSpot.target);
+
+            // Add sculpture to pedestal (Try Nefertiti or AntiqueCamera)
+            gltfLoader.load('{{ url_for("static", filename="models/Nefertiti.glb") }}', function(gltf) {
+                const sculpture = gltf.scene;
+                sculpture.position.set(0, 3.2, 10);
+                sculpture.scale.set(3.0, 3.0, 3.0);
+                scene.add(sculpture);
+            }, undefined, function() {
+                gltfLoader.load('{{ url_for("static", filename="models/AntiqueCamera.glb") }}', function(gltfCam) {
+                    const camModel = gltfCam.scene;
+                    camModel.position.set(0, 3.2, 10);
+                    camModel.scale.set(0.8, 0.8, 0.8);
+                    scene.add(camModel);
+                });
+            });
+
+            obstacles.push({ x: 0, z: 10, radius: 2.6 });
+
+            // Architectural Minimalist Benches along side walls
+            createMinimalistBench(scene, benchWoodMat, darkAccentMat, -11, 8, Math.PI / 2);
+            createMinimalistBench(scene, benchWoodMat, darkAccentMat, 11, 8, -Math.PI / 2);
+            obstacles.push({ x: -11, z: 8, radius: 2.2 });
+            obstacles.push({ x: 11, z: 8, radius: 2.2 });
+
+            // Register Walkable Zone for Atrium (with generous overlap at portal)
+            walkableZones.push({
+                minX: -width / 2 + 1.5,
+                maxX: width / 2 - 1.5,
+                minZ: endZ - 3.0,
+                maxZ: startZ - 1.5
+            });
+
+            zoneLabels.push({
+                name: 'Giriş Atriumu',
+                minZ: endZ,
+                maxZ: startZ
+            });
+        }
+
+        function buildPavilion({ scene, floorMat, wallMat, darkAccentMat, glassMat, frameMat, paspartuMat, benchWoodMat, gltfLoader, pavilionIndex, photos, width, length, height, startZ }) {
+            const endZ = startZ - length;
+
+            // Floor
+            const floorGeo = new THREE.PlaneGeometry(width, length);
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.set(0, 0, startZ - length / 2);
+            scene.add(floor);
+
+            // Ceiling with recessed Skylight
+            const ceilGeo = new THREE.PlaneGeometry(width, length);
+            const ceil = new THREE.Mesh(ceilGeo, wallMat);
+            ceil.rotation.x = Math.PI / 2;
+            ceil.position.set(0, height, startZ - length / 2);
+            scene.add(ceil);
+
+            const skyW = 10;
+            const skyL = length - 16;
+            const skyGlass = new THREE.Mesh(new THREE.PlaneGeometry(skyW, skyL), glassMat);
+            skyGlass.rotation.x = Math.PI / 2;
+            skyGlass.position.set(0, height - 0.2, startZ - length / 2);
+            scene.add(skyGlass);
+
+            // Skylight cross beams
+            for (let sz = startZ - 12; sz > endZ + 12; sz -= 10) {
+                const beam = new THREE.Mesh(new THREE.BoxGeometry(skyW, 0.4, 0.4), darkAccentMat);
+                beam.position.set(0, height - 0.1, sz);
+                scene.add(beam);
+            }
+
+            // Side Walls
+            const sideWallGeo = new THREE.PlaneGeometry(length, height);
+            const leftWall = new THREE.Mesh(sideWallGeo, wallMat);
+            leftWall.rotation.y = Math.PI / 2;
+            leftWall.position.set(-width / 2, height / 2, startZ - length / 2);
+            scene.add(leftWall);
+
+            const rightWall = new THREE.Mesh(sideWallGeo, wallMat);
+            rightWall.rotation.y = -Math.PI / 2;
+            rightWall.position.set(width / 2, height / 2, startZ - length / 2);
+            scene.add(rightWall);
+
+            // Ceiling Track Lighting System (Tracks along left and right sides)
+            const trackL = length - 8;
+            const trackGeo = new THREE.BoxGeometry(0.3, 0.2, trackL);
+            const trackMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3 });
+
+            const leftTrack = new THREE.Mesh(trackGeo, trackMat);
+            leftTrack.position.set(-width / 2 + 7, height - 0.2, startZ - length / 2);
+            scene.add(leftTrack);
+
+            const rightTrack = new THREE.Mesh(trackGeo, trackMat);
+            rightTrack.position.set(width / 2 - 7, height - 0.2, startZ - length / 2);
+            scene.add(rightTrack);
+
+            // End portal opening to next section
+            const portalW = 14;
+            const portalH = 11;
+            const wallLeftW = (width - portalW) / 2;
+
+            const endWallPieceL = new THREE.Mesh(new THREE.PlaneGeometry(wallLeftW, height), wallMat);
+            endWallPieceL.position.set(-width / 2 + wallLeftW / 2, height / 2, endZ);
+            scene.add(endWallPieceL);
+
+            const endWallPieceR = new THREE.Mesh(new THREE.PlaneGeometry(wallLeftW, height), wallMat);
+            endWallPieceR.position.set(width / 2 - wallLeftW / 2, height / 2, endZ);
+            scene.add(endWallPieceR);
+
+            const endWallPieceTop = new THREE.Mesh(new THREE.PlaneGeometry(portalW, height - portalH), wallMat);
+            endWallPieceTop.position.set(0, portalH + (height - portalH) / 2, endZ);
+            scene.add(endWallPieceTop);
+
+            // Modern Minimalist Bench in Pavilion Center
+            createMinimalistBench(scene, benchWoodMat, darkAccentMat, 0, startZ - length / 2, 0);
+            obstacles.push({ x: 0, z: startZ - length / 2, radius: 2.2 });
+
+            // Display Photos inside this Pavilion
+            const textureLoader = new THREE.TextureLoader();
+
+            if (photos.length === 0) {
+                // Empty gallery message
+                const emptyTex = createWelcomeBannerTexture('Boş Koleksiyon');
+                const emptyMesh = new THREE.Mesh(new THREE.PlaneGeometry(8, 4), new THREE.MeshBasicMaterial({ map: emptyTex }));
+                emptyMesh.position.set(-width / 2 + 0.2, 7.5, startZ - length / 2);
+                emptyMesh.rotation.y = Math.PI / 2;
+                scene.add(emptyMesh);
+            }
+
+            photos.forEach((photo, idx) => {
+                const isLeft = (idx % 2 === 0);
+                const pairIndex = Math.floor(idx / 2);
+                const zPos = startZ - 14 - (pairIndex * PHOTO_Z_SPACING);
+
+                textureLoader.load(photo.image_url, function(texture) {
+                    texture.colorSpace = THREE.SRGBColorSpace;
+                    texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+                    texture.minFilter = THREE.LinearMipmapLinearFilter;
+                    texture.magFilter = THREE.LinearFilter;
+                    texture.generateMipmaps = true;
+
+                    const aspect = (texture.image && texture.image.height > 0) ? (texture.image.width / texture.image.height) : 1.33;
+                    let photoH = 8.5;
+                    let photoW = photoH * aspect;
+                    if (photoW > 14) {
+                        photoW = 14;
+                        photoH = photoW / aspect;
+                    }
+
+                    // Paspartu Mat Board (Border around image)
+                    const matPadding = 0.8;
+                    const matW = photoW + matPadding * 2;
+                    const matH = photoH + matPadding * 2;
+                    const frameD = 0.35;
+
+                    const matMesh = new THREE.Mesh(new THREE.BoxGeometry(matW, matH, frameD), paspartuMat);
+                    const outerFrameMesh = new THREE.Mesh(new THREE.BoxGeometry(matW + 0.5, matH + 0.5, frameD + 0.1), frameMat);
+                    const photoMesh = new THREE.Mesh(new THREE.PlaneGeometry(photoW, photoH), new THREE.MeshBasicMaterial({ map: texture }));
+
+                    const centerY = 7.5;
+                    const wallX = isLeft ? (-width / 2) : (width / 2);
+                    const dirSign = isLeft ? 1 : -1;
+
+                    outerFrameMesh.position.set(wallX + dirSign * (frameD / 2), centerY, zPos);
+                    outerFrameMesh.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
+                    scene.add(outerFrameMesh);
+
+                    matMesh.position.set(wallX + dirSign * (frameD / 2 + 0.05), centerY, zPos);
+                    matMesh.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
+                    scene.add(matMesh);
+
+                    photoMesh.position.set(wallX + dirSign * (frameD + 0.1), centerY, zPos);
+                    photoMesh.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
+                    scene.add(photoMesh);
+
+                    // EXIF Info Plaque
+                    const plaqueTex = createPlaqueTexture(photo);
+                    const plaqueW = 3.6;
+                    const plaqueH = 2.4;
+                    const plaqueMesh = new THREE.Mesh(new THREE.PlaneGeometry(plaqueW, plaqueH), new THREE.MeshBasicMaterial({ map: plaqueTex }));
+                    const plaqueBacking = new THREE.Mesh(new THREE.BoxGeometry(plaqueW + 0.2, plaqueH + 0.2, 0.15), darkAccentMat);
+
+                    const plaqueZ = zPos - (photoW / 2) - 2.8;
+                    const plaqueY = 5.2;
+
+                    plaqueBacking.position.set(wallX + dirSign * 0.1, plaqueY, plaqueZ);
+                    plaqueBacking.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
+                    scene.add(plaqueBacking);
+
+                    plaqueMesh.position.set(wallX + dirSign * 0.2, plaqueY, plaqueZ);
+                    plaqueMesh.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
+                    scene.add(plaqueMesh);
+
+                    // Dedicated Art Gallery Track Spotlight (Warm, focused beam)
+                    const spotX = isLeft ? (-width / 2 + 7) : (width / 2 - 7);
+                    const spot = new THREE.SpotLight(0xfff8ee, 4.5, 32, Math.PI / 5, 0.55);
+                    spot.decay = 1.2;
+                    spot.position.set(spotX, height - 0.4, zPos);
+                    spot.target = photoMesh;
+                    scene.add(spot);
+                    scene.add(spot.target);
+
+                    // Sleek cylinder spot fixture on track
+                    const fixtureGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.6, 12);
+                    const fixture = new THREE.Mesh(fixtureGeo, darkAccentMat);
+                    fixture.position.set(spotX, height - 0.4, zPos);
+                    fixture.lookAt(photoMesh.position);
+                    scene.add(fixture);
+                });
+            });
+
+            // Register Walkable Zone for Pavilion
+            walkableZones.push({
+                minX: -width / 2 + 1.5,
+                maxX: width / 2 - 1.5,
+                minZ: endZ - 3.0,
+                maxZ: startZ + 3.0
+            });
+
+            zoneLabels.push({
+                name: `Sergi Salonu ${pavilionIndex}`,
+                minZ: endZ,
+                maxZ: startZ
+            });
+        }
+
+        function buildGlassSkybridge({ scene, bridgeFloorMat, darkAccentMat, glassMat, width, length, height, startZ }) {
+            const endZ = startZ - length;
+
+            // Floor
+            const floorGeo = new THREE.PlaneGeometry(width, length);
+            const floor = new THREE.Mesh(floorGeo, bridgeFloorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.set(0, 0, startZ - length / 2);
+            scene.add(floor);
+
+            // Ceiling (Dark Architectural Canopy)
+            const ceilGeo = new THREE.PlaneGeometry(width, length);
+            const ceil = new THREE.Mesh(ceilGeo, darkAccentMat);
+            ceil.rotation.x = Math.PI / 2;
+            ceil.position.set(0, height, startZ - length / 2);
+            scene.add(ceil);
+
+            // Floor-to-Ceiling Glass Walls on Left and Right
+            const glassWallGeo = new THREE.PlaneGeometry(length, height);
+
+            const leftGlass = new THREE.Mesh(glassWallGeo, glassMat);
+            leftGlass.rotation.y = Math.PI / 2;
+            leftGlass.position.set(-width / 2, height / 2, startZ - length / 2);
+            scene.add(leftGlass);
+
+            const rightGlass = new THREE.Mesh(glassWallGeo, glassMat);
+            rightGlass.rotation.y = -Math.PI / 2;
+            rightGlass.position.set(width / 2, height / 2, startZ - length / 2);
+            scene.add(rightGlass);
+
+            // Architectural Steel Struts / Mullions
+            const mullionGeo = new THREE.BoxGeometry(0.35, height, 0.35);
+            for (let z = startZ; z >= endZ; z -= 5) {
+                const mLeft = new THREE.Mesh(mullionGeo, darkAccentMat);
+                mLeft.position.set(-width / 2, height / 2, z);
+                scene.add(mLeft);
+
+                const mRight = new THREE.Mesh(mullionGeo, darkAccentMat);
+                mRight.position.set(width / 2, height / 2, z);
+                scene.add(mRight);
+            }
+
+            // Exterior Courtyard Planters visible through the glass
+            createOutdoorPlanter(scene, -width / 2 - 4, startZ - length / 2);
+            createOutdoorPlanter(scene, width / 2 + 4, startZ - length / 2);
+
+            // Register Walkable Zone for Skybridge
+            walkableZones.push({
+                minX: -width / 2 + 1.2,
+                maxX: width / 2 - 1.2,
+                minZ: endZ - 3.0,
+                maxZ: startZ + 3.0
+            });
+
+            zoneLabels.push({
+                name: 'Panoramik Cam Köprü',
+                minZ: endZ,
+                maxZ: startZ
+            });
+        }
+
+        function buildEndLounge({ scene, floorMat, wallMat, darkAccentMat, glassMat, gltfLoader, benchWoodMat, width, length, height, startZ }) {
+            const endZ = startZ - length;
+
+            // Floor
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(width, length), floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.set(0, 0, startZ - length / 2);
+            scene.add(floor);
+
+            // Ceiling
+            const ceil = new THREE.Mesh(new THREE.PlaneGeometry(width, length), wallMat);
+            ceil.rotation.x = Math.PI / 2;
+            ceil.position.set(0, height, startZ - length / 2);
+            scene.add(ceil);
+
+            // Side Walls
+            const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(length, height), wallMat);
+            leftWall.rotation.y = Math.PI / 2;
+            leftWall.position.set(-width / 2, height / 2, startZ - length / 2);
+            scene.add(leftWall);
+
+            const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(length, height), wallMat);
+            rightWall.rotation.y = -Math.PI / 2;
+            rightWall.position.set(width / 2, height / 2, startZ - length / 2);
+            scene.add(rightWall);
+
+            // Giant Panoramic Glass Window at the end of the museum
+            const endGlass = new THREE.Mesh(new THREE.PlaneGeometry(width, height), glassMat);
+            endGlass.position.set(0, height / 2, endZ);
+            scene.add(endGlass);
+
+            // Window Mullions
+            for (let x = -width / 2 + 6; x < width / 2; x += 6) {
+                const vm = new THREE.Mesh(new THREE.BoxGeometry(0.3, height, 0.3), darkAccentMat);
+                vm.position.set(x, height / 2, endZ + 0.1);
+                scene.add(vm);
+            }
+
+            // Designer Chairs and Lounge Table facing the view
+            gltfLoader.load('{{ url_for("static", filename="models/SheenChair.glb") }}', function(gltf) {
+                const chairL = gltf.scene;
+                chairL.position.set(-4, 0, endZ + 8);
+                chairL.scale.set(3.5, 3.5, 3.5);
+                chairL.rotation.y = Math.PI;
+                scene.add(chairL);
+
+                const chairR = chairL.clone();
+                chairR.position.set(4, 0, endZ + 8);
+                chairR.rotation.y = Math.PI;
+                scene.add(chairR);
+            });
+
+            obstacles.push({ x: 0, z: endZ + 8, radius: 4.5 });
+
+            // Register Walkable Zone for Lounge
+            walkableZones.push({
+                minX: -width / 2 + 1.5,
+                maxX: width / 2 - 1.5,
+                minZ: endZ + 2.0,
+                maxZ: startZ + 3.0
+            });
+
+            zoneLabels.push({
+                name: 'Seyir Lounge & Teras',
+                minZ: endZ,
+                maxZ: startZ
+            });
+        }
+
+        // --- Helper Furniture & Foliage Builders ---
+
+        function createMinimalistBench(scene, woodMat, legMat, x, z, rotationY) {
+            const benchGroup = new THREE.Group();
+
+            // Wooden Seat
+            const seatGeo = new THREE.BoxGeometry(7.0, 0.4, 2.2);
+            const seat = new THREE.Mesh(seatGeo, woodMat);
+            seat.position.y = 1.6;
+            benchGroup.add(seat);
+
+            // Metal Legs
+            const legGeo = new THREE.BoxGeometry(0.2, 1.4, 2.0);
+            const legL = new THREE.Mesh(legGeo, legMat);
+            legL.position.set(-3.0, 0.7, 0);
+            benchGroup.add(legL);
+
+            const legR = new THREE.Mesh(legGeo, legMat);
+            legR.position.set(3.0, 0.7, 0);
+            benchGroup.add(legR);
+
+            benchGroup.position.set(x, 0, z);
+            benchGroup.rotation.y = rotationY;
+            scene.add(benchGroup);
+        }
+
+        function createOutdoorPlanter(scene, x, z) {
+            const planterGroup = new THREE.Group();
+
+            // Pot
+            const potGeo = new THREE.CylinderGeometry(2.0, 1.6, 3.5, 16);
+            const potMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+            const pot = new THREE.Mesh(potGeo, potMat);
+            pot.position.y = 1.75;
+            planterGroup.add(pot);
+
+            // Green Foliage Spheres (Stylized modern tree / shrub)
+            const foliageMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 });
+            const f1 = new THREE.Mesh(new THREE.DodecahedronGeometry(2.2, 1), foliageMat);
+            f1.position.y = 4.8;
+            planterGroup.add(f1);
+
+            const f2 = new THREE.Mesh(new THREE.DodecahedronGeometry(1.6, 1), foliageMat);
+            f2.position.set(0.6, 5.8, 0.4);
+            planterGroup.add(f2);
+
+            planterGroup.position.set(x, 0, z);
+            scene.add(planterGroup);
+        }
+
+        // --- Collision System: Multi-Zone Union Checker ---
+
+        function isPointInWalkableZones(x, z, radius = 1.6) {
+            for (let i = 0; i < walkableZones.length; i++) {
+                const zone = walkableZones[i];
+                if (x >= zone.minX + radius && x <= zone.maxX - radius &&
+                    z >= zone.minZ + radius && z <= zone.maxZ - radius) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function collidesWithObstacle(x, z) {
+            for (let i = 0; i < obstacles.length; i++) {
+                const obs = obstacles[i];
+                const dx = x - obs.x;
+                const dz = z - obs.z;
+                if ((dx * dx + dz * dz) < (obs.radius * obs.radius)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function updateRoomIndicator(currentZ) {
+            const badge = document.getElementById('room-name');
+            if (!badge) return;
+            for (let i = 0; i < zoneLabels.length; i++) {
+                const z = zoneLabels[i];
+                if (currentZ >= z.minZ && currentZ <= z.maxZ) {
+                    if (badge.textContent !== z.name) {
+                        badge.textContent = z.name;
+                    }
+                    return;
+                }
+            }
+        }
+
+        // --- Avatar Loader & Animation System ---
+
+        function loadAvatar() {
+            avatarGroup = new THREE.Group();
+            scene.add(avatarGroup);
+
+            const loader = new GLTFLoader();
+            loader.load('{{ url_for("static", filename="models/lowpoly_anime_character_cyberstyle.glb") }}', function (gltf) {
+                const model = gltf.scene;
+
+                // Scale tuned to 4.5x for perfect human proportions
+                model.scale.set(4.5, 4.5, 4.5);
+                model.position.set(0, 0, 0);
+
+                model.traverse(function (node) {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                        if (node.material) {
+                            node.material.roughness = 0.6;
+                        }
+                    }
+                });
+
+                avatarGroup.add(model);
+
+                // GLTF Animations (Idle and Walk)
+                if (gltf.animations && gltf.animations.length > 0) {
+                    avatarMixer = new THREE.AnimationMixer(model);
+
+                    for (let i = 0; i < gltf.animations.length; i++) {
+                        const clip = gltf.animations[i];
+                        const name = clip.name.toLowerCase();
+
+                        if (name.includes('walk') || name.includes('run')) {
+                            walkAction = avatarMixer.clipAction(clip);
+                        } else if (name.includes('idle') || name.includes('stand') || name.includes('breath') || name.includes('wait')) {
+                            idleAction = avatarMixer.clipAction(clip);
+                        }
+                    }
+
+                    if (!walkAction && gltf.animations.length > 0) walkAction = avatarMixer.clipAction(gltf.animations[0]);
+                    if (!idleAction && gltf.animations.length > 1) idleAction = avatarMixer.clipAction(gltf.animations[1]);
+                    if (!idleAction && walkAction) idleAction = walkAction;
+
+                    if (idleAction) {
+                        currentAction = idleAction;
+                        currentAction.play();
+                    }
+                }
+            }, undefined, function (error) {
+                console.error("Avatar failed to load:", error);
+            });
+        }
+
+        // --- PC & Mobile Controls Setup ---
+
+        function setupControls() {
             if (!isMobile) {
                 controls = new PointerLockControls(camera, document.body);
-                
+
                 const blocker = document.getElementById('blocker');
                 const instructions = document.getElementById('instructions');
                 const crosshair = document.getElementById('crosshair');
 
-                instructions.addEventListener('click', function() {
+                instructions.addEventListener('click', function () {
                     controls.lock();
                 });
 
-                controls.addEventListener('lock', function() {
+                controls.addEventListener('lock', function () {
                     instructions.style.display = 'none';
                     blocker.style.display = 'none';
                     crosshair.style.display = 'block';
                 });
 
-                controls.addEventListener('unlock', function() {
+                controls.addEventListener('unlock', function () {
                     blocker.style.display = 'flex';
                     instructions.style.display = '';
                     crosshair.style.display = 'none';
@@ -317,7 +1248,7 @@
                         case 'ArrowLeft': case 'KeyA': moveLeft = true; break;
                         case 'ArrowDown': case 'KeyS': moveBackward = true; break;
                         case 'ArrowRight': case 'KeyD': moveRight = true; break;
-                        case 'KeyC': isThirdPerson = !isThirdPerson; break;
+                        case 'KeyC': toggleCameraView(); break;
                     }
                 };
 
@@ -333,15 +1264,15 @@
                 document.addEventListener('keydown', onKeyDown);
                 document.addEventListener('keyup', onKeyUp);
             } else {
-                // Mobile Setup
+                // Mobile Interface Setup
                 document.getElementById('instructions').style.display = 'none';
                 document.getElementById('blocker').style.display = 'none';
                 document.getElementById('crosshair').style.display = 'none';
 
                 const joystickZone = document.createElement('div');
                 joystickZone.style.position = 'absolute';
-                joystickZone.style.bottom = '50px';
-                joystickZone.style.left = '50px';
+                joystickZone.style.bottom = '40px';
+                joystickZone.style.left = '40px';
                 joystickZone.style.width = '120px';
                 joystickZone.style.height = '120px';
                 joystickZone.style.zIndex = '100';
@@ -352,7 +1283,7 @@
                     mode: 'static',
                     position: { left: '50%', top: '50%' },
                     color: 'white',
-                    size: 100
+                    size: 90
                 });
 
                 manager.on('move', function (evt, data) {
@@ -361,7 +1292,7 @@
 
                     if (forward > 0) { fwdValue = Math.abs(forward); bkdValue = 0; }
                     else if (forward < 0) { fwdValue = 0; bkdValue = Math.abs(forward); }
-                    
+
                     if (turn > 0) { rgtValue = Math.abs(turn); lftValue = 0; }
                     else if (turn < 0) { rgtValue = 0; lftValue = Math.abs(turn); }
                 });
@@ -371,20 +1302,20 @@
                 });
 
                 document.body.addEventListener('touchstart', function(e) {
-                    for(let i=0; i<e.changedTouches.length; i++) {
-                        if(e.changedTouches[i].clientX > window.innerWidth / 2) {
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        if (e.changedTouches[i].clientX > window.innerWidth / 2) {
                             previousTouchLook.x = e.changedTouches[i].clientX;
                             previousTouchLook.y = e.changedTouches[i].clientY;
                         }
                     }
-                }, {passive: false});
+                }, { passive: false });
 
                 document.body.addEventListener('touchmove', function(e) {
-                    for(let i=0; i<e.changedTouches.length; i++) {
-                        if(e.changedTouches[i].clientX > window.innerWidth / 2) {
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        if (e.changedTouches[i].clientX > window.innerWidth / 2) {
                             let movementX = e.changedTouches[i].clientX - previousTouchLook.x;
                             let movementY = e.changedTouches[i].clientY - previousTouchLook.y;
-                            
+
                             lon += movementX * 0.4;
                             lat -= movementY * 0.4;
                             lat = Math.max(-85, Math.min(85, lat));
@@ -393,485 +1324,18 @@
                             previousTouchLook.y = e.changedTouches[i].clientY;
                         }
                     }
-                }, {passive: false});
+                }, { passive: false });
             }
 
-            // Floor (Marble Floor)
-            const gltfLoader = new GLTFLoader();
-            gltfLoader.load('{{ url_for("static", filename="models/marble_floor.glb") }}', function(gltf) {
-                const floorModel = gltf.scene;
-                
-                // Modelin boyutunu hesapla
-                const box = new THREE.Box3().setFromObject(floorModel);
-                const size = new THREE.Vector3();
-                box.getSize(size);
-                
-                // Modeli odanın genişliğine (veya belirli bir karö boyutuna) göre ölçekle
-                // Odanın genişliği 40 birim, 10 birimlik karolar döşeyelim
-                const targetTileSize = 10;
-                const scale = targetTileSize / (size.x || 1); 
-                floorModel.scale.set(scale, scale, scale);
-                
-                const scaledSize = size.clone().multiplyScalar(scale);
-                
-                // Koridor boyunca fayansları döşe
-                const startZ = 40;
-                const endZ = -totalZ + 20; // 20 birim tolerans bırakalım
-                const startX = -roomWidth / 2;
-                const endX = roomWidth / 2;
-                
-                for (let x = startX; x < endX; x += targetTileSize) {
-                    for (let z = startZ; z > endZ; z -= targetTileSize) {
-                        const tile = floorModel.clone();
-                        // Karo merkezini hizalayarak yerleştir
-                        tile.position.set(x + targetTileSize / 2, 0, z - targetTileSize / 2);
-                        scene.add(tile);
-                    }
-                }
-            }, undefined, function(error) {
-                console.error("Failed to load marble floor:", error);
-                // Hata durumunda varsayılan zemin
-                const floorGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
-                const floorMat = new THREE.MeshStandardMaterial({ color: 0x2c2c2c, roughness: 0.5 });
-                const floor = new THREE.Mesh(floorGeo, floorMat);
-                floor.rotation.x = -Math.PI / 2;
-                floor.position.z = -totalZ / 2 + 40;
-                scene.add(floor);
-            });
-            
-            // Red Carpet (Model)
-            gltfLoader.load('{{ url_for("static", filename="models/floor_red_carpet.glb") }}', function(gltf) {
-                const carpetModel = gltf.scene;
-                
-                // Halının mevcut boyutunu ölç
-                const box = new THREE.Box3().setFromObject(carpetModel);
-                const size = new THREE.Vector3();
-                box.getSize(size);
-                
-                // Hedef genişlik (yaklaşık 6 birim)
-                const targetWidth = 6;
-                const scale = targetWidth / (size.x || 1);
-                carpetModel.scale.set(scale, scale, scale);
-                
-                const scaledZ = size.z * scale;
-                
-                // Koridor boyunca halıyı döşe
-                const startZ = 40;
-                const endZ = -totalZ + 40;
-                
-                for (let z = startZ; z > endZ; z -= scaledZ) {
-                    const carpetTile = carpetModel.clone();
-                    // Z-fighting önlemek için Y ekseninde 0.05 birim yukarıda
-                    carpetTile.position.set(0, 0.05, z - scaledZ / 2);
-                    scene.add(carpetTile);
-                }
-            }, undefined, function(error) {
-                console.error("Failed to load red carpet:", error);
-            });
-            // Ceiling
-            const ceilGeo = new THREE.PlaneGeometry(roomWidth, totalZ);
-            const ceilMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1 });
-            const ceiling = new THREE.Mesh(ceilGeo, ceilMat);
-            ceiling.rotation.x = Math.PI / 2;
-            ceiling.position.y = roomHeight;
-            ceiling.position.z = -totalZ / 2 + 40;
-            scene.add(ceiling);
-
-            // Walls
-            const wallTexture = createWallTexture();
-            wallTexture.repeat.set(totalZ / 20, roomHeight / 20); // Scale the texture
-            
-            const wallMat = new THREE.MeshStandardMaterial({ 
-                color: 0xffffff, 
-                roughness: 1.0,
-                map: wallTexture,
-                bumpMap: wallTexture,
-                bumpScale: 0.4
-            });
-            const wallGeo = new THREE.PlaneGeometry(totalZ, roomHeight);
-            
-            // Left Wall
-            const leftWall = new THREE.Mesh(wallGeo, wallMat);
-            leftWall.rotation.y = Math.PI / 2;
-            leftWall.position.x = -roomWidth / 2;
-            leftWall.position.y = roomHeight / 2;
-            leftWall.position.z = -totalZ / 2 + 40;
-            scene.add(leftWall);
-
-            // Right Wall
-            const rightWall = new THREE.Mesh(wallGeo, wallMat);
-            rightWall.rotation.y = -Math.PI / 2;
-            rightWall.position.x = roomWidth / 2;
-            rightWall.position.y = roomHeight / 2;
-            rightWall.position.z = -totalZ / 2 + 40;
-            scene.add(rightWall);
-            
-            // Back Wall
-            const backWallGeo = new THREE.PlaneGeometry(roomWidth, roomHeight);
-            
-            const backWallTexture = wallTexture.clone();
-            backWallTexture.repeat.set(roomWidth / 20, roomHeight / 20);
-            const backWallMat = new THREE.MeshStandardMaterial({
-                color: 0xffffff, roughness: 1.0, map: backWallTexture, bumpMap: backWallTexture, bumpScale: 0.4
-            });
-
-            const backWall = new THREE.Mesh(backWallGeo, backWallMat);
-            backWall.position.z = -totalZ + 40;
-            backWall.position.y = roomHeight / 2;
-            scene.add(backWall);
-
-            // Start Wall (Behind player)
-            const startWall = new THREE.Mesh(backWallGeo, backWallMat);
-            startWall.rotation.y = Math.PI;
-            startWall.position.z = 40;
-            startWall.position.y = roomHeight / 2;
-            scene.add(startWall);
-
-            // Create Exhibition Doors
-            function createExhibitionDoor() {
-                const doorGroup = new THREE.Group();
-                
-                // Door Frame
-                const frameGeo = new THREE.BoxGeometry(10, 12, 0.4);
-                const frameMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.3, metalness: 0.8 });
-                const frame = new THREE.Mesh(frameGeo, frameMat);
-                frame.position.y = 6;
-                doorGroup.add(frame);
-                
-                // Glass Panels (Left and Right)
-                const glassGeo = new THREE.BoxGeometry(4.2, 11, 0.2);
-                const glassMat = new THREE.MeshStandardMaterial({ 
-                    color: 0x88ccff, 
-                    roughness: 0.1, 
-                    metalness: 0.1, 
-                    transparent: true, 
-                    opacity: 0.4 
-                });
-                
-                const leftGlass = new THREE.Mesh(glassGeo, glassMat);
-                leftGlass.position.set(-2.4, 6, 0);
-                doorGroup.add(leftGlass);
-                
-                const rightGlass = new THREE.Mesh(glassGeo, glassMat);
-                rightGlass.position.set(2.4, 6, 0);
-                doorGroup.add(rightGlass);
-                
-                // Handles
-                const handleGeo = new THREE.CylinderGeometry(0.1, 0.1, 3);
-                const handleMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.2, metalness: 0.9 });
-                
-                const leftHandle = new THREE.Mesh(handleGeo, handleMat);
-                leftHandle.position.set(-0.6, 6, 0.25);
-                doorGroup.add(leftHandle);
-                
-                const rightHandle = new THREE.Mesh(handleGeo, handleMat);
-                rightHandle.position.set(0.6, 6, 0.25);
-                doorGroup.add(rightHandle);
-                
-                const leftHandleBack = new THREE.Mesh(handleGeo, handleMat);
-                leftHandleBack.position.set(-0.6, 6, -0.25);
-                doorGroup.add(leftHandleBack);
-                
-                const rightHandleBack = new THREE.Mesh(handleGeo, handleMat);
-                rightHandleBack.position.set(0.6, 6, -0.25);
-                doorGroup.add(rightHandleBack);
-                
-                return doorGroup;
-            }
-
-            // Start Door
-            const startDoor = createExhibitionDoor();
-            startDoor.position.set(0, 0, 39.9);
-            scene.add(startDoor);
-            
-            // End Door
-            const endDoor = createExhibitionDoor();
-            endDoor.position.set(0, 0, -totalZ + 40.1);
-            endDoor.rotation.y = Math.PI; // Face inward
-            scene.add(endDoor);
-
-            // Ceiling Lamps (Chandelier)
-            gltfLoader.load('{{ url_for("static", filename="models/chandelier_black.glb") }}', function(gltf) {
-                const chandelierModel = gltf.scene;
-                // Chandelier scale (can be adjusted)
-                chandelierModel.scale.set(0.08, 0.08, 0.08);
-                
-                for (let z = 20; z > -totalZ + 40; z -= zSpacing) {
-                    const chandelier = chandelierModel.clone();
-                    // Tavan yüksekliğinden biraz aşağıya as (Tavanın içinde kalmaması için -3 birim)
-                    chandelier.position.set(0, roomHeight - 3, z);
-                    scene.add(chandelier);
-                    
-                    const pointLight = new THREE.PointLight(0xffffee, 0.8, 60);
-                    pointLight.position.set(0, roomHeight - 3, z);
-                    scene.add(pointLight);
-                }
-            }, undefined, function(error) {
-                console.error("Failed to load chandelier:", error);
-                // Fallback to basic cylinders
-                for (let z = 20; z > -totalZ + 40; z -= zSpacing) {
-                    const lampGeo = new THREE.CylinderGeometry(0.8, 1, 0.4, 16);
-                    const lampMat = new THREE.MeshStandardMaterial({ color: 0x333333, emissive: 0xffffff, emissiveIntensity: 1 });
-                    const lamp = new THREE.Mesh(lampGeo, lampMat);
-                    lamp.position.set(0, roomHeight - 0.2, z);
-                    scene.add(lamp);
-                    
-                    const pointLight = new THREE.PointLight(0xffffee, 0.5, 60);
-                    pointLight.position.set(0, roomHeight - 1, z);
-                    scene.add(pointLight);
-                }
-            });
-
-            // Coffee Tables
-            gltfLoader.load('{{ url_for("static", filename="models/coffee_table.glb") }}', function(gltf) {
-                const tableModel = gltf.scene;
-                
-                // Masanın mevcut boyutunu ölç ve odanın büyüklüğüne orantıla
-                const box = new THREE.Box3().setFromObject(tableModel);
-                const size = new THREE.Vector3();
-                box.getSize(size);
-                
-                // Hedef genişlik (yaklaşık 3 birim) - Biraz küçültüldü
-                const targetWidth = 3;
-                const scale = targetWidth / (size.x || 1);
-                tableModel.scale.set(scale, scale, scale);
-                
-                // Tablolar arası mesafenin (zSpacing) tam ortalarına (zSpacing / 2) masaları yerleştir
-                for (let z = -zSpacing / 2; z > -totalZ + 40; z -= zSpacing) {
-                    const tableLeft = tableModel.clone();
-                    tableLeft.rotation.y = Math.PI / 2;
-                    tableLeft.position.set(0, 0, z);
-                    tableLeft.updateMatrixWorld(true);
-                    let boxL = new THREE.Box3().setFromObject(tableLeft);
-                    
-                    // Mermere (Y=0) tam sıfıra sıfır oturt
-                    tableLeft.position.y -= boxL.min.y;
-                    tableLeft.updateMatrixWorld(true);
-                    boxL = new THREE.Box3().setFromObject(tableLeft);
-                    
-                    // Sol duvara sıfıra sıfır yanaştır
-                    tableLeft.position.x -= (boxL.min.x - (-roomWidth / 2));
-                    scene.add(tableLeft);
-
-                    const tableRight = tableModel.clone();
-                    tableRight.rotation.y = -Math.PI / 2;
-                    tableRight.position.set(0, 0, z);
-                    tableRight.updateMatrixWorld(true);
-                    let boxR = new THREE.Box3().setFromObject(tableRight);
-                    
-                    // Mermere (Y=0) tam sıfıra sıfır oturt
-                    tableRight.position.y -= boxR.min.y;
-                    tableRight.updateMatrixWorld(true);
-                    boxR = new THREE.Box3().setFromObject(tableRight);
-                    
-                    // Sağ duvara sıfıra sıfır yanaştır
-                    tableRight.position.x -= (boxR.max.x - (roomWidth / 2));
-                    scene.add(tableRight);
-                }
-            }, undefined, function(error) {
-                console.error("Failed to load coffee table:", error);
-            });
-
-            // Add Photos and Wall Lamps
-            const textureLoader = new THREE.TextureLoader();
-
-            function renderPhotos(lampModel, barrierModel) {
-                photosData.forEach((photo, index) => {
-                    const side = index % 2 === 0 ? 'left' : 'right';
-                const zPos = -Math.floor(index / 2) * zSpacing;
-                
-                textureLoader.load(photo.image_url, function(texture) {
-                    texture.colorSpace = THREE.SRGBColorSpace;
-                    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-                    texture.minFilter = THREE.LinearMipmapLinearFilter;
-                    texture.magFilter = THREE.LinearFilter;
-                    texture.generateMipmaps = true;
-                    
-                    const aspect = texture.image.width / texture.image.height;
-                    let pHeight = 10;
-                    let pWidth = pHeight * aspect;
-                    
-                    if (pWidth > 18) {
-                        pWidth = 18;
-                        pHeight = pWidth / aspect;
-                    }
-                    
-                    // Image Plane
-                    const imgGeo = new THREE.PlaneGeometry(pWidth, pHeight);
-                    const imgMat = new THREE.MeshBasicMaterial({ map: texture });
-                    const imgMesh = new THREE.Mesh(imgGeo, imgMat);
-                    
-                    // Frame
-                    const frameGeo = new THREE.BoxGeometry(pWidth + 0.8, pHeight + 0.8, 0.4);
-                    const frameMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2 }); // Siyah çerçeve güzel durur
-                    const frameMesh = new THREE.Mesh(frameGeo, frameMat);
-                    
-                    // Tüm tabloların ALT çizgisinin (çerçeve dahil) sabit bir yükseklikte (4.0 birim) olmasını sağla
-                    const targetHeight = 4.0;
-                    const frameHeight = pHeight + 0.8;
-                    const paintingCenterY = targetHeight + frameHeight / 2;
-                    
-                    if (side === 'left') {
-                        // Frame center at -19.9, front face is at -19.7
-                        // Place image at -19.65 to be slightly in front of the frame face
-                        imgMesh.position.set(-roomWidth / 2 + 0.35, paintingCenterY, zPos);
-                        imgMesh.rotation.y = Math.PI / 2;
-                        
-                        frameMesh.position.set(-roomWidth / 2 + 0.1, paintingCenterY, zPos);
-                        frameMesh.rotation.y = Math.PI / 2;
-                    } else {
-                        // Frame center at 19.9, front face is at 19.7
-                        // Place image at 19.65 to be slightly in front of the frame face
-                        imgMesh.position.set(roomWidth / 2 - 0.35, paintingCenterY, zPos);
-                        imgMesh.rotation.y = -Math.PI / 2;
-                        
-                        frameMesh.position.set(roomWidth / 2 - 0.1, paintingCenterY, zPos);
-                        frameMesh.rotation.y = -Math.PI / 2;
-                    }
-                    
-                    scene.add(imgMesh);
-                    scene.add(frameMesh);
-                    
-                    // Create Plaque
-                    const plaqueTex = createTextTexture(photo);
-                    plaqueTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-                    
-                    const plaqueGeo = new THREE.PlaneGeometry(3, 3);
-                    const plaqueMat = new THREE.MeshBasicMaterial({ map: plaqueTex });
-                    const plaqueMesh = new THREE.Mesh(plaqueGeo, plaqueMat);
-                    
-                    const plaqueFrameGeo = new THREE.BoxGeometry(3.2, 3.2, 0.2);
-                    const plaqueFrameMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3 });
-                    const plaqueFrameMesh = new THREE.Mesh(plaqueFrameGeo, plaqueFrameMat);
-                    
-                    const plaqueY = 6.5; // Sabit yükseklik, tablolar oynasa da isimlikler düz bir hizada kalır
-                    
-                    if (side === 'left') {
-                        plaqueMesh.position.set(-roomWidth / 2 + 0.35, plaqueY, zPos - pWidth / 2 - 2.5);
-                        plaqueMesh.rotation.y = Math.PI / 2;
-                        
-                        plaqueFrameMesh.position.set(-roomWidth / 2 + 0.15, plaqueY, zPos - pWidth / 2 - 2.5);
-                        plaqueFrameMesh.rotation.y = Math.PI / 2;
-                    } else {
-                        plaqueMesh.position.set(roomWidth / 2 - 0.35, plaqueY, zPos - pWidth / 2 - 2.5);
-                        plaqueMesh.rotation.y = -Math.PI / 2;
-                        
-                        plaqueFrameMesh.position.set(roomWidth / 2 - 0.15, plaqueY, zPos - pWidth / 2 - 2.5);
-                        plaqueFrameMesh.rotation.y = -Math.PI / 2;
-                    }
-                    scene.add(plaqueMesh);
-                    scene.add(plaqueFrameMesh);
-                    
-                    // Spotlight above the painting
-                    const spotLight = new THREE.SpotLight(0xffffff, 2.5);
-                    spotLight.position.set(side === 'left' ? -roomWidth/2 + 6 : roomWidth/2 - 6, roomHeight - 1, zPos);
-                    spotLight.target = imgMesh;
-                    spotLight.angle = Math.PI / 5;
-                    spotLight.penumbra = 0.5;
-                    spotLight.distance = 30;
-                    spotLight.decay = 1.5;
-                    scene.add(spotLight);
-                    
-                    // Wall Lamp (Centered above the painting)
-                    if (lampModel) {
-                        const topLamp = lampModel.clone();
-                        
-                        // Tablo boyutuna (pWidth) oranla lamba boyutunu (scale) ayarla (Öncekinin 5'te 1'i)
-                        const lampScale = Math.max(0.01, pWidth * 0.003);
-                        topLamp.scale.set(lampScale, lampScale, lampScale);
-                        
-                        // Lamba yüksekliği: Tablonun üst sınırından 1.5 birim yukarıda
-                        const lampHeight = paintingCenterY + (pHeight / 2) + 1.5;
-                        
-                        // Duvar içine girmesini önlemek için X ekseninde biraz öne (odanın içine) çekiyoruz
-                        const wallOffset = 0.4;
-                        if (side === 'left') {
-                            topLamp.position.set(-roomWidth / 2 + wallOffset, lampHeight, zPos);
-                            topLamp.rotation.y = Math.PI / 2; // 180 derece döndürüldü
-                        } else {
-                            topLamp.position.set(roomWidth / 2 - wallOffset, lampHeight, zPos);
-                            topLamp.rotation.y = -Math.PI / 2; // 180 derece döndürüldü
-                        }
-                        
-                        scene.add(topLamp);
-                        
-                        // Mobil Optimizasyon: Sadece masaüstünde ekstra lamba ışığı hesapla
-                        if (!isMobile) {
-                            const light = new THREE.PointLight(0xffddaa, 0.5, 15);
-                            light.position.copy(topLamp.position);
-                            // Işığı lambanın kafesinin içine (duvardan biraz uzağa ve aşağı/yukarı) konumlandır
-                            light.position.x += (side === 'left' ? 0.8 : -0.8);
-                            scene.add(light);
-                        }
-                    }
-                    
-                    // Kırmızı kadife bariyer ekleme
-                    if (barrierModel) {
-                        const barrier = barrierModel.clone();
-                        
-                        // Bariyerin boyutunu hesapla
-                        const box = new THREE.Box3().setFromObject(barrier);
-                        const size = new THREE.Vector3();
-                        box.getSize(size);
-                        
-                        // Bariyer yüksekliği: Tabloların alt noktasıyla aynı (hepsi tam 4.0 birim)
-                        const scaleY = targetHeight / (size.y || 1);
-                        // Genişliğini tablonun genişliğiyle (pWidth) eşitle
-                        const scaleX = pWidth / (size.x || 1);
-                        // Derinliği (kalınlığı) yükseklikle orantılı bırak
-                        barrier.scale.set(scaleX, scaleY, scaleY);
-                        
-                        // Bariyeri yere tam sıfır oturtmak için y kaydırmasını hesapla
-                        barrier.position.set(0, 0, 0);
-                        barrier.updateMatrixWorld(true);
-                        let bbox = new THREE.Box3().setFromObject(barrier);
-                        barrier.position.y -= bbox.min.y;
-                        
-                        // Tablo duvarından ne kadar uzakta olacağı
-                        const barrierOffset = 3;
-                        if (side === 'left') {
-                            barrier.position.set(-roomWidth / 2 + barrierOffset, barrier.position.y, zPos);
-                            barrier.rotation.y = Math.PI / 2;
-                        } else {
-                            barrier.position.set(roomWidth / 2 - barrierOffset, barrier.position.y, zPos);
-                            barrier.rotation.y = -Math.PI / 2;
-                        }
-                        
-                        scene.add(barrier);
-                    }
-                });
-            });
+            document.getElementById('cam-toggle-btn').addEventListener('click', toggleCameraView);
         }
 
-        gltfLoader.load('{{ url_for("static", filename="models/red_velvet_rope_barriers.glb") }}', function(gltfBarrier) {
-            const barrierModel = gltfBarrier.scene;
-            gltfLoader.load('{{ url_for("static", filename="models/top_lamp.glb") }}', function(gltfLamp) {
-                renderPhotos(gltfLamp.scene, barrierModel);
-            }, undefined, function(error) {
-                console.error("Failed to load wall lamp:", error);
-                renderPhotos(null, barrierModel);
-            });
-        }, undefined, function(error) {
-            console.error("Failed to load barrier:", error);
-            // Fallback
-            gltfLoader.load('{{ url_for("static", filename="models/top_lamp.glb") }}', function(gltfLamp) {
-                renderPhotos(gltfLamp.scene, null);
-            }, undefined, function(error) {
-                console.error("Failed to load wall lamp:", error);
-                renderPhotos(null, null);
-            });
-        });
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-            
-            // Mobil cihazlarda çözünürlüğü kısıtla (Optimizasyon)
-            const maxPixelRatio = isMobile ? 1.0 : window.devicePixelRatio;
-            renderer.setPixelRatio(maxPixelRatio);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.outputColorSpace = THREE.SRGBColorSpace;
-            document.body.appendChild(renderer.domElement);
-
-            window.addEventListener('resize', onWindowResize);
+        function toggleCameraView() {
+            isThirdPerson = !isThirdPerson;
+            const textEl = document.getElementById('cam-mode-text');
+            if (textEl) {
+                textEl.textContent = isThirdPerson ? "Kamera: 3. Şahıs (C)" : "Kamera: 1. Şahıs (C)";
+            }
         }
 
         function onWindowResize() {
@@ -885,11 +1349,16 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
+        // --- Animation Loop ---
+
         function animate() {
             requestAnimationFrame(animate);
 
             const time = performance.now();
-            const delta = (time - prevTime) / 1000;
+            const delta = Math.min((time - prevTime) / 1000, 0.1);
+
+            // Position Vector to update
+            const playerPos = (!isMobile && controls) ? controls.getObject().position : camera.position;
 
             if (!isMobile && controls && controls.isLocked === true) {
                 velocity.x -= velocity.x * 10.0 * delta;
@@ -903,33 +1372,32 @@
                 if (moveForward || moveBackward) velocity.z -= direction.z * speed * delta;
                 if (moveLeft || moveRight) velocity.x -= direction.x * speed * delta;
 
-                const pos = controls.getObject().position;
-                const oldX = pos.x;
-                const oldZ = pos.z;
+                // Proposed movement in world coordinates
+                const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+                euler.setFromQuaternion(controls.getObject().quaternion);
 
-                controls.moveRight(-velocity.x * delta);
-                controls.moveForward(-velocity.z * delta);
-                
-                // Wall Collision
-                if (pos.x < -roomWidth / 2 + 2) pos.x = -roomWidth / 2 + 2;
-                if (pos.x > roomWidth / 2 - 2) pos.x = roomWidth / 2 - 2;
-                if (pos.z > 40 - 2) pos.z = 40 - 2; 
-                if (pos.z < -totalZ + 40 + 2) pos.z = -totalZ + 40 + 2; 
-                
-                // Obstacle Collision
-                for (let i = 0; i < obstacles.length; i++) {
-                    const obs = obstacles[i];
-                    if (Math.abs(pos.x - obs.x) < (obs.width / 2 + 1.5) && 
-                        Math.abs(pos.z - obs.z) < (obs.depth / 2 + 1.5)) {
-                        pos.x = oldX;
-                        pos.z = oldZ;
-                        break;
-                    }
+                const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), euler.y);
+                const rgt = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), euler.y);
+
+                const stepZ = fwd.multiplyScalar(-velocity.z * delta);
+                const stepX = rgt.multiplyScalar(-velocity.x * delta);
+                const totalStep = stepZ.add(stepX);
+
+                // Test X motion with sliding collision
+                const nextX = playerPos.x + totalStep.x;
+                if (isPointInWalkableZones(nextX, playerPos.z) && !collidesWithObstacle(nextX, playerPos.z)) {
+                    playerPos.x = nextX;
                 }
-                
-                pos.y = 8;
+
+                // Test Z motion with sliding collision
+                const nextZ = playerPos.z + totalStep.z;
+                if (isPointInWalkableZones(playerPos.x, nextZ) && !collidesWithObstacle(playerPos.x, nextZ)) {
+                    playerPos.z = nextZ;
+                }
+
+                playerPos.y = 8;
             } else if (isMobile) {
-                // Mobile Look
+                // Mobile Look Orientation
                 phi = THREE.MathUtils.degToRad(90 - lat);
                 theta = THREE.MathUtils.degToRad(lon);
                 const targetPosition = new THREE.Vector3();
@@ -938,62 +1406,50 @@
                 targetPosition.z = camera.position.z + 100 * Math.sin(phi) * Math.sin(theta);
                 camera.lookAt(targetPosition);
 
-                // Mobile Move
+                // Mobile Move (matched to desktop walking pace)
                 const speed = 10.0;
-                
                 const forwardVec = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
                 forwardVec.y = 0; forwardVec.normalize();
-                
+
                 const rightVec = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
                 rightVec.y = 0; rightVec.normalize();
 
-                const pos = camera.position;
-                const oldX = pos.x;
-                const oldZ = pos.z;
+                let moveStep = new THREE.Vector3();
+                if (fwdValue > 0) moveStep.addScaledVector(forwardVec, speed * delta * fwdValue);
+                if (bkdValue > 0) moveStep.addScaledVector(forwardVec, -speed * delta * bkdValue);
+                if (rgtValue > 0) moveStep.addScaledVector(rightVec, speed * delta * rgtValue);
+                if (lftValue > 0) moveStep.addScaledVector(rightVec, -speed * delta * lftValue);
 
-                if (fwdValue > 0) camera.position.addScaledVector(forwardVec, speed * delta * fwdValue);
-                if (bkdValue > 0) camera.position.addScaledVector(forwardVec, -speed * delta * bkdValue);
-                if (rgtValue > 0) camera.position.addScaledVector(rightVec, speed * delta * rgtValue);
-                if (lftValue > 0) camera.position.addScaledVector(rightVec, -speed * delta * lftValue);
-
-                // Wall Collision
-                if (pos.x < -roomWidth / 2 + 2) pos.x = -roomWidth / 2 + 2;
-                if (pos.x > roomWidth / 2 - 2) pos.x = roomWidth / 2 - 2;
-                if (pos.z > 40 - 2) pos.z = 40 - 2; 
-                if (pos.z < -totalZ + 40 + 2) pos.z = -totalZ + 40 + 2; 
-                
-                // Obstacle Collision
-                for (let i = 0; i < obstacles.length; i++) {
-                    const obs = obstacles[i];
-                    if (Math.abs(pos.x - obs.x) < (obs.width / 2 + 1.5) && 
-                        Math.abs(pos.z - obs.z) < (obs.depth / 2 + 1.5)) {
-                        pos.x = oldX;
-                        pos.z = oldZ;
-                        break;
-                    }
+                const nextX = playerPos.x + moveStep.x;
+                if (isPointInWalkableZones(nextX, playerPos.z) && !collidesWithObstacle(nextX, playerPos.z)) {
+                    playerPos.x = nextX;
                 }
-                
-                pos.y = 8;
+
+                const nextZ = playerPos.z + moveStep.z;
+                if (isPointInWalkableZones(playerPos.x, nextZ) && !collidesWithObstacle(playerPos.x, nextZ)) {
+                    playerPos.z = nextZ;
+                }
+
+                playerPos.y = 8;
             }
 
             prevTime = time;
 
-            // Calculate Camera Yaw (euler) globally so both avatar and tpCamera can use it
+            // Update Current Room HUD Indicator
+            updateRoomIndicator(playerPos.z);
+
+            // Global Camera Yaw for Avatar and 3rd Person View
             const euler = new THREE.Euler(0, 0, 0, 'YXZ');
             if (isMobile) {
                 euler.setFromQuaternion(camera.quaternion);
-            } else {
+            } else if (controls) {
                 euler.setFromQuaternion(controls.getObject().quaternion);
             }
 
-            // --- Avatar Update Logic ---
+            // --- Avatar Update & Animation Crossfades ---
             if (avatarGroup) {
-                const camPos = isMobile ? camera.position : controls.getObject().position;
-                
-                // Match position (except Y is locked to 0)
-                avatarGroup.position.set(camPos.x, 0, camPos.z);
-                
-                // Yürüme yönünü hesapla
+                avatarGroup.position.set(playerPos.x, 0, playerPos.z);
+
                 let moveDir = new THREE.Vector3();
                 if (!isMobile && controls && controls.isLocked) {
                     if (moveForward) moveDir.z = -1;
@@ -1006,26 +1462,18 @@
                     if (lftValue > 0) moveDir.x = -1;
                     if (rgtValue > 0) moveDir.x = 1;
                 }
-                
-                let isMoving = moveDir.lengthSq() > 0;
-                
+
+                const isMoving = moveDir.lengthSq() > 0;
+
                 if (isMoving) {
                     moveDir.normalize();
-                    // Kamera açısına göre yürüme vektörünü döndür
                     moveDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), euler.y);
-                    
-                    // Avatarın bakması gereken hedef açı
-                    let targetAngle = Math.atan2(moveDir.x, moveDir.z);
-                    
-                    // Eğer model ters bakıyorsa buraya bir offset ekleyebiliriz: (targetAngle + Math.PI)
-                    // Şimdilik offset yok
-                    
-                    // Pürüzsüz dönüş (Smooth Rotation)
+
+                    const targetAngle = Math.atan2(moveDir.x, moveDir.z);
                     let diff = targetAngle - avatarGroup.rotation.y;
-                    diff = Math.atan2(Math.sin(diff), Math.cos(diff)); // Normalize to [-PI, PI]
-                    avatarGroup.rotation.y += diff * 15 * delta;
-                    
-                    // Harekete başlayınca yürüme animasyonuna geç
+                    diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+                    avatarGroup.rotation.y += diff * 14 * delta;
+
                     if (walkAction && currentAction !== walkAction) {
                         if (currentAction) currentAction.fadeOut(0.2);
                         walkAction.reset().fadeIn(0.2).play();
@@ -1034,51 +1482,48 @@
                         currentAction.play();
                     }
                 } else {
-                    // Durunca bekleme (idle) animasyonuna geç
                     if (idleAction && currentAction !== idleAction) {
                         if (currentAction) currentAction.fadeOut(0.2);
                         idleAction.reset().fadeIn(0.2).play();
                         currentAction = idleAction;
-                    } else if (!idleAction && currentAction && currentAction.isRunning()) {
-                        currentAction.stop();
                     }
                 }
 
-                // Update GLTF Animations
                 if (avatarMixer) {
                     avatarMixer.update(delta);
                 }
             }
 
+            // --- 3rd Person Camera Logic with Wall Clipping Protection ---
             let activeCamera = isThirdPerson ? tpCamera : camera;
+
             if (isThirdPerson) {
-                const dist = 12;
-                // euler.y determines the direction the camera is facing. 
-                // Vector(0,0,1) is the local "backward" vector.
-                const dir = new THREE.Vector3(0, 0, 1);
-                dir.applyAxisAngle(new THREE.Vector3(0,1,0), euler.y);
-                tpCamera.position.copy(camera.position).add(dir.multiplyScalar(dist));
-                tpCamera.position.y = camera.position.y + 4;
-                
-                // Duvarların dışına çıkmasını engelle (Kamera sınırlandırma)
-                const marginX = 1.5; // Duvardan ne kadar uzak kalacağı
-                const marginZ = 1.5;
-                tpCamera.position.x = Math.max(-roomWidth / 2 + marginX, Math.min(roomWidth / 2 - marginX, tpCamera.position.x));
-                tpCamera.position.z = Math.max(-totalZ + 40 + marginZ, Math.min(40 - marginZ, tpCamera.position.z));
-                
-                // Kameranın her zaman ileriye (karakterin önündeki bir noktaya) bakmasını sağla
-                const targetPoint = new THREE.Vector3(0, 0, -20);
-                targetPoint.applyAxisAngle(new THREE.Vector3(0,1,0), euler.y);
-                targetPoint.add(camera.position);
+                const maxDist = 11.0;
+                const dir = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), euler.y);
+
+                // Check distance against walls so camera doesn't clip through
+                let safeDist = maxDist;
+                for (let d = maxDist; d >= 3.0; d -= 1.0) {
+                    const testPos = playerPos.clone().add(dir.clone().multiplyScalar(d));
+                    if (isPointInWalkableZones(testPos.x, testPos.z, 0.8)) {
+                        safeDist = d;
+                        break;
+                    }
+                }
+
+                tpCamera.position.copy(playerPos).add(dir.multiplyScalar(safeDist));
+                tpCamera.position.y = playerPos.y + 3.0;
+
+                // Look at a target point slightly ahead of the avatar
+                const targetPoint = new THREE.Vector3(0, 0, -18);
+                targetPoint.applyAxisAngle(new THREE.Vector3(0, 1, 0), euler.y);
+                targetPoint.add(playerPos);
+                targetPoint.y = playerPos.y - 1.5;
                 tpCamera.lookAt(targetPoint);
             }
 
             renderer.render(scene, activeCamera);
         }
-        
-        document.getElementById('cam-toggle-btn').addEventListener('click', () => {
-            isThirdPerson = !isThirdPerson;
-        });
     </script>
 </body>
 </html>
