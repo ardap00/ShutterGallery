@@ -67,6 +67,9 @@ def create_app(config_class=Config):
 
     @app.errorhandler(500)
     def server_error(e):
-        return "<h2>500 - Sunucu Hatası</h2>", 500
+        import traceback
+        error_details = traceback.format_exc()
+        app.logger.error(f"500 Error: {error_details}")
+        return f"<h2>500 - Sunucu Hatası</h2><pre style='background:#111;color:#ff6b6b;padding:15px;border-radius:8px;font-size:12px;white-space:pre-wrap;'>{error_details}</pre>", 500
 
     return app
