@@ -122,9 +122,10 @@ def join_game(code):
 
     return redirect(url_for('game.arena', room_code=game_obj.room_code))
 
-@game.route('/arena/<code>')
+@game.route('/arena/<room_code>')
 @login_required
-def arena(code):
+def arena(room_code):
+    code = room_code
     game_obj = db.session.execute(
         db.select(Game).filter_by(room_code=code.upper())
     ).scalar_one_or_none()
