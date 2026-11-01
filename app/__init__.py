@@ -57,6 +57,9 @@ def create_app(config_class=Config):
     from app.messages import messages as messages_bp
     app.register_blueprint(messages_bp, url_prefix='/messages')
 
+    from app.game import game as game_bp
+    app.register_blueprint(game_bp, url_prefix='/game')
+
     # Güvenli hata işleyiciler — stack trace asla client'a gönderilmez
     @app.errorhandler(404)
     def not_found(e):

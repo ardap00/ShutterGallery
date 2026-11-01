@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen pt-20 pb-24 px-4 flex flex-col items-center justify-start max-w-4xl mx-auto">
+    <!-- Top Scoreboard Bar -->
+    <div class="w-full glass-panel border border-white/10 rounded-3xl p-4 md:p-6 mb-6 shadow-2xl relative overflow-hidden">
+        <div class="flex items-center justify-between">
+            <!-- Player 1 -->
+            <div id="p1Card" class="flex items-center gap-3 flex-1">
+                <div class="relative">
+                    <img id="p1Avatar" src="{{ url_for('static', filename='uploads/' + (game.player1.avatar_file or 'default.jpg')) }}" class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-2 border-emerald-500 shadow-md">
+                    <span id="p1Badge" class="hidden absolute -bottom-1 -right-1 bg-emerald-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full">SEN</span>
+                </div>
+                <div class="truncate">
+                    <div id="p1Name" class="font-bold text-sm md:text-base text-white truncate">{{ game.player1.username }}</div>
+                    <div class="text-xs text-white/40 font-mono">Fotoğrafçı 1</div>
+                </div>
+            </div>
+
+            <!-- Score Center -->
+            <div class="flex flex-col items-center px-4 md:px-8">
+                <div class="text-[10px] md:text-xs font-mono uppercase tracking-widest text-emerald-400 mb-1">
+                    <span id="roundIndicator">TUR {{ game.current_round_num }}</span> / HEDEF {{ game.target_score }}
+                </div>
+                <div class="flex items-center gap-3 font-mono font-black text-2xl md:text-4xl text-white">
+                    <span id="p1Score" class="text-emerald-400">{{ game.player1_score }}</span>
+                    <span class="text-white/30 text-lg md:text-2xl">-</span>
+                    <span id="p2Score" class="text-teal-400">{{ game.player2_score }}</span>
+                </div>
+                <div class="text-[10px] font-mono text-white/40 mt-1">Oda: #{{ game.room_code }}</div>
+            </div>
+
+            <!-- Player 2 -->
+            <div id="p2Card" class="flex items-center gap-3 flex-1 justify-end text-right">
+                <div class="truncate">
+                    <div id="p2Name" class="font-bold text-sm md:text-base text-white truncate">
+                        {% if game.player2 %}{{ game.player2.username }}{% else %}Bekleniyor...{% endif %}
+                    </div>
+                    <div class="text-xs text-white/40 font-mono">Fotoğrafçı 2</div>
+                </div>
+                <div class="relative">
+                    <img id="p2Avatar" src="{% if game.player2 %}{{ url_for('static', filename='uploads/' + (game.player2.avatar_file or 'default.jpg')) }}{% else %}{{ url_for('static', filename='default.jpg') }}{% endif %}" class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-2 {% if game.player2 %}border-teal-500{% else %}border-dashed border-white/20{% endif %}">
+                    <span id="p2Badge" class="hidden absolute -bottom-1 -right-1 bg-teal-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full">SEN</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- State 1: Waiting for opponent -->
+    <div id="waitingScreen" class="w-full glass-card p-8 md:p-12 rounded-3xl text-center border border-white/10 {% if game.status != 'waiting' %}hidden{% endif %}">
+        <div class="inline-flex p-4 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mb-4 animate-bounce">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </div>
+        <h2 class="text-2xl font-bold text-white mb-2">Rakip Bekleniyor...</h2>
+        <p class="text-white/60 text-sm max-w-md mx-auto mb-6">
+            Arkadaşına bu oda kodunu göndererek yarışmaya davet edebilirsin:
+        </p>
+        <div class="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 font-mono text-2xl text-emerald-400 tracking-widest font-bold mb-4">
+            <span>{{ game.room_code }}</span>
+            <button onclick="copyRoomCode()" class="text-xs text-white/50 hover:text-white bg-white/10 px-2.5 py-1 rounded-lg">Kopyala</button>
+        </div>
+        <div class="text-xs text-white/40 flex items-center justify-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            Birisi katıldığında oyun otomatik olarak başlayacak
+        </div>
+    </div>
+
+    <!-- State 2: Active Round / Uploading -->
+    <div id="activeRoundScreen" class="w-full flex flex-col gap-6 {% if game.status == 'waiting' or game.status == 'completed' %}hidden{% endif %}">
+        <!-- Theme Header -->
+        <div class="glass-panel p-6 rounded-3xl border border-emerald-500/20 text-center relative overflow-hidden">
+            <div class="text-xs font-mono uppercase tracking-widest text-emerald-400 mb-1">Mevcut Turun Teması</div>
+            <h2 id="themeTitle" class="text-2xl md:text-3xl font-extrabold text-white mb-2">
+                {% if round %}{{ round.theme }}{% endif %}
+            </h2>
+            <p id="themeDesc" class="text-white/60 text-sm max-w-lg mx-auto">
+                {% if round %}{{ round.theme_description }}{% endif %}
+            </p>
+        </div>
+
+        <!-- Upload Status & Area -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- P1 Upload Box -->
+            <div id="p1UploadBox" class="glass-card p-6 rounded-3xl border border-white/10 flex flex-col items-center justify-center min-h-[260px] text-center">
+                <div id="p1StatusIcon" class="text-4xl mb-3">⏳</div>
+                <div id="p1UploadStatus" class="text-sm font-semibold text-white mb-1">Fotoğraf Bekleniyor</div>
+                <div class="text-xs text-white/40 mb-4" id="p1UploadUser">{{ game.player1.username }}</div>
+                <div id="p1Preview" class="hidden w-full max-h-48 rounded-xl overflow-hidden mb-2">
+                    <img id="p1PreviewImg" class="w-full h-44 object-cover rounded-xl" src="">
+                </div>
+            </div>
+
+            <!-- P2 Upload Box -->
+            <div id="p2UploadBox" class="glass-card p-6 rounded-3xl border border-white/10 flex flex-col items-center justify-center min-h-[260px] text-center">
+                <div id="p2StatusIcon" class="text-4xl mb-3">⏳</div>
+                <div id="p2UploadStatus" class="text-sm font-semibold text-white mb-1">Fotoğraf Bekleniyor</div>
+                <div class="text-xs text-white/40 mb-4" id="p2UploadUser">{% if game.player2 %}{{ game.player2.username }}{% else %}Oyuncu 2{% endif %}</div>
+                <div id="p2Preview" class="hidden w-full max-h-48 rounded-xl overflow-hidden mb-2">
+                    <img id="p2PreviewImg" class="w-full h-44 object-cover rounded-xl" src="">
+                </div>
+            </div>
+        </div>
+
+        <!-- My Upload Action -->
+        <div id="myUploadSection" class="glass-panel p-6 rounded-3xl border border-white/10 flex flex-col items-center text-center">
+            <h3 class="text-base font-bold text-white mb-1">Fotoğrafını Seç ve Yükle</h3>
+            <p class="text-white/50 text-xs mb-4">Temaya en uygun, kadrajı ve ışığı en iyi fotoğrafını yükle.</p>
+            
+            <form id="uploadPhotoForm" class="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md">
+                <input type="file" id="photoFileInput" accept="image/*" class="w-full text-xs text-white/70 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer">
+                <button type="submit" id="uploadSubmitBtn" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap shadow-lg shadow-emerald-500/20 active:scale-95">
+                    Gönder
+                </button>
+            </form>
+            <div id="uploadingSpinner" class="hidden mt-3 text-xs text-emerald-400 flex items-center gap-2">
+                <svg class="animate-spin h-4 w-4 text-emerald-400" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                Fotoğraf yükleniyor...
+            </div>
+        </div>
+
+        <!-- AI Judging State Box -->
+        <div id="judgingBanner" class="hidden glass-panel p-8 rounded-3xl border border-amber-500/30 text-center animate-pulse">
+            <div class="text-4xl mb-3">🤖✨</div>
+            <h3 class="text-lg font-bold text-white mb-1">Gemini AI Jürisi Fotoğrafları Değerlendiriyor...</h3>
+            <p class="text-white/50 text-xs max-w-md mx-auto">
+                Kompozisyon, ışık kalitesi, temaya uygunluk ve hikaye analizi yapılıyor. Karar birkaç saniye içinde açıklanacak.
+            </p>
+        </div>
+
+        <!-- Round Result Box -->
+        <div id="roundResultBox" class="hidden glass-card p-6 md:p-8 rounded-3xl border border-emerald-500/30">
+            <div class="text-center mb-6">
+                <div id="roundWinnerBadge" class="inline-block px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-sm mb-2">
+                    Turu Kazanan Açıklanıyor
+                </div>
+                <h3 id="roundWinnerTitle" class="text-2xl font-black text-white"></h3>
+            </div>
+
+            <!-- Photos Comparison View -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="glass-panel p-3 rounded-2xl flex flex-col items-center">
+                    <img id="resultP1Img" class="w-full h-48 md:h-64 object-cover rounded-xl mb-2" src="">
+                    <div class="text-xs font-bold text-white" id="resultP1Name"></div>
+                    <div class="text-[11px] text-white/60 mt-1 italic text-center px-2" id="resultP1Feedback"></div>
+                </div>
+                <div class="glass-panel p-3 rounded-2xl flex flex-col items-center">
+                    <img id="resultP2Img" class="w-full h-48 md:h-64 object-cover rounded-xl mb-2" src="">
+                    <div class="text-xs font-bold text-white" id="resultP2Name"></div>
+                    <div class="text-[11px] text-white/60 mt-1 italic text-center px-2" id="resultP2Feedback"></div>
+                </div>
+            </div>
+
+            <!-- AI Reason -->
+            <div class="glass-panel p-4 rounded-2xl border border-white/10 mb-6">
+                <div class="text-xs font-mono uppercase text-emerald-400 mb-1 flex items-center gap-1.5">
+                    <span>🤖</span> AI Jüri Kararı & Gerekçe
+                </div>
+                <p id="roundReasoning" class="text-sm text-white/80 leading-relaxed"></p>
+            </div>
+
+            <button id="nextRoundBtn" onclick="requestNextRound()" class="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm tracking-wide transition-all shadow-lg shadow-emerald-500/20">
+                Sonraki Tura Geç →
+            </button>
+        </div>
+    </div>
+
+    <!-- State 3: Game Completed -->
+    <div id="gameCompletedScreen" class="w-full glass-card p-8 md:p-12 rounded-3xl text-center border border-emerald-500/30 {% if game.status != 'completed' %}hidden{% endif %}">
+        <div class="text-6xl mb-4">🏆</div>
+        <div class="text-xs font-mono uppercase tracking-widest text-emerald-400 mb-2">ŞAMPİYON</div>
+        <h2 id="gameWinnerName" class="text-3xl md:text-5xl font-black text-white mb-4">
+            {% if game.winner %}{{ game.winner.username }}{% endif %}
+        </h2>
+        <p class="text-white/60 text-sm max-w-md mx-auto mb-8">
+            3 puana ilk ulaşarak fotoğraf kapışmasının mutlak galibi oldu!
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ url_for('game.lobby') }}" class="px-8 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm transition-all shadow-lg shadow-emerald-500/20">
+                Yeni Oyuna Başla
+            </a>
+            <a href="{{ url_for('main.index') }}" class="px-8 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm transition-all border border-white/10">
+                Ana Sayfaya Dön
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+const ROOM_CODE = "{{ game.room_code }}";
+const CURRENT_USER_ID = {{ current_user.id }};
+let isPolling = true;
+let isUploading = false;
+let currentRoundNum = {{ game.current_round_num }};
+
+function copyRoomCode() {
+    navigator.clipboard.writeText(ROOM_CODE);
+    alert('Oda kodu kopyalandı: ' + ROOM_CODE);
+}
+
+function resolveImageUrl(img) {
+    if (!img) return '';
+    if (img.startsWith('http://') || img.startsWith('https://')) return img;
+    return "{{ url_for('static', filename='uploads/') }}" + img;
+}
+
+async function pollStatus() {
+    if (!isPolling) return;
+    try {
+        const res = await fetch("{{ url_for('game.game_status', code=game.room_code) }}");
+        if (!res.ok) return;
+        const data = await res.json();
+        updateUI(data);
+    } catch (e) {
+        console.error("Poll error:", e);
+    }
+}
+
+function updateUI(data) {
+    // Scores
+    document.getElementById('p1Score').textContent = data.p1_score;
+    document.getElementById('p2Score').textContent = data.p2_score;
+    document.getElementById('roundIndicator').textContent = `TUR ${data.current_round_num}`;
+
+    // Player 2 joined?
+    if (data.p2) {
+        document.getElementById('p2Name').textContent = data.p2.username;
+        document.getElementById('p2Avatar').src = resolveImageUrl(data.p2.avatar);
+        document.getElementById('p2Avatar').classList.remove('border-dashed', 'border-white/20');
+        document.getElementById('p2Avatar').classList.add('border-teal-500');
+        document.getElementById('p2UploadUser').textContent = data.p2.username;
+    }
+
+    // You badges
+    if (CURRENT_USER_ID === data.p1.id) {
+        document.getElementById('p1Badge').classList.remove('hidden');
+    } else if (data.p2 && CURRENT_USER_ID === data.p2.id) {
+        document.getElementById('p2Badge').classList.remove('hidden');
+    }
+
+    // Screens
+    if (data.status === 'waiting') {
+        document.getElementById('waitingScreen').classList.remove('hidden');
+        document.getElementById('activeRoundScreen').classList.add('hidden');
+        document.getElementById('gameCompletedScreen').classList.add('hidden');
+        return;
+    }
+
+    if (data.status === 'completed') {
+        document.getElementById('waitingScreen').classList.add('hidden');
+        document.getElementById('activeRoundScreen').classList.add('hidden');
+        document.getElementById('gameCompletedScreen').classList.remove('hidden');
+        const winner = (data.winner_id === data.p1.id) ? data.p1 : data.p2;
+        document.getElementById('gameWinnerName').textContent = winner ? winner.username : 'Oyun Bitti';
+        isPolling = false;
+        return;
+    }
+
+    // In Progress
+    document.getElementById('waitingScreen').classList.add('hidden');
+    document.getElementById('activeRoundScreen').classList.remove('hidden');
+    document.getElementById('gameCompletedScreen').classList.add('hidden');
+
+    const rnd = data.round;
+    if (!rnd) return;
+
+    document.getElementById('themeTitle').textContent = rnd.theme;
+    document.getElementById('themeDesc').textContent = rnd.theme_description || '';
+
+    // Upload status
+    const amIP1 = (CURRENT_USER_ID === data.p1.id);
+    const myUploaded = amIP1 ? rnd.p1_uploaded : rnd.p2_uploaded;
+
+    // P1 upload indicator
+    if (rnd.p1_uploaded) {
+        document.getElementById('p1StatusIcon').textContent = '✅';
+        document.getElementById('p1UploadStatus').textContent = 'Fotoğraf Yüklendi';
+        document.getElementById('p1UploadStatus').className = 'text-sm font-semibold text-emerald-400 mb-1';
+    } else {
+        document.getElementById('p1StatusIcon').textContent = '⏳';
+        document.getElementById('p1UploadStatus').textContent = 'Fotoğraf Bekleniyor';
+        document.getElementById('p1UploadStatus').className = 'text-sm font-semibold text-white mb-1';
+    }
+
+    // P2 upload indicator
+    if (rnd.p2_uploaded) {
+        document.getElementById('p2StatusIcon').textContent = '✅';
+        document.getElementById('p2UploadStatus').textContent = 'Fotoğraf Yüklendi';
+        document.getElementById('p2UploadStatus').className = 'text-sm font-semibold text-emerald-400 mb-1';
+    } else {
+        document.getElementById('p2StatusIcon').textContent = '⏳';
+        document.getElementById('p2UploadStatus').textContent = 'Fotoğraf Bekleniyor';
+        document.getElementById('p2UploadStatus').className = 'text-sm font-semibold text-white mb-1';
+    }
+
+    // Hide or show my upload form
+    if (myUploaded || rnd.status !== 'uploading') {
+        document.getElementById('myUploadSection').classList.add('hidden');
+    } else {
+        document.getElementById('myUploadSection').classList.remove('hidden');
+    }
+
+    // Judging state
+    if (rnd.status === 'judging') {
+        document.getElementById('judgingBanner').classList.remove('hidden');
+        document.getElementById('roundResultBox').classList.add('hidden');
+    } else if (rnd.status === 'completed') {
+        document.getElementById('judgingBanner').classList.add('hidden');
+        document.getElementById('roundResultBox').classList.remove('hidden');
+
+        // Populate results
+        document.getElementById('resultP1Img').src = resolveImageUrl(rnd.p1_image);
+        document.getElementById('resultP2Img').src = resolveImageUrl(rnd.p2_image);
+        document.getElementById('resultP1Name').textContent = data.p1.username;
+        document.getElementById('resultP2Name').textContent = data.p2 ? data.p2.username : 'Oyuncu 2';
+
+        document.getElementById('resultP1Feedback').textContent = rnd.feedback_p1 || '';
+        document.getElementById('resultP2Feedback').textContent = rnd.feedback_p2 || '';
+        document.getElementById('roundReasoning').textContent = rnd.reasoning || '';
+
+        if (rnd.is_tie) {
+            document.getElementById('roundWinnerBadge').textContent = '🤝 Berabere';
+            document.getElementById('roundWinnerTitle').textContent = 'İki Fotoğraf da Eşit Seviyede!';
+        } else if (rnd.winner_id === data.p1.id) {
+            document.getElementById('roundWinnerBadge').textContent = '🏆 Tur Galibi';
+            document.getElementById('roundWinnerTitle').textContent = `${data.p1.username} Kazandı! (+1 Puan)`;
+        } else if (data.p2 && rnd.winner_id === data.p2.id) {
+            document.getElementById('roundWinnerBadge').textContent = '🏆 Tur Galibi';
+            document.getElementById('roundWinnerTitle').textContent = `${data.p2.username} Kazandı! (+1 Puan)`;
+        }
+    } else {
+        document.getElementById('judgingBanner').classList.add('hidden');
+        document.getElementById('roundResultBox').classList.add('hidden');
+    }
+}
+
+// Upload photo handler
+document.getElementById('uploadPhotoForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('photoFileInput');
+    if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Lütfen bir fotoğraf seçin.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('photo', fileInput.files[0]);
+
+    document.getElementById('uploadSubmitBtn').disabled = true;
+    document.getElementById('uploadingSpinner').classList.remove('hidden');
+
+    try {
+        const res = await fetch("{{ url_for('game.upload_photo', code=game.room_code) }}", {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('myUploadSection').classList.add('hidden');
+            pollStatus();
+        } else {
+            alert(data.error || 'Yükleme sırasında hata oluştu.');
+        }
+    } catch (err) {
+        alert('Bağlantı hatası: ' + err);
+    } finally {
+        document.getElementById('uploadSubmitBtn').disabled = false;
+        document.getElementById('uploadingSpinner').classList.add('hidden');
+    }
+});
+
+// Request next round
+async function requestNextRound() {
+    const btn = document.getElementById('nextRoundBtn');
+    btn.disabled = true;
+    btn.textContent = 'Yükleniyor...';
+
+    try {
+        const res = await fetch("{{ url_for('game.next_round', code=game.room_code) }}", {
+            method: 'POST'
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('roundResultBox').classList.add('hidden');
+            pollStatus();
+        } else {
+            alert(data.error || 'Hata oluştu.');
+        }
+    } catch (err) {
+        alert('Hata: ' + err);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sonraki Tura Geç →';
+    }
+}
+
+// Poll every 2.5 seconds
+setInterval(pollStatus, 2500);
+pollStatus();
+</script>
+{% endblock %}

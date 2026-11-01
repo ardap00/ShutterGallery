@@ -171,3 +171,62 @@ class Message(db.Model):
 
     sender: Mapped["User"] = relationship(foreign_keys=[sender_id], back_populates='messages_sent')
     recipient: Mapped["User"] = relationship(foreign_keys=[recipient_id], back_populates='messages_received')
+
+
+class Game(db.Model):
+    __tablename__ = 'games'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    room_code: Mapped[str] = mapped_column(String(16), unique=True, nullable=False)
+    player1_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    player2_id: Mapped[Optional[int]] = mapped_column(ForeignKey('users.id'), nullable=True)
+    
+    player1_score: Mapped[int] = mapped_column(Integer, default=0)
+    player2_score: Mapped[int] = mapped_column(Integer, default=0)
+    
+    # Status: 'waiting', 'in_progress', 'completed', 'cancelled'
+    status: Mapped[str] = mapped_column(String(32), default='waiting')
+    winner_id: Mapped[Optional[int]] = mapped_column(ForeignKey('users.id'), nullable=True)
+    
+    current_round_num: Mapped[int] = mapped_column(Integer, default=1)
+    target_score: Mapped[int] = mapped_column(Integer, default=3)
+    
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    player1: Mapped["User"] = relationship(foreign_keys=[player1_id])
+    player2: Mapped[Optional["User"]] = relationship(foreign_keys=[player2_id])
+    winner: Mapped[Optional["User"]] = relationship(foreign_keys=[winner_id])
+    rounds: Mapped[List["GameRound"]] = relationship(back_populates='game', cascade="all, delete-orphan", order_by="GameRound.round_num")
+
+
+class GameRound(db.Model):
+    __tablename__ = 'game_rounds'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    game_id: Mapped[int] = mapped_column(ForeignKey('games.id'), nullable=False)
+    round_num: Mapped[int] = mapped_column(Integer, nullable=False)
+    theme: Mapped[str] = mapped_column(String(128), nullable=False)
+    theme_description: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    
+    # Photo image filenames or Cloudinary URLs
+    player1_image: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
+    player2_image: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
+    
+    player1_uploaded_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    player2_uploaded_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    
+    # AI judging results
+    winner_id: Mapped[Optional[int]] = mapped_column(ForeignKey('users.id'), nullable=True)
+    is_tie: Mapped[bool] = mapped_column(db.Boolean, default=False)
+    ai_reasoning: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    ai_feedback_p1: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    ai_feedback_p2: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
+    # Round status: 'uploading', 'judging', 'completed'
+    status: Mapped[str] = mapped_column(String(32), default='uploading')
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    game: Mapped["Game"] = relationship(back_populates='rounds')
+    winner: Mapped[Optional["User"]] = relationship(foreign_keys=[winner_id])
+
