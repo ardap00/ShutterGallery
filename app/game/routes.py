@@ -346,3 +346,20 @@ def next_round(code):
         db.session.commit()
 
     return jsonify({'success': True, 'next_round': next_round_num})
+
+@game.route('/api/leave/<code>', methods=['POST'])
+@login_required
+def leave_game(code):
+    game_obj = db.session.execute(
+        db.select(Game).filter_by(room_code=code.upper())
+    ).scalar_one_or_none()
+
+    if not game_obj:
+        return jsonify({'error': 'Oyun bulunamadı'}), 404
+
+    if current_user.id in [game_obj.player1_id, game_obj.player2_id]:
+        game_obj.status = 'cancelled'
+        db.session.commit()
+
+    return jsonify({'success': True, 'redirect_url': url_for('game.lobby')})
+

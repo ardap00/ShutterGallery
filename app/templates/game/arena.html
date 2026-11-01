@@ -28,6 +28,10 @@
                     <span id="p2Score" class="text-teal-400">{{ game.player2_score }}</span>
                 </div>
                 <div class="text-[10px] font-mono text-white/40 mt-1">Oda: #{{ game.room_code }}</div>
+                <button onclick="leaveGame()" class="mt-2 text-[10px] font-mono text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 px-3 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    Oyundan Çık
+                </button>
             </div>
 
             <!-- Player 2 -->
@@ -164,6 +168,21 @@
         </div>
     </div>
 
+    <!-- State: Game Cancelled -->
+    <div id="gameCancelledScreen" class="hidden w-full glass-card p-8 md:p-12 rounded-3xl text-center border border-rose-500/30 animate-fade-in">
+        <div class="text-5xl mb-4">🚪</div>
+        <div class="text-xs font-mono uppercase tracking-widest text-rose-400 mb-2">OYUN SONLANDIRILDI</div>
+        <h2 class="text-2xl md:text-3xl font-black text-white mb-3">Oyunculardan Biri Ayrıldı</h2>
+        <p class="text-white/60 text-sm max-w-md mx-auto mb-8">
+            Bu oyun odası kapatıldı. Yeni bir oyun başlatmak için lobiye dönebilirsin.
+        </p>
+        <div class="flex justify-center">
+            <a href="{{ url_for('game.lobby') }}" class="px-8 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm transition-all shadow-lg shadow-emerald-500/20">
+                Lobiye Dön
+            </a>
+        </div>
+    </div>
+
     <!-- State 3: Game Completed -->
     <div id="gameCompletedScreen" class="w-full glass-card p-8 md:p-12 rounded-3xl text-center border border-emerald-500/30 {% if game.status != 'completed' %}hidden{% endif %}">
         <div class="text-6xl mb-4">🏆</div>
@@ -242,6 +261,15 @@ function updateUI(data) {
         document.getElementById('waitingScreen').classList.remove('hidden');
         document.getElementById('activeRoundScreen').classList.add('hidden');
         document.getElementById('gameCompletedScreen').classList.add('hidden');
+        return;
+    }
+
+    if (data.status === 'cancelled') {
+        document.getElementById('waitingScreen').classList.add('hidden');
+        document.getElementById('activeRoundScreen').classList.add('hidden');
+        document.getElementById('gameCompletedScreen').classList.add('hidden');
+        document.getElementById('gameCancelledScreen').classList.remove('hidden');
+        isPolling = false;
         return;
     }
 
@@ -393,8 +421,26 @@ async function requestNextRound() {
     }
 }
 
+async function leaveGame() {
+    if (!confirm('Oyundan çıkmak istediğinize emin misiniz? Oyun odası tamamen kapanacaktır.')) return;
+    try {
+        const res = await fetch("{{ url_for('game.leave_game', code=game.room_code) }}", {
+            method: 'POST'
+        });
+        const data = await res.json();
+        if (data.success && data.redirect_url) {
+            window.location.href = data.redirect_url;
+        } else {
+            window.location.href = "{{ url_for('game.lobby') }}";
+        }
+    } catch (e) {
+        window.location.href = "{{ url_for('game.lobby') }}";
+    }
+}
+
 // Poll every 2.5 seconds
 setInterval(pollStatus, 2500);
 pollStatus();
 </script>
 {% endblock %}
+
