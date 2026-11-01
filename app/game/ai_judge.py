@@ -62,7 +62,7 @@ def judge_round(theme_name, theme_desc, p1_username, p1_img, p2_username, p2_img
         "feedback_p2": "..."
     }
     """
-    api_key = current_app.config.get('GEMINI_API_KEY') or os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
+    api_key = current_app.config.get('GEMINI_API_KEY') or os.environ.get('GEMINI_API_KEY') or os.environ.get('Gemini_API_Key') or os.environ.get('GOOGLE_API_KEY')
     model_name = current_app.config.get('GEMINI_MODEL') or 'gemini-2.0-flash'
     
     if not api_key:
