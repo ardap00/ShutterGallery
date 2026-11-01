@@ -31,7 +31,7 @@ class Config:
     CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET')
 
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
-    GEMINI_MODEL = os.environ.get('GEMINI_MODEL') or 'gemini-2.0-flash'
+    GEMINI_MODEL = os.environ.get('GEMINI_MODEL') or 'gemini-3.5-flash'
 
 
 
