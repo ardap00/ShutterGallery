@@ -175,7 +175,7 @@ def game_status(code):
     p2 = game_obj.player2
 
     # Check if both uploaded and round is ready to be judged
-    if current_round and current_round.status == 'uploading':
+    if current_round and current_round.status in ['uploading', 'judging'] and not current_round.ai_reasoning:
         if current_round.player1_image and current_round.player2_image:
             current_round.status = 'judging'
             db.session.commit()
